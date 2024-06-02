@@ -1,6 +1,7 @@
 import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart';
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
+import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -70,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
       case 'LG Services':
         return const Text('Content for LG Services');
       case 'About':
-        return const Text('Content for About');
+        return const AboutSection();
       default:
         return const Text('Select an item to view details');
     }
@@ -79,8 +80,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryBackground,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(5.0),
+        child: AppBar(
+          backgroundColor: AppColors.primaryBackground,
+        ),
       ),
       body: Stack(
         children: [
@@ -124,10 +128,25 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
   Widget _buildRightSidebar() {
     return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.primaryBackground,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40.0),
+          bottomLeft: Radius.circular(40.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.softGrey,
+            spreadRadius: 3,
+            blurRadius: 20,
+            offset: Offset(10, 10),
+          ),
+        ],
+      ),
       width: 450,
-      color: AppColors.primaryBackground,
       child: Column(
         children: [
           Expanded(
@@ -141,7 +160,21 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildCollapsedRightSidebar() {
     return Container(
       width: 40,
-      color: AppColors.primaryBackground,
+      decoration: const BoxDecoration(
+        color: AppColors.primaryBackground,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40.0),
+          bottomLeft: Radius.circular(40.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.softGrey,
+            spreadRadius: 3,
+            blurRadius: 20,
+            offset: Offset(10, 10),
+          ),
+        ],
+      ),
     );
   }
 }
