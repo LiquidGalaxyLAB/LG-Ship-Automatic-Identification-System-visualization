@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart'; // Make sure the ImagePath contains paths for the indicator icons
 
@@ -26,7 +27,7 @@ class ConnectionIndicatorComponent extends StatelessWidget {
         if (isOpened) ...[
           const SizedBox(width: 10),
           Text(
-            isConnected ? 'Connected' : 'Disconnected',
+            isConnected ? AppTexts.connected : AppTexts.disconnected,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
