@@ -14,7 +14,7 @@ class FloatingArrow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned(
       right: isOpen ? 450 - 40 : 0,
-      top: isOpen ? 0 : MediaQuery.of(context).size.height / 2 - 80,
+      top: isOpen ? -5 : MediaQuery.of(context).size.height / 2 - 80,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -23,6 +23,14 @@ class FloatingArrow extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: AppColors.primaryBackground,
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.softGrey,
+                spreadRadius: 3,
+                blurRadius: 10,
+                offset: Offset(3, 0),
+              ),
+            ],
           ),
           child: Padding(
             padding: const EdgeInsets.only(right: 30.0),

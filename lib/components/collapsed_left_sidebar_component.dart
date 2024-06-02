@@ -24,7 +24,7 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 100,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(40.0),
@@ -32,10 +32,10 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withOpacity(0.5),
+            color: AppColors.softGrey,
             spreadRadius: 3,
-            blurRadius: 10,
-            offset: const Offset(1, 0),
+            blurRadius: 20,
+            offset: Offset(10, 0),
           ),
         ],
       ),
@@ -55,17 +55,17 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
               children: [
                 Image.asset(
                   ImagePath.appLogoNoname,
-                  width: 80,
+                  width: 60,
                 ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Image.asset(
-              ImagePath.lgLogo,
-              width: 40,
-            ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.0),
+            // child: Image.asset(
+            //   ImagePath.lgLogo,
+            //   width: 40,
+            // ),
           ),
           Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -117,7 +117,6 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                           Image.asset(
                             navbarIcons.last,
                             width: 32,
-                            height: 32,
                           ),
                         ],
                       ),

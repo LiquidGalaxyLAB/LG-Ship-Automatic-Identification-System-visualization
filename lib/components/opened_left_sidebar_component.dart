@@ -24,7 +24,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 230,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(40.0),
@@ -32,10 +32,10 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withOpacity(0.5),
+            color: AppColors.softGrey,
             spreadRadius: 3,
-            blurRadius: 10,
-            offset: const Offset(1, 0),
+            blurRadius: 20,
+            offset: Offset(10, 0),
           ),
         ],
       ),
@@ -58,7 +58,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                   children: [
                     Image.asset(
                       ImagePath.appLogoNoname,
-                      width: 100,
+                      width: 80,
                     ),
                     Text(
                       'AIS Visualizer',
@@ -71,7 +71,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Image.asset(
                   ImagePath.lgLogo,
-                  width: 70,
+                  width: 60,
                 ),
               ),
               Padding(
@@ -126,7 +126,6 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                           Image.asset(
                             navbarIcons.last,
                             width: 32,
-                            height: 32,
                           ),
                           const SizedBox(width: 8),
                           Text(
