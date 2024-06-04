@@ -1,4 +1,4 @@
-import 'package:ais_visualizer/providers.dart/lg_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/screens/main_screen.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/theme/theme.dart';

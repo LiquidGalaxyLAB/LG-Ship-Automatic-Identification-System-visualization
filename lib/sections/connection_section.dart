@@ -1,4 +1,4 @@
-import 'package:ais_visualizer/providers.dart/lg_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
