@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CollapsedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
