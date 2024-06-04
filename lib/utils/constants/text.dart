@@ -3,18 +3,26 @@ class AppTexts {
   AppTexts._();
 
   static const String appName = 'AIS Visualizer';
+  static const String visualization = 'Visualization';
+  static const String collision = 'Collision';
+  static const String selectRegion = 'Select region';
+  static const String filter = 'Filter';
+  static const String lgConnection = 'LG Connection';
+  static const String lgServices = 'LG Services';
+  static const String about = 'About';
+
   static const List<String> navBarItems = [
-    'Visualization',
-    'Collision',
-    'Select region',
-    'Filter',
-    'Connect',
-    'LG Services',
-    'About'
+    visualization,
+    collision,
+    selectRegion,
+    filter,
+    lgConnection,
+    lgServices,
+    about,
   ];
   static const String connected = 'Connected';
   static const String disconnected = 'Disconnected';
-  static const String about = 'About AIS Visualizer';
+  static const String aboutAIS = 'About AIS Visualizer';
   static const String aboutDescription = 'AIS Visualizer utilizes open data provided by the Norwegian Coastal Administration to deliver an intuitive visualization experience.';
   static const String keyFeatures = 'Key Features:';
   static const List<String> features = [
@@ -27,4 +35,25 @@ class AppTexts {
     'Change What Region You See'
   ];
   static const String getStarted = 'Get Started Now!';
+
+  static const String ip = 'Master Machine IP Address';
+  static const String ipHint = 'xxx.xxx.xxx.xxx';
+  static const String ipError = 'Please enter IP Address';
+  static const String port = 'Master Machine Port Number';
+  static const String portHint = '22';
+  static const String portError = 'Please enter Port Number';
+  static const String username = 'Master Machine Username';
+  static const String usernameHint = 'lg';
+  static const String usernameError = 'Please enter Username';
+  static const String password = 'Master Machine Password';
+  static const String passwordHint = 'lg';
+  static const String passwordError = 'Please enter Password';
+  static const String screenNumber = 'Total Machines in LG Rig';
+  static const String screenNumberHint = '3';
+  static const String screenNumberError = 'Please enter Total Machines in LG Rig';
+  static const String connect = 'Connect';
+  static const String connectionLG = 'Liquid Galaxy Rig Connection';
+  static const String connectedSuccessfully = 'Connected to LG Successfully';
+  static const String connectionFailed = 'Failed to Connect to LG';
+
 }

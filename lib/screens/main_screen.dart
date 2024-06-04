@@ -2,8 +2,9 @@ import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart'
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
+import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
-import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/floating_arrow.dart';
@@ -17,7 +18,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late List<String> _navbarItems;
-  late List<String> _navbarIcons;
+  late List<IconData> _navbarIcons;
   late String _selectedItem;
   bool _isRightSidebarOpen = true;
   bool _isLeftSidebarOpen = true;
@@ -27,13 +28,12 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _navbarItems = AppTexts.navBarItems;
     _navbarIcons = [
-      ImagePath.visualizationIcon,
-      ImagePath.collisionIcon,
-      ImagePath.selectRegionIcon,
-      ImagePath.filterIcon,
-      ImagePath.connectIcon,
-      ImagePath.lgServicesIcon,
-      ImagePath.aboutIcon
+      FontAwesomeIcons.earthAmericas,
+      FontAwesomeIcons.downLeftAndUpRightToCenter,
+      FontAwesomeIcons.drawPolygon,
+      FontAwesomeIcons.filter,
+      FontAwesomeIcons.link,
+      FontAwesomeIcons.gears,
     ];
     _selectedItem = _navbarItems[_navbarItems.length - 1];
   }
@@ -58,19 +58,19 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _getSelectedItemWidget() {
     switch (_selectedItem) {
-      case 'Visualization':
+      case AppTexts.visualization:
         return const Text('Content for Visualization');
-      case 'Collision':
+      case AppTexts.collision:
         return const Text('Content for Collision');
-      case 'Select region':
+      case AppTexts.selectRegion:
         return const Text('Content for Select region');
-      case 'Filter':
+      case AppTexts.filter:
         return const Text('Content for Filter');
-      case 'Connect':
-        return const Text('Content for Connect');
-      case 'LG Services':
+      case AppTexts.lgConnection:
+        return const ConnectionSection();
+      case AppTexts.lgServices:
         return const Text('Content for LG Services');
-      case 'About':
+      case AppTexts.about:
         return const AboutSection();
       default:
         return const Text('Select an item to view details');

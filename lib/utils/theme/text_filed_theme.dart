@@ -7,10 +7,10 @@ class AppTextFormFieldTheme {
     errorMaxLines: 2,
     prefixIconColor: AppColors.grey,
     suffixIconColor: AppColors.secondary,
-    labelStyle: AppTextTheme.lightTheme.headlineMedium,
+    labelStyle: AppTextTheme.lightTheme.bodyLarge,
+    floatingLabelStyle: AppTextTheme.lightTheme.headlineMedium,
     hintStyle: AppTextTheme.lightTheme.labelSmall,
-    errorStyle: AppTextTheme.lightTheme.labelMedium,
-
+    errorStyle: AppTextTheme.lightTheme.labelMedium!.copyWith(fontSize: 12),
     border: const OutlineInputBorder().copyWith(
       borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(

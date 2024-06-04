@@ -14,7 +14,7 @@ class AboutSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 30.0),
           child: Center(
             child: Text(
-              AppTexts.about,
+              AppTexts.aboutAIS,
               style: Theme.of(context).textTheme.headlineLarge,
             ),
           ),
@@ -44,7 +44,7 @@ class AboutSection extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Implement your onPressed logic here
+                    // Implement onPressed logic here
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),

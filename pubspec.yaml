@@ -40,6 +40,9 @@ dependencies:
   page_transition: ^2.0.0
   line_icons: ^2.0.3
   font_awesome_flutter: ^10.7.0
+  shared_preferences: ^2.2.3
+  dartssh2: ^2.8.2
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
