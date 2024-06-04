@@ -1,18 +1,21 @@
+import 'package:ais_visualizer/providers.dart/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
-import 'package:ais_visualizer/utils/constants/image_path.dart'; // Make sure the ImagePath contains paths for the indicator icons
+import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:provider/provider.dart';
 
 class ConnectionIndicatorComponent extends StatelessWidget {
-  final bool isConnected;
   final bool isOpened;
 
   ConnectionIndicatorComponent({
-    required this.isConnected,
     required this.isOpened,
   });
 
   @override
   Widget build(BuildContext context) {
+    final connectionStatusProvider = Provider.of<LgConnectionStatusProvider>(context);
+    final isConnected = connectionStatusProvider.isConnected;
+    
     String indicatorImage = isConnected
         ? ImagePath.connectedIcon
         : ImagePath.disconnectedIcon;

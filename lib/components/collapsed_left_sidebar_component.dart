@@ -1,12 +1,13 @@
-import 'package:ais_visualizer/components/connection_indicator.dart';
+import 'package:ais_visualizer/components/connection_indicator_component.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CollapsedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
-  final List<String> navbarIcons;
+  final List<IconData> navbarIcons;
   final String selectedItem;
   final Function(String) handleNavbarItemTap;
   final Function() toggleLeftSidebar;
@@ -26,9 +27,9 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
       width: 100,
       decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(40.0),
-          bottomRight: Radius.circular(40.0),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20.0),
+          bottomRight: Radius.circular(20.0),
         ),
         boxShadow: [
           BoxShadow(
@@ -44,7 +45,11 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: IconButton(
-              icon: const Icon(Icons.arrow_forward),
+              icon: const Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.softGrey,
+                size: 20.0,
+                ),
               onPressed: toggleLeftSidebar,
             ),
           ),
@@ -60,17 +65,17 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
               ],
             ),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 20.0),
-            // child: Image.asset(
-            //   ImagePath.lgLogo,
-            //   width: 40,
-            // ),
+            child: Image.asset(
+              ImagePath.lgLogo,
+              width: 46,
+            ),
           ),
           Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Center(
-                  child: ConnectionIndicatorComponent(isConnected: false, isOpened: false),
+                  child: ConnectionIndicatorComponent(isOpened: false),
                 ),
               ),
           Padding(
@@ -85,12 +90,17 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
             child: ListView.builder(
               itemCount: navbarItems.length - 1,
               itemBuilder: (context, index) {
-                return NavbarItemComponent(
-                  onPressed: () => handleNavbarItemTap(navbarItems[index]),
-                  label: navbarItems[index],
-                  icon: navbarIcons[index],
-                  isSelected: selectedItem == navbarItems[index],
-                  isSidebarOpen: false,
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    NavbarItemComponent(
+                      onPressed: () => handleNavbarItemTap(navbarItems[index]),
+                      label: navbarItems[index],
+                      iconData: navbarIcons[index],
+                      isSelected: selectedItem == navbarItems[index],
+                      isSidebarOpen: false,
+                    ),
+                  ],
                 );
               },
             ),
@@ -108,14 +118,14 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: AppColors.softGrey,
-                        borderRadius: BorderRadius.circular(40.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
-                            navbarIcons.last,
+                            ImagePath.aboutIcon,
                             width: 32,
                           ),
                         ],

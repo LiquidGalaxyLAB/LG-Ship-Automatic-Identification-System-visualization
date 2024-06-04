@@ -1,12 +1,13 @@
-import 'package:ais_visualizer/components/connection_indicator.dart';
+import 'package:ais_visualizer/components/connection_indicator_component.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OpenedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
-  final List<String> navbarIcons;
+  final List<IconData> navbarIcons;
   final String selectedItem;
   final Function(String) handleNavbarItemTap;
   final Function() toggleLeftSidebar;
@@ -26,9 +27,9 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
       width: 230,
       decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(40.0),
-          bottomRight: Radius.circular(40.0),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20.0),
+          bottomRight: Radius.circular(20.0),
         ),
         boxShadow: [
           BoxShadow(
@@ -47,7 +48,11 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: AppColors.softGrey,
+                    size: 20.0,
+                    ),
                   onPressed: toggleLeftSidebar,
                 ),
               ),
@@ -77,7 +82,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Center(
-                  child: ConnectionIndicatorComponent(isConnected: false, isOpened: true),
+                  child: ConnectionIndicatorComponent(isOpened: true),
                 ),
               ),
             ],
@@ -97,7 +102,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                 return NavbarItemComponent(
                   onPressed: () => handleNavbarItemTap(navbarItems[index]),
                   label: navbarItems[index],
-                  icon: navbarIcons[index],
+                  iconData: navbarIcons[index],
                   isSelected: selectedItem == navbarItems[index],
                   isSidebarOpen: true,
                 );
@@ -117,14 +122,14 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: AppColors.softGrey,
-                        borderRadius: BorderRadius.circular(40.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
-                            navbarIcons.last,
+                            ImagePath.aboutIcon,
                             width: 32,
                           ),
                           const SizedBox(width: 8),
