@@ -106,11 +106,12 @@ class _ConnectionSectionState extends State<ConnectionSection> {
           const SizedBox(height: 30.0),
           Center(
             child: Text(
+              textAlign: TextAlign.center,
               AppTexts.connectionLG,
               style: Theme.of(context).textTheme.headlineLarge,
             ),
           ),
-          const SizedBox(height: 20.0), // Add space
+          const SizedBox(height: 20.0),
           Form(
             key: _formKey,
             child: Column(

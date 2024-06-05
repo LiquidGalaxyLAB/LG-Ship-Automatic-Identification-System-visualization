@@ -3,6 +3,7 @@ import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
+import 'package:ais_visualizer/sections/lg_services_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -69,7 +70,7 @@ class _MainScreenState extends State<MainScreen> {
       case AppTexts.lgConnection:
         return const ConnectionSection();
       case AppTexts.lgServices:
-        return const Text('Content for LG Services');
+        return const LgServiceSection();
       case AppTexts.about:
         return const AboutSection();
       default:

@@ -1,5 +1,4 @@
 class AppTexts {
-
   AppTexts._();
 
   static const String appName = 'AIS Visualizer';
@@ -23,7 +22,8 @@ class AppTexts {
   static const String connected = 'Connected';
   static const String disconnected = 'Disconnected';
   static const String aboutAIS = 'About AIS Visualizer';
-  static const String aboutDescription = 'AIS Visualizer utilizes open data provided by the Norwegian Coastal Administration to deliver an intuitive visualization experience.';
+  static const String aboutDescription =
+      'AIS Visualizer utilizes open data provided by the Norwegian Coastal Administration to deliver an intuitive visualization experience.';
   static const String keyFeatures = 'Key Features:';
   static const List<String> features = [
     'Track Ships Live',
@@ -50,10 +50,28 @@ class AppTexts {
   static const String passwordError = 'Please enter Password';
   static const String screenNumber = 'Total Machines in LG Rig';
   static const String screenNumberHint = '3';
-  static const String screenNumberError = 'Please enter Total Machines in LG Rig';
+  static const String screenNumberError =
+      'Please enter Total Machines in LG Rig';
   static const String connect = 'Connect';
-  static const String connectionLG = 'Liquid Galaxy Rig Connection';
+  static const String connectionLG = 'Liquid Galaxy Rig Connection Manager';
   static const String connectedSuccessfully = 'Connected to LG Successfully';
   static const String connectionFailed = 'Failed to Connect to LG';
+
+  static const String lgServicesDescription =
+      'This service is responsible for sending commands to Liquid Galaxy rig if you are connected to it.';
+  static const String shutdown = 'Shutdown';
+  static const String reboot = 'Reboot';
+  static const String relaunch = 'Relaunch';
+  static const String clearKML = 'Clear KML';
+
+  static const String notConnectedError =
+      'You are not connected to LG. Please connect and try again.';
+  static const String error = 'Error!';
+  static const String ok = 'Ok';
+  static const String executeServiceSuccess =
+      'Service command executed successfully';
+  static const String success = 'Success!';
+  static const String executeServiceFailed =
+      'Failed to execute service command, check the connection or your authentication';
 
 }
