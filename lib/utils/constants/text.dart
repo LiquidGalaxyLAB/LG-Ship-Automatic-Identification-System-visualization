@@ -74,4 +74,11 @@ class AppTexts {
   static const String executeServiceFailed =
       'Failed to execute service command, check the connection or your authentication';
 
+  static const String navigationDetails = 'Navigation Details';
+  static const String vesselCharacteristics = 'Vessel Characteristics';
+  static const String physicalDimensions = 'Physical Dimensions';
+  static const String positioningDetails = 'Positioning Details';
+  static const String routeTracker = 'AIS Route Tracker Timeline';
+  static const String routePrediction = 'Fan Chart Route Prediction';
+
 }

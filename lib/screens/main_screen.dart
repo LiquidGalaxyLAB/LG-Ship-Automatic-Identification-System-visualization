@@ -4,6 +4,7 @@ import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
+import 'package:ais_visualizer/sections/visualization_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -60,7 +61,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget _getSelectedItemWidget() {
     switch (_selectedItem) {
       case AppTexts.visualization:
-        return const Text('Content for Visualization');
+        return const VisualizationSection();
       case AppTexts.collision:
         return const Text('Content for Collision');
       case AppTexts.selectRegion:
@@ -136,7 +137,6 @@ class _MainScreenState extends State<MainScreen> {
         color: AppColors.primaryBackground,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(40.0),
-          bottomLeft: Radius.circular(40.0),
         ),
         boxShadow: [
           BoxShadow(
@@ -165,7 +165,6 @@ class _MainScreenState extends State<MainScreen> {
         color: AppColors.primaryBackground,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(40.0),
-          bottomLeft: Radius.circular(40.0),
         ),
         boxShadow: [
           BoxShadow(

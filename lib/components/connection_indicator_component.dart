@@ -16,16 +16,13 @@ class ConnectionIndicatorComponent extends StatelessWidget {
     final connectionStatusProvider = Provider.of<LgConnectionStatusProvider>(context);
     final isConnected = connectionStatusProvider.isConnected;
     
-    String indicatorImage = isConnected
-        ? ImagePath.connectedIcon
-        : ImagePath.disconnectedIcon;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(
-          indicatorImage,
-          width: 25,
+        Icon(
+          isConnected ? Icons.wifi : Icons.signal_wifi_off_outlined,
+          color: isConnected ? Colors.green : Colors.red,
+          size: 20.0,
         ),
         if (isOpened) ...[
           const SizedBox(width: 10),
