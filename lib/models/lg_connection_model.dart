@@ -39,6 +39,11 @@ class LgConnectionModel {
         userNamePref != null &&
         passwordPref != null &&
         screenNumberPref != null) {
+      _singleton.ip = ipPref;
+      _singleton.port = portPref;
+      _singleton.userName = userNamePref;
+      _singleton.password = passwordPref;
+      _singleton.screenNumber = screenNumberPref;
       return true;
     } else {
       return false;
