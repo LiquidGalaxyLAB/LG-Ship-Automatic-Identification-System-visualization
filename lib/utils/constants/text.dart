@@ -81,4 +81,30 @@ class AppTexts {
   static const String routeTracker = 'AIS Route Tracker Timeline';
   static const String routePrediction = 'Fan Chart Route Prediction';
 
+  static const String speedOverGround = 'Speed Over Ground';
+  static const String courseOverGround = 'Course Over Ground';
+  static const String navigationalStatus = 'Navigational Status';
+  static const String rateOfTurn = 'Rate of Turn';
+  static const String heading = 'Heading';
+  static const String lastKnownPosition = 'Last known position';
+
+  static const String shipType = 'Ship Type';
+  static const String callSign = 'Call Sign';
+  static const String destination = 'Destination';
+  static const String estimatedArrival = 'Estimated Time of Arrival (ETA)';
+  static const String imoNumber = 'IMO Number';
+  static const String draught = 'Draught';
+
+  static const String dimensionA = 'Dimension A';
+  static const String dimensionB = 'Dimension B';
+  static const String dimensionC = 'Dimension C';
+  static const String dimensionD = 'Dimension D';
+  static const String shipLength = 'Ship Length';
+  static const String shipWidth = 'Ship Width';
+  
+  static const String positionFixingDeviceType = 'Position Fixing Device Type';
+  static const String reportClass = 'Report Class';
+
+  static const String showVesselroute = 'Show the vessel route on the map';
+  static const String showVesselChart = 'Show the vessel fan chart on the map';
 }

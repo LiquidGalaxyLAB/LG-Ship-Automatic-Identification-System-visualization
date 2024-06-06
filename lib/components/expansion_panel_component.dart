@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class ExpansionPanelComponent extends StatefulWidget {
   final String header;
-  final String body;
+  final Widget body;
 
   const ExpansionPanelComponent({
     super.key,
@@ -17,7 +17,7 @@ class ExpansionPanelComponent extends StatefulWidget {
 }
 
 class _ExpansionPanelComponentState extends State<ExpansionPanelComponent> {
-  bool _isExpanded = false; // Manage expansion state
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +45,7 @@ class _ExpansionPanelComponentState extends State<ExpansionPanelComponent> {
                   title: Text(widget.header, style: Theme.of(context).textTheme.headlineMedium),
                 );
               },
-              body: Container(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 20.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.textContainerBackground,
-                    border: Border.all(
-                      color: AppColors.primary,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: ListTile(
-                    title: Text(widget.body),
-                  ),
-                ),
-              ),
+              body: widget.body,
               isExpanded: _isExpanded,
               backgroundColor: AppColors.white,
             ),

@@ -1,4 +1,5 @@
 import 'package:ais_visualizer/components/expansion_panel_component.dart';
+import 'package:ais_visualizer/components/vessel_panels_body.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
@@ -105,46 +106,32 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                 ],
               ),
               const SizedBox(height: 20.0),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
                 child: ExpansionPanelComponent(
                   header: AppTexts.navigationDetails,
-                  body: "myBody",
+                  body: NavigationExpansionPanelBody(body: 'id'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
                 child: ExpansionPanelComponent(
                   header: AppTexts.vesselCharacteristics,
-                  body: "myBody",
+                  body: VesselCharacteristicsExpansionPanelBody(body: 'id'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
                 child: ExpansionPanelComponent(
                   header: AppTexts.physicalDimensions,
-                  body: "myBody",
+                  body: PhysicalDimensionsExpansionPanelBody(body: 'id'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
                 child: ExpansionPanelComponent(
-                  header: AppTexts.positioningDetails,
-                  body: "myBody",
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: ExpansionPanelComponent(
-                  header: AppTexts.routeTracker,
-                  body: "myBody",
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: ExpansionPanelComponent(
-                  header: AppTexts.routePrediction,
-                  body: "myBody",
+                  header: AppTexts.physicalDimensions,
+                  body: PositioningDetailsExpansionPanelBody(body: 'id'),
                 ),
               ),
             ],
