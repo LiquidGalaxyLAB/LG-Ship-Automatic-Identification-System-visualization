@@ -1,13 +1,14 @@
+import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 
 class NavigationExpansionPanelBody extends StatefulWidget {
-  final String body;
+  VesselFull? currentVessel;
 
-  const NavigationExpansionPanelBody({
+  NavigationExpansionPanelBody({
     super.key,
-    required this.body,
+    required this.currentVessel,
   });
 
   @override
@@ -36,7 +37,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.speedOverGround, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.speedOverGround.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -44,7 +45,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.courseOverGround, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.courseOverGround.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -52,7 +53,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.navigationalStatus, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.navigationalStatus.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -60,7 +61,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.rateOfTurn, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.rateOfTurn.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -68,7 +69,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.heading, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.trueHeading.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -76,7 +77,7 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
                 children: [
                   Text(AppTexts.lastKnownPosition, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text("${widget.currentVessel!.latitude.toString()}, ${widget.currentVessel!.longitude.toString()}", style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
             ],
@@ -89,11 +90,11 @@ class _NavigationExpansionPanelBodyState extends State<NavigationExpansionPanelB
 
 
 class VesselCharacteristicsExpansionPanelBody extends StatefulWidget {
-  final String body;
+  VesselFull? currentVessel;
 
-  const VesselCharacteristicsExpansionPanelBody({
+  VesselCharacteristicsExpansionPanelBody({
     super.key,
-    required this.body,
+    required this.currentVessel,
   });
 
   @override
@@ -122,7 +123,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.shipType, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.shipType.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -130,7 +131,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.callSign, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.callSign!, style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -138,7 +139,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.destination, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.destination!, style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -146,7 +147,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.estimatedArrival, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.eta!, style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -154,7 +155,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.imoNumber, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.imoNumber.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -162,7 +163,7 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
                 children: [
                   Text(AppTexts.draught, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.draught.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
             ],
@@ -174,11 +175,11 @@ class _VesselCharacteristicsExpansionPanelBodyState extends State<VesselCharacte
 }
 
 class PhysicalDimensionsExpansionPanelBody extends StatefulWidget {
-  final String body;
+  VesselFull? currentVessel;
 
-  const PhysicalDimensionsExpansionPanelBody({
+  PhysicalDimensionsExpansionPanelBody({
     super.key,
-    required this.body,
+    required this.currentVessel,
   });
 
   @override
@@ -207,7 +208,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.dimensionA, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.dimensionA.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -215,7 +216,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.dimensionB, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.dimensionB.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -223,7 +224,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.dimensionC, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.dimensionC.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -231,7 +232,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.dimensionD, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.dimensionD.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -239,7 +240,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.shipLength, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.shipLength.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -247,7 +248,7 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
                 children: [
                   Text(AppTexts.shipWidth, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.shipWidth.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
             ],
@@ -259,11 +260,11 @@ class _PhysicalDimensionsExpansionPanelBodyState extends State<PhysicalDimension
 }
 
 class PositioningDetailsExpansionPanelBody extends StatefulWidget {
-  final String body;
+  VesselFull? currentVessel;
 
-  const PositioningDetailsExpansionPanelBody({
+  PositioningDetailsExpansionPanelBody({
     super.key,
-    required this.body,
+    required this.currentVessel,
   });
 
   @override
@@ -292,7 +293,7 @@ class _PositioningDetailsExpansionPanelBodyState extends State<PositioningDetail
                 children: [
                   Text(AppTexts.positionFixingDeviceType, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.positionFixingDeviceType.toString(), style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
               const SizedBox(height: 10.0),
@@ -300,7 +301,7 @@ class _PositioningDetailsExpansionPanelBodyState extends State<PositioningDetail
                 children: [
                   Text(AppTexts.reportClass, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(width: 10.0),
-                  Flexible(child: Text(widget.body, style: Theme.of(context).textTheme.bodyLarge)),
+                  Flexible(child: Text(widget.currentVessel!.reportClass!, style: Theme.of(context).textTheme.bodyLarge)),
                 ],
               ),
             ],

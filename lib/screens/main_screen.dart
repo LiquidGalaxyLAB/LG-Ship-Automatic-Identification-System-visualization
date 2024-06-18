@@ -1,15 +1,18 @@
 import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart';
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
+import 'package:ais_visualizer/models/lg_connection_model.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
 import 'package:ais_visualizer/sections/visualization_section.dart';
+import 'package:ais_visualizer/services/auth_service.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/floating_arrow.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key});
@@ -38,6 +41,18 @@ class _MainScreenState extends State<MainScreen> {
       FontAwesomeIcons.gears,
     ];
     _selectedItem = _navbarItems[_navbarItems.length - 1];
+
+    // lg and data servers initialization
+    AuthService.fetchToken();
+  }
+
+  Future<void> _lgConnection() async{
+    final prefs = await SharedPreferences.getInstance();
+    final lgConnectionModel = LgConnectionModel();
+    bool isPresent = await lgConnectionModel.isPresentInSharedPreferences(prefs);
+    if (isPresent){
+
+    }
   }
 
   void _toggleRightSidebar() {

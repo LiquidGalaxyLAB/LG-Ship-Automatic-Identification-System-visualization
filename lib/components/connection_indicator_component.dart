@@ -1,7 +1,6 @@
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
-import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:provider/provider.dart';
 
 class ConnectionIndicatorComponent extends StatelessWidget {

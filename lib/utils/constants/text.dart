@@ -74,6 +74,11 @@ class AppTexts {
   static const String executeServiceFailed =
       'Failed to execute service command, check the connection or your authentication';
 
+  
+  static const String name = 'Name';
+  static const String mmsi = 'MMSI';
+  static const String signalReceived = 'Signal Received';
+
   static const String navigationDetails = 'Navigation Details';
   static const String vesselCharacteristics = 'Vessel Characteristics';
   static const String physicalDimensions = 'Physical Dimensions';
@@ -85,7 +90,7 @@ class AppTexts {
   static const String courseOverGround = 'Course Over Ground';
   static const String navigationalStatus = 'Navigational Status';
   static const String rateOfTurn = 'Rate of Turn';
-  static const String heading = 'Heading';
+  static const String heading = 'True Heading';
   static const String lastKnownPosition = 'Last known position';
 
   static const String shipType = 'Ship Type';

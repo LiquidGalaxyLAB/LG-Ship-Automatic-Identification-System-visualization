@@ -43,6 +43,9 @@ dependencies:
   shared_preferences: ^2.2.3
   dartssh2: ^2.8.2
   provider: ^6.1.2
+  dio: ^5.4.3+1
+  http: ^1.2.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +71,7 @@ flutter:
 
   assets:
     - assets/img/
+    - .env 
 
   fonts:
     - family: Montserrat
