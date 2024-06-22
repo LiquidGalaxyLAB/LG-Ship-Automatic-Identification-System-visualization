@@ -7,7 +7,6 @@ import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class VisualizationSection extends StatefulWidget {
@@ -201,6 +200,21 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                           header: AppTexts.positioningDetails,
                           body: PositioningDetailsExpansionPanelBody(
                               currentVessel: _currentVessel),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: ExpansionPanelComponent(
+                          header: AppTexts.routeTracker,
+                          body: RouteTrackerExpansionPanelBody(
+                              currentVessel: _currentVessel),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: ExpansionPanelComponent(
+                          header: AppTexts.routePrediction,
+                          body: Container()
                         ),
                       ),
                     ],

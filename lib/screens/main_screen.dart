@@ -41,9 +41,6 @@ class _MainScreenState extends State<MainScreen> {
       FontAwesomeIcons.gears,
     ];
     _selectedItem = _navbarItems[_navbarItems.length - 1];
-
-    // lg and data servers initialization
-    AuthService.fetchToken();
   }
 
   Future<void> _lgConnection() async{

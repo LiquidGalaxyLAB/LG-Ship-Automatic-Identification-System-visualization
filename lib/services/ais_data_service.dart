@@ -112,4 +112,32 @@ class AisDataService {
       }
     }
   }
+
+  Future<List<VesselSampled>> fetchHistoricTrackData(int mmsi, String startTime, String endTime) async {
+    try {
+      final token = await AuthService.getToken();
+      final baseUrl = 'https://historic.ais.barentswatch.no/open/v1/historic/tracks';
+      final modelFormat = 'json';
+
+      final url = Uri.parse('$baseUrl/$mmsi/$startTime/$endTime?modelFormat=$modelFormat');
+
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'accept': 'application/json',
+      };
+
+      final response = await _client.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((item) => VesselSampled.fromJson(item)).toList();
+      } else {
+        throw Exception('Failed to fetch historic track data: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any exceptions thrown during the process
+      print('Error fetching historic track data: $e');
+      rethrow; // Re-throw the exception for the caller to handle
+    }
+  }
 }

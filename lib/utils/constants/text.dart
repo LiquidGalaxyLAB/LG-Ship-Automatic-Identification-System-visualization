@@ -74,7 +74,6 @@ class AppTexts {
   static const String executeServiceFailed =
       'Failed to execute service command, check the connection or your authentication';
 
-  
   static const String name = 'Name';
   static const String mmsi = 'MMSI';
   static const String signalReceived = 'Signal Received';
@@ -106,10 +105,15 @@ class AppTexts {
   static const String dimensionD = 'Dimension D';
   static const String shipLength = 'Ship Length';
   static const String shipWidth = 'Ship Width';
-  
+
   static const String positionFixingDeviceType = 'Position Fixing Device Type';
   static const String reportClass = 'Report Class';
 
   static const String showVesselroute = 'Show the vessel route on the map';
   static const String showVesselChart = 'Show the vessel fan chart on the map';
+  static const String dateRange = 'Select Date Range';
+  static const String chooseDate = 'Choose start and end date';
+  static const String showVesselRoute = 'Show track on the map';
+
+  static const String simulate = 'Route Simulation Media Player';
 }
