@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
@@ -47,18 +46,9 @@ class _MapComponentState extends State<MapComponent> {
       (sample) {
         setState(() {
           if (samplesMap.containsKey(sample.mmsi)) {
-            // Update existing sample
-            //print("Updated existing vessel with MMSI: ${sample.mmsi}");
             samplesMap[sample.mmsi!] = sample;
-            //print("Total vessels: ${samplesMap.length}");
           } else {
-            // Add new sample
             samplesMap[sample.mmsi!] = sample;
-            //print("Added new vessel with MMSI: ${sample.mmsi}");
-            //print(
-            //'Latitude: ${sample.latitude}, Longitude: ${sample.longitude}');
-            //print count
-            //print("Total vessels: ${samplesMap.length}");
           }
         });
       },
@@ -75,7 +65,7 @@ class _MapComponentState extends State<MapComponent> {
     String endDate,
   ) async {
     try {
-      print('Fetched track data for MMSIaaaaaaaaaaaaaaaa: $mmsi');
+      print('Fetched track data for MMSI: $mmsi');
       final track = await AisDataService().fetchHistoricTrackData(
         mmsi,
         startDate,
@@ -101,7 +91,6 @@ class _MapComponentState extends State<MapComponent> {
     final routeTrackerStateProvider =
         Provider.of<RouteTrackerState>(context, listen: false);
 
-    // Check if a timer is already running and cancel it
     if (markerTimer != null && markerTimer!.isActive) {
       markerTimer!.cancel();
     }
@@ -143,16 +132,13 @@ class _MapComponentState extends State<MapComponent> {
     final selectedVesselProvider =
         Provider.of<SelectedVesselProvider>(context, listen: false);
 
-    // Retrieve current values
     final startDate = routeTrackerStateProvider.startDate;
     final endDate = routeTrackerStateProvider.endDate;
 
-    // Check if the date range has changed
     if (_startDate != startDate || _endDate != endDate) {
       _startDate = startDate;
       _endDate = endDate;
 
-      // Proceed to fetch track data
       if (startDate != null && endDate != null) {
         print('Fetching track data for selected dates');
         final formattedStartDate = startDate.toUtc().toIso8601String();
@@ -196,49 +182,22 @@ class _MapComponentState extends State<MapComponent> {
                 width: 80.0,
                 height: 80.0,
                 point: LatLng(sample.latitude!, sample.longitude!),
-                child: GestureDetector(
-                  onTap: () {
-                    updateSelectedVessel(sample.mmsi!);
-                    // showDialog(
-                    //   context: context,
-                    //   builder: (BuildContext context) {
-                    //     return AlertDialog(
-                    //       title: Text('Vessel Details'),
-                    //       content: SingleChildScrollView(
-                    //         child: Column(
-                    //           crossAxisAlignment: CrossAxisAlignment.start,
-                    //           children: [
-                    //             Text('Name: ${sample.name}'),
-                    //             Text('MMSI: ${sample.mmsi}'),
-                    //             Text('Latitude: ${sample.latitude}'),
-                    //             Text('Longitude: ${sample.longitude}'),
-                    //             Text('Course Over Ground: ${sample.courseOverGround}'),
-                    //             Text('Speed Over Ground: ${sample.speedOverGround}'),
-                    //             Text('True Heading: ${sample.trueHeading}'),
-                    //             Text('Navigational Status: ${sample.navigationalStatus}'),
-                    //           ],
-                    //         ),
-                    //       ),
-                    //       actions: <Widget>[
-                    //         TextButton(
-                    //           child: Text('Close'),
-                    //           onPressed: () {
-                    //             Navigator.of(context).pop();
-                    //           },
-                    //         ),
-                    //       ],
-                    //     );
-                    //   },
-                    // );
-                  },
-                  child: Icon(
-                    Icons.directions_boat,
-                    color: Colors.blue,
-                    size: 40.0,
-                  ),
-                ),
-              );
-            }).toList(),
+                rotate: true,
+                      child: Transform.rotate(
+                        angle: (sample.courseOverGround ?? 0) * (3.141592653589793 / 180),
+                        child: GestureDetector(
+                          onTap: () {
+                            updateSelectedVessel(sample.mmsi!);
+                          },
+                          child: Icon(
+                            Icons.directions_boat,
+                            color: Colors.blue,
+                            size: 40.0,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
           ),
           if (state.showVesselRoute && selectedVesselTrack.isNotEmpty)
             PolylineLayer(
@@ -261,12 +220,16 @@ class _MapComponentState extends State<MapComponent> {
                   height: 80.0,
                   point: LatLng(selectedVesselTrack[markerIndex].latitude!,
                       selectedVesselTrack[markerIndex].longitude!),
-                  child: Icon(
-                    Icons.location_on,
-                    color: Colors.green,
-                    size: 40.0,
-                  ),
-                ),
+                  rotate: true,
+                        child: Transform.rotate(
+                          angle: (selectedVesselTrack[markerIndex].courseOverGround ?? 0) * (3.141592653589793 / 180),
+                          child: Icon(
+                            Icons.directions_boat,
+                            color: Colors.green,
+                            size: 40.0,
+                          ),
+                        ),
+                      ),
               ],
             ),
         ],
