@@ -68,6 +68,9 @@ class AppTexts {
       'You are not connected to LG. Please connect and try again.';
   static const String error = 'Error!';
   static const String ok = 'Ok';
+  static const String cancel = 'Cancel';
+  static const String confirmation = 'Confirmation';
+  static const String confirmationMessage = 'Are you sure you want to execute?';
   static const String executeServiceSuccess =
       'Service command executed successfully';
   static const String success = 'Success!';
