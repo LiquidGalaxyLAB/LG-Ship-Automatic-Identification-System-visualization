@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
+import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
+import 'package:ais_visualizer/services/lg_service.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -20,6 +25,7 @@ class _MapComponentState extends State<MapComponent> {
   int markerIndex = 0;
   DateTime? _startDate;
   DateTime? _endDate;
+  bool _isUplaoding = false;
 
   @override
   void initState() {
@@ -149,10 +155,30 @@ class _MapComponentState extends State<MapComponent> {
     }
   }
 
+  Future<void> showVesselsOnLG() async {
+    if(samplesMap.isEmpty) {
+      _isUplaoding = false;
+      return;
+    }
+    VesselKmlModel kmlModel =
+        VesselKmlModel(vessels: samplesMap.values.toList().sublist(0, 4));
+    final kmlFile = await createFile('vessels.kml', kmlModel.generateKml());
+    await LgService().uploadKml(kmlFile, 'vessels.kml');
+    _isUplaoding = false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context);
+    final isConnected = connectionStatusProvider.isConnected;
     return Consumer<RouteTrackerState>(builder: (context, state, child) {
       fetchTrackDataFromProviderDates();
+
+      if (isConnected && !_isUplaoding) {
+        _isUplaoding = true;
+        //showVesselsOnLG();
+      }
 
       if (state.isPlaying) {
         startMarkerAnimation();
@@ -183,21 +209,22 @@ class _MapComponentState extends State<MapComponent> {
                 height: 80.0,
                 point: LatLng(sample.latitude!, sample.longitude!),
                 rotate: true,
-                      child: Transform.rotate(
-                        angle: (sample.courseOverGround ?? 0) * (3.141592653589793 / 180),
-                        child: GestureDetector(
-                          onTap: () {
-                            updateSelectedVessel(sample.mmsi!);
-                          },
-                          child: Icon(
-                            Icons.directions_boat,
-                            color: Colors.blue,
-                            size: 40.0,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                child: Transform.rotate(
+                  angle: (sample.courseOverGround ?? 0) *
+                      (3.141592653589793 / 180),
+                  child: GestureDetector(
+                    onTap: () {
+                      updateSelectedVessel(sample.mmsi!);
+                    },
+                    child: Icon(
+                      Icons.directions_boat,
+                      color: Colors.blue,
+                      size: 40.0,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
           if (state.showVesselRoute && selectedVesselTrack.isNotEmpty)
             PolylineLayer(
@@ -221,15 +248,17 @@ class _MapComponentState extends State<MapComponent> {
                   point: LatLng(selectedVesselTrack[markerIndex].latitude!,
                       selectedVesselTrack[markerIndex].longitude!),
                   rotate: true,
-                        child: Transform.rotate(
-                          angle: (selectedVesselTrack[markerIndex].courseOverGround ?? 0) * (3.141592653589793 / 180),
-                          child: Icon(
-                            Icons.directions_boat,
-                            color: Colors.green,
-                            size: 40.0,
-                          ),
-                        ),
-                      ),
+                  child: Transform.rotate(
+                    angle: (selectedVesselTrack[markerIndex].courseOverGround ??
+                            0) *
+                        (3.141592653589793 / 180),
+                    child: Icon(
+                      Icons.directions_boat,
+                      color: Colors.green,
+                      size: 40.0,
+                    ),
+                  ),
+                ),
               ],
             ),
         ],

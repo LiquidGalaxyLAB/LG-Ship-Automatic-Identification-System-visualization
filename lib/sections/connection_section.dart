@@ -1,3 +1,5 @@
+import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
+import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -64,6 +66,28 @@ class _ConnectionSectionState extends State<ConnectionSection> {
       if (isConnected != null && isConnected) {
         updateConnectionStatus(true);
         showSuccessSnackBar();
+        await lgService.cleanKMLsAndVisualization(true);
+        await lgService.sendLogo();
+
+        AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
+          id: '1',
+          name: 'About AIS Visualization Tool',
+          lat: 54.623032,
+          lng: 6.640915, 
+        );
+        String aboutKml = aboutModel.generateKml(); 
+        await lgService.sendBallonKml(aboutKml);
+
+        LookAtKmlModel lookAtModel = LookAtKmlModel(
+          lat: 54.623032,
+          lng: 6.640915,
+          range: '5000',
+          tilt: '0',
+          heading: '0',
+          altitude: 7000000,
+          altitudeMode: 'relativeToGround',
+        );
+        await lgService.flyTo(lookAtModel.linearTag);
       } else {
         updateConnectionStatus(false);
         showFailureSnackBar();
