@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:ais_visualizer/components/expansion_panel_component.dart';
 import 'package:ais_visualizer/components/vessel_panels_body.dart';
+import 'package:ais_visualizer/models/kml/vessel_info_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
+import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +23,8 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   VesselFull? _currentVessel;
   late SelectedVesselProvider _selectedVesselProvider;
   late StreamSubscription<VesselFull> _streamSubscription;
-  
+  bool _isUplaoding = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,10 +55,15 @@ class _VisualizationSectionState extends State<VisualizationSection> {
 
   void _fetchLatestData() async {
     try {
-      final vessel = await AisDataService().fetchVesselData(getSelectedVessel());
+      final vessel =
+          await AisDataService().fetchVesselData(getSelectedVessel());
       if (mounted && vessel != null) {
         setState(() {
           _currentVessel = vessel;
+          if (!_isUplaoding) {
+            _isUplaoding = true;
+            showVesselsOnLG();
+          }
         });
         _connectToStream(); // Connect to the stream after fetching the latest data
       } else {
@@ -66,12 +75,17 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   }
 
   void _connectToStream() async {
-    _streamSubscription = AisDataService().streamVesselData(getSelectedVessel()).listen(
+    _streamSubscription =
+        AisDataService().streamVesselData(getSelectedVessel()).listen(
       (sample) {
         if (mounted) {
           setState(() {
             print('Received new vessel data');
             _currentVessel = sample;
+            if (!_isUplaoding) {
+              _isUplaoding = true;
+              showVesselsOnLG();
+            }
           });
         }
       },
@@ -80,6 +94,18 @@ class _VisualizationSectionState extends State<VisualizationSection> {
       },
       cancelOnError: true,
     );
+  }
+
+  Future<void> showVesselsOnLG() async {
+    if (mounted && _currentVessel == null) {
+      _isUplaoding = false;
+      return;
+    }
+    VesselInfoBalloonKmlModel kmlModel =
+        VesselInfoBalloonKmlModel(vessel: _currentVessel!);
+    String kml = kmlModel.generateKml();
+    await LgService().sendBallonKml(kml);
+    _isUplaoding = false;
   }
 
   @override
@@ -213,9 +239,8 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20.0),
                         child: ExpansionPanelComponent(
-                          header: AppTexts.routePrediction,
-                          body: Container()
-                        ),
+                            header: AppTexts.routePrediction,
+                            body: Container()),
                       ),
                     ],
                   )
