@@ -31,7 +31,7 @@ class _LgServiceSectionState extends State<LgServiceSection> {
       } else if (service == AppTexts.relaunch) {
         success = await LgService().relaunchLG();
       } else if (service == AppTexts.clearKML) {
-        success = await LgService().clearKML();
+        success = await LgService().cleanKMLsAndVisualization(true);
       } else if (service == AppTexts.reboot) {
         success = await LgService().reboot();
       }
@@ -137,6 +137,59 @@ class _LgServiceSectionState extends State<LgServiceSection> {
     });
   }
 
+  Future<void> showConfirmationDialog(String service) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppTexts.confirmation,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.secondary)),
+          content: Text(AppTexts.confirmationMessage,
+              style: Theme.of(context).textTheme.headlineSmall),
+          actions: <Widget>[
+            TextButton(
+              style: ButtonStyle(
+                side: WidgetStateProperty.all(
+                      const BorderSide(color: AppColors.darkGrey, width: 3.0)),
+                ),
+              child: Text(
+                AppTexts.cancel,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: AppColors.darkGrey),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: ButtonStyle(
+                side: WidgetStateProperty.all(
+                      const BorderSide(color: AppColors.darkGrey, width: 3.0)),
+                ),
+              child: Text(
+                AppTexts.ok,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: AppColors.darkGrey),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                executeService(service);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   bool checkConnectionStatus() {
     final connectionStatusProvider =
         Provider.of<LgConnectionStatusProvider>(context, listen: false);
@@ -174,22 +227,22 @@ class _LgServiceSectionState extends State<LgServiceSection> {
               LgServiceButtonComponent(
                   text: AppTexts.shutdown,
                   icon: Icons.power_settings_new,
-                  executeService: executeService),
+                  executeService: (service) => showConfirmationDialog(service)),
               const SizedBox(height: 10.0),
               LgServiceButtonComponent(
                   text: AppTexts.relaunch,
                   icon: Icons.refresh,
-                  executeService: executeService),
+                  executeService: (service) => showConfirmationDialog(service)),
               const SizedBox(height: 10.0),
               LgServiceButtonComponent(
                   text: AppTexts.clearKML,
                   icon: Icons.delete_sweep_outlined,
-                  executeService: executeService),
+                  executeService: (service) => showConfirmationDialog(service)),
               const SizedBox(height: 10.0),
               LgServiceButtonComponent(
                   text: AppTexts.reboot,
                   icon: Icons.restart_alt,
-                  executeService: executeService),
+                  executeService: (service) => showConfirmationDialog(service)),
             ],
           ),
         ],
