@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:ais_visualizer/models/kml/blank_kml_model.dart';
-import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/screen_overlay_kml_model.dart';
 import 'package:ais_visualizer/models/lg_connection_model.dart';
 import 'package:dartssh2/dartssh2.dart';
