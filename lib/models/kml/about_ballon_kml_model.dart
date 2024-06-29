@@ -24,20 +24,53 @@ class AboutBalloonKmlModel {
   String generateKml() {
     String featuresList = features
         .map((feature) =>
-            '<li style="color: rgba(2, 48, 71, 255);">$feature</li>')
+            '<li style="color: rgba(2, 48, 71, 255); font-size: 14px;">$feature</li>')
         .join('');
 
     String balloonContent = '''
       <![CDATA[<!DOCTYPE html>
       <html>
-        <head></head>
-        <body style="background:#FFFFFF;">
+        <head>
+          <style>
+            body {
+              background: rgba(245, 245, 245, 255);
+              font-family: Arial, sans-serif;
+            }
+            .card {
+              background-color: #FFFFFF;
+              border: 1px solid #FFFFFF;
+              border-radius: 5px;
+              padding: 16px;
+              margin-bottom: 10px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            .images {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-top: 40px;
+            }
+            .images img {
+              margin: 0 0px;
+              width: 300px;
+              height: auto;
+              border-radius: 5px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+          </style>
+        </head>
+        <body>
           <h1 style="color: rgba(255,131, 14, 255);">$aboutAIS</h1>
-          <p style="color: rgba(2, 48, 71, 255);">$aboutDescription</p>
-          <h2 style="color: rgba(255,131, 14, 255);">$keyFeatures</h2>
-          <ul>
-            $featuresList
-          </ul>
+          <p style="color: rgba(2, 48, 71, 255); font-size: 16px;">$aboutDescription</p>
+          <div class="card">
+            <h2 style="color: rgba(255,131, 14, 255);">$keyFeatures</h2>
+            <ul>
+              $featuresList
+            </ul>
+          </div>
+          <div class="images">
+            <img src="https://i.imgur.com/0lEEIpf.png" alt="logo"/>
+          </div>
         </body>
       </html>]]>
     ''';
