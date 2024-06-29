@@ -79,7 +79,7 @@ class AppTexts {
 
   static const String name = 'Name';
   static const String mmsi = 'MMSI';
-  static const String signalReceived = 'Signal Received';
+  static const String signalReceived = 'Signal Received At';
 
   static const String navigationDetails = 'Navigation Details';
   static const String vesselCharacteristics = 'Vessel Characteristics';
