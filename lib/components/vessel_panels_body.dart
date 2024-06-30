@@ -1,5 +1,6 @@
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
+import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
@@ -412,9 +413,13 @@ class _RouteTrackerExpansionPanelBodyState
   @override
   void didUpdateWidget(covariant RouteTrackerExpansionPanelBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentVessel?.mmsi != oldWidget.currentVessel?.mmsi) {
+    print("Old MMSI: ${oldWidget.currentVessel?.mmsi}");
+    print("New MMSI: ${widget.currentVessel?.mmsi}");
+    final selectedVesselProvider = Provider.of<SelectedVesselProvider>(context);
+    if (selectedVesselProvider.selectedMMSI != selectedVesselProvider.previousMMSI) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<RouteTrackerState>().resetState();
+        print("Resetting stateaaaaaaaaaaaaaaaaaaa");
         _dateTimeController.clear();
         _speedController.text = '1.0';
       });
@@ -426,7 +431,8 @@ class _RouteTrackerExpansionPanelBodyState
     if (speed != null && speed >= 0.5 && speed <= 32.0) {
       context.read<RouteTrackerState>().setPlaybackSpeed(speed);
     } else {
-      _speedController.text = context.read<RouteTrackerState>().playbackSpeed.toStringAsFixed(1);
+      _speedController.text =
+          context.read<RouteTrackerState>().playbackSpeed.toStringAsFixed(1);
     }
   }
 
@@ -479,76 +485,81 @@ class _RouteTrackerExpansionPanelBodyState
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 5.0),
-                  Consumer<RouteTrackerState>(
-                    builder: (context, state, child) {
-                      return TextField(
-                        controller:TextEditingController(
-                          text: state.startDate != null && state.endDate != null
-                              ? '${state.startDate} - ${state.endDate}'
-                              : '',
+                  Consumer<RouteTrackerState>(builder: (context, state, child) {
+                    return TextField(
+                      controller: TextEditingController(
+                        text: state.startDate != null && state.endDate != null
+                            ? '${state.startDate} - ${state.endDate}'
+                            : '',
+                      ),
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppColors.darkGrey,
+                          ),
                         ),
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.darkGrey,
-                            ),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppColors.darkGrey,
                           ),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                          hintText: AppTexts.chooseDate,
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.calendar_today),
-                            onPressed: () async {
-                              DateTime now = DateTime.now();
-                              DateTime sevenDaysAgo = now.subtract(const Duration(days: 14));
-                              List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
-                                context: context,
-                                startInitialDate: now,
-                                startFirstDate: sevenDaysAgo,
-                                startLastDate: now,
-                                endInitialDate: now,
-                                endFirstDate: sevenDaysAgo,
-                                endLastDate: now,
-                                is24HourMode: false,
-                                isShowSeconds: false,
-                                minutesInterval: 1,
-                                secondsInterval: 1,
-                                borderRadius: const BorderRadius.all(Radius.circular(16)),
-                                constraints: const BoxConstraints(
-                                  maxWidth: 350,
-                                  maxHeight: 650,
-                                ),
-                                transitionBuilder: (context, anim1, anim2, child) {
-                                  return FadeTransition(
-                                    opacity: anim1.drive(
-                                      Tween(
-                                        begin: 0,
-                                        end: 1,
-                                      ),
+                        ),
+                        hintText: AppTexts.chooseDate,
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            DateTime now = DateTime.now();
+                            DateTime sevenDaysAgo =
+                                now.subtract(const Duration(days: 14));
+                            List<DateTime>? dateTimeList =
+                                await showOmniDateTimeRangePicker(
+                              context: context,
+                              startInitialDate: now,
+                              startFirstDate: sevenDaysAgo,
+                              startLastDate: now,
+                              endInitialDate: now,
+                              endFirstDate: sevenDaysAgo,
+                              endLastDate: now,
+                              is24HourMode: false,
+                              isShowSeconds: false,
+                              minutesInterval: 1,
+                              secondsInterval: 1,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(16)),
+                              constraints: const BoxConstraints(
+                                maxWidth: 350,
+                                maxHeight: 650,
+                              ),
+                              transitionBuilder:
+                                  (context, anim1, anim2, child) {
+                                return FadeTransition(
+                                  opacity: anim1.drive(
+                                    Tween(
+                                      begin: 0,
+                                      end: 1,
                                     ),
-                                    child: child,
-                                  );
-                                },
-                                transitionDuration: const Duration(milliseconds: 200),
-                                barrierDismissible: true,
-                                endSelectableDayPredicate: (dateTime) {
-                                  return dateTime != DateTime(2023, 2, 25);
-                                },
-                              );
-                      
-                              if (dateTimeList != null && dateTimeList.length == 2) {
-                                state.updateDates(dateTimeList[0], dateTimeList[1]);
-                              }
-                            },
-                          ),
+                                  ),
+                                  child: child,
+                                );
+                              },
+                              transitionDuration:
+                                  const Duration(milliseconds: 200),
+                              barrierDismissible: true,
+                              endSelectableDayPredicate: (dateTime) {
+                                return dateTime != DateTime(2023, 2, 25);
+                              },
+                            );
+
+                            if (dateTimeList != null &&
+                                dateTimeList.length == 2) {
+                              state.updateDates(
+                                  dateTimeList[0], dateTimeList[1]);
+                            }
+                          },
                         ),
-                      );
-                    }
-                  ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -593,7 +604,9 @@ class _RouteTrackerExpansionPanelBodyState
                                 },
                               ),
                               IconButton(
-                                icon: Icon(state.isPlaying ? Icons.pause : Icons.play_arrow),
+                                icon: Icon(state.isPlaying
+                                    ? Icons.pause
+                                    : Icons.play_arrow),
                                 onPressed: () {
                                   state.toggleIsPlaying(!state.isPlaying);
                                 },
@@ -603,7 +616,7 @@ class _RouteTrackerExpansionPanelBodyState
                                 onPressed: () {
                                   state.setCurrentPosition(-1);
                                   state.toggleIsPlaying(true);
-                                 },
+                                },
                               ),
                             ],
                           ),
@@ -626,7 +639,8 @@ class _RouteTrackerExpansionPanelBodyState
                                   double newSpeed = state.playbackSpeed - 0.5;
                                   if (newSpeed >= 0.5) {
                                     state.setPlaybackSpeed(newSpeed);
-                                    _speedController.text = newSpeed.toStringAsFixed(1);
+                                    _speedController.text =
+                                        newSpeed.toStringAsFixed(1);
                                   }
                                 },
                               ),
@@ -634,12 +648,15 @@ class _RouteTrackerExpansionPanelBodyState
                                 width: 70,
                                 child: TextFormField(
                                   controller: _speedController,
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          decimal: true),
                                   onFieldSubmitted: handleSpeedInput,
                                   decoration: const InputDecoration(
                                     contentPadding: EdgeInsets.all(10),
                                     border: OutlineInputBorder(
-                                      borderSide: BorderSide(color: AppColors.darkGrey),
+                                      borderSide:
+                                          BorderSide(color: AppColors.darkGrey),
                                     ),
                                   ),
                                 ),
@@ -650,7 +667,8 @@ class _RouteTrackerExpansionPanelBodyState
                                   double newSpeed = state.playbackSpeed + 0.5;
                                   if (newSpeed <= 32.0) {
                                     state.setPlaybackSpeed(newSpeed);
-                                    _speedController.text = newSpeed.toStringAsFixed(1);
+                                    _speedController.text =
+                                        newSpeed.toStringAsFixed(1);
                                   }
                                 },
                               ),
