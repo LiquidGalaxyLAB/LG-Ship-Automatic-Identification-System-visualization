@@ -22,12 +22,17 @@ class VisualizationSection extends StatefulWidget {
 class _VisualizationSectionState extends State<VisualizationSection> {
   VesselFull? _currentVessel;
   late SelectedVesselProvider _selectedVesselProvider;
-  late StreamSubscription<VesselFull> _streamSubscription;
+  late StreamSubscription<VesselFull>? _streamSubscription;
   bool _isUplaoding = false;
+  bool _fetchingNewVessel = false;
 
   @override
   void initState() {
     super.initState();
+    _streamSubscription = null;
+    if (_getSelectedVessel() != -1) {
+      _fetchLatestData();
+    }
   }
 
   @override
@@ -35,37 +40,52 @@ class _VisualizationSectionState extends State<VisualizationSection> {
     super.didChangeDependencies();
     _selectedVesselProvider = Provider.of<SelectedVesselProvider>(context);
     _selectedVesselProvider.addListener(_onSelectedVesselChanged);
-    _fetchLatestData();
   }
 
   @override
   void dispose() {
     _selectedVesselProvider.removeListener(_onSelectedVesselChanged);
-    _streamSubscription.cancel();
+    _streamSubscription?.cancel();
     super.dispose();
   }
 
   void _onSelectedVesselChanged() {
-    _fetchLatestData();
+    final currentSelectedVessel = _getSelectedVessel();
+    final previousSelectedVessel = _getPerviousSelectedVessel();
+    print('Selected vessel changed to: $currentSelectedVessel');
+    print('Previous selected vessel: $previousSelectedVessel');
+    if (previousSelectedVessel != currentSelectedVessel) {
+      _fetchLatestData();
+    }
   }
 
-  int getSelectedVessel() {
+  int _getSelectedVessel() {
     return _selectedVesselProvider.selectedMMSI;
+  }
+
+  int _getPerviousSelectedVessel() {
+    return _selectedVesselProvider.previousMMSI;
   }
 
   void _fetchLatestData() async {
     try {
+      if (!mounted) return;
+      setState(() {
+        _fetchingNewVessel = true;
+      });
+
       final vessel =
-          await AisDataService().fetchVesselData(getSelectedVessel());
+          await AisDataService().fetchVesselData(_getSelectedVessel());
       if (mounted && vessel != null) {
         setState(() {
           _currentVessel = vessel;
+          _fetchingNewVessel = false;
           if (!_isUplaoding) {
             _isUplaoding = true;
             showVesselsOnLG();
           }
         });
-        _connectToStream(); // Connect to the stream after fetching the latest data
+        _connectToStream();
       } else {
         print('No vessel data found');
       }
@@ -76,7 +96,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
 
   void _connectToStream() async {
     _streamSubscription =
-        AisDataService().streamVesselData(getSelectedVessel()).listen(
+        AisDataService().streamVesselData(_getSelectedVessel()).listen(
       (sample) {
         if (mounted) {
           setState(() {
@@ -116,7 +136,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20.0),
-          _currentVessel == null
+          _currentVessel == null || _fetchingNewVessel
               ? const Center(child: CircularProgressIndicator())
               : Column(children: [
                   Text(

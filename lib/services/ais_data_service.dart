@@ -14,10 +14,15 @@ class AisDataService {
   }
 
   final http.Client _client = http.Client();
+  StreamSubscription<VesselFull>? _activeStreamSubscription;
+  final StreamController<VesselFull> _streamController = StreamController<VesselFull>.broadcast();
+
+  Stream<VesselFull> get vesselStream => _streamController.stream;
 
   Future<List<VesselSampled>> fetchInitialData() async {
     final token = await AuthService.getToken();
-    final url = Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
+    final url =
+        Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -34,7 +39,8 @@ class AisDataService {
 
   Stream<VesselSampled> streamVesselsData() async* {
     final token = await AuthService.getToken();
-    final url = Uri.parse('https://live.ais.barentswatch.no/live/v1/sse/combined');
+    final url =
+        Uri.parse('https://live.ais.barentswatch.no/live/v1/sse/combined');
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -49,7 +55,8 @@ class AisDataService {
     final response = await _client.send(request);
     final stream = response.stream;
 
-    await for (var event in stream.transform(utf8.decoder).transform(const LineSplitter())) {
+    await for (var event
+        in stream.transform(utf8.decoder).transform(const LineSplitter())) {
       if (event.startsWith('data: ')) {
         String jsonData = event.substring(6);
         Map<String, dynamic> jsonMap = jsonDecode(jsonData);
@@ -59,8 +66,10 @@ class AisDataService {
   }
 
   Future<VesselFull?> fetchVesselData(int mmsi) async {
+    await cancelActiveStreamSubscription();
     final token = await AuthService.getToken();
-    final url = Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
+    final url =
+        Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -70,7 +79,6 @@ class AisDataService {
       "modelType": "Full",
       "downsample": true
     });
-
     final response = await _client.post(url, headers: headers, body: body);
     if (response.statusCode == 200) {
       List<dynamic> jsonList = jsonDecode(response.body);
@@ -85,7 +93,8 @@ class AisDataService {
 
   Stream<VesselFull> streamVesselData(int mmsi) async* {
     final token = await AuthService.getToken();
-    final url = Uri.parse('https://live.ais.barentswatch.no/live/v1/sse/combined');
+    final url =
+        Uri.parse('https://live.ais.barentswatch.no/live/v1/sse/combined');
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -104,22 +113,35 @@ class AisDataService {
     final response = await _client.send(request);
     final stream = response.stream;
 
-    await for (var event in stream.transform(utf8.decoder).transform(const LineSplitter())) {
-      if (event.startsWith('data: ')) {
-        String jsonData = event.substring(6);
-        Map<String, dynamic> jsonMap = jsonDecode(jsonData);
-        yield VesselFull.fromJson(jsonMap);
-      }
-    }
+    _activeStreamSubscription = stream
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .where((event) => event.startsWith('data: '))
+        .map((event) => event.substring(6))
+        .map((jsonData) => jsonDecode(jsonData))
+        .map((jsonMap) => VesselFull.fromJson(jsonMap))
+        .listen((sample) {
+          print('Emitting sample: $sample');
+        // Emit the sample to the stream
+        _streamController.add(sample);
+    }, onError: (error) {
+      print('Error occurred in streamVesselData: $error');
+    }, cancelOnError: true);
+
+    // Yield data from the stream controller
+    yield* _streamController.stream;
   }
 
-  Future<List<VesselSampled>> fetchHistoricTrackData(int mmsi, String startTime, String endTime) async {
+  Future<List<VesselSampled>> fetchHistoricTrackData(
+      int mmsi, String startTime, String endTime) async {
     try {
       final token = await AuthService.getToken();
-      final baseUrl = 'https://historic.ais.barentswatch.no/open/v1/historic/tracks';
+      final baseUrl =
+          'https://historic.ais.barentswatch.no/open/v1/historic/tracks';
       final modelFormat = 'json';
 
-      final url = Uri.parse('$baseUrl/$mmsi/$startTime/$endTime?modelFormat=$modelFormat');
+      final url = Uri.parse(
+          '$baseUrl/$mmsi/$startTime/$endTime?modelFormat=$modelFormat');
 
       final headers = {
         'Authorization': 'Bearer $token',
@@ -132,12 +154,21 @@ class AisDataService {
         List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((item) => VesselSampled.fromJson(item)).toList();
       } else {
-        throw Exception('Failed to fetch historic track data: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch historic track data: ${response.statusCode}');
       }
     } catch (e) {
       // Handle any exceptions thrown during the process
       print('Error fetching historic track data: $e');
       rethrow; // Re-throw the exception for the caller to handle
+    }
+  }
+
+  Future<void> cancelActiveStreamSubscription() async {
+    if (_activeStreamSubscription != null) {
+      await _activeStreamSubscription!.cancel().timeout(Duration(seconds: 5));
+      _activeStreamSubscription = null;
+      print("Canceled active stream subscription");
     }
   }
 }
