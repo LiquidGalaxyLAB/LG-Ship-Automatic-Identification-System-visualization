@@ -7,6 +7,7 @@ class RouteTrackerState extends ChangeNotifier {
   double _currentPosition = -1.0;
   DateTime? _startDate;
   DateTime? _endDate;
+  bool _isFetching = false;
 
 
   bool get showVesselRoute  => _showVesselRoute ;
@@ -15,6 +16,7 @@ class RouteTrackerState extends ChangeNotifier {
   double get currentPosition => _currentPosition;
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
+  bool get isFetching => _isFetching;
 
   void toggleShowRoute(bool value) {
     _showVesselRoute  = value;
@@ -40,6 +42,11 @@ class RouteTrackerState extends ChangeNotifier {
     _startDate = newStartDate;
     _endDate = newEndDate;
     notifyListeners();
+  } 
+
+  void toggleIsFetching(bool value) {
+    _isFetching = value;
+    notifyListeners();
   }
 
   void resetState() {
@@ -49,6 +56,7 @@ class RouteTrackerState extends ChangeNotifier {
     _currentPosition = -1.0;
     _startDate = null;
     _endDate = null;
+    _isFetching = false;
     notifyListeners();
   }
 }

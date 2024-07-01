@@ -416,7 +416,9 @@ class _RouteTrackerExpansionPanelBodyState
     print("Old MMSI: ${oldWidget.currentVessel?.mmsi}");
     print("New MMSI: ${widget.currentVessel?.mmsi}");
     final selectedVesselProvider = Provider.of<SelectedVesselProvider>(context);
-    if (selectedVesselProvider.selectedMMSI != selectedVesselProvider.previousMMSI) {
+    print("Selected MMSI: ${selectedVesselProvider.selectedMMSI}");
+    print("Previous MMSI: ${selectedVesselProvider.previousMMSI}");
+    if (widget.currentVessel?.mmsi != oldWidget.currentVessel?.mmsi) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<RouteTrackerState>().resetState();
         print("Resetting stateaaaaaaaaaaaaaaaaaaa");
