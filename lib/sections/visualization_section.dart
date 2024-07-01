@@ -30,9 +30,6 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   void initState() {
     super.initState();
     _streamSubscription = null;
-    if (_getSelectedVessel() != -1) {
-      _fetchLatestData();
-    }
   }
 
   @override
@@ -40,31 +37,22 @@ class _VisualizationSectionState extends State<VisualizationSection> {
     super.didChangeDependencies();
     _selectedVesselProvider = Provider.of<SelectedVesselProvider>(context);
     _selectedVesselProvider.addListener(_onSelectedVesselChanged);
+    _onSelectedVesselChanged();
   }
 
   @override
   void dispose() {
     _selectedVesselProvider.removeListener(_onSelectedVesselChanged);
-    _streamSubscription?.cancel();
+    _cancelStreamSubscription();
     super.dispose();
   }
 
   void _onSelectedVesselChanged() {
-    final currentSelectedVessel = _getSelectedVessel();
-    final previousSelectedVessel = _getPerviousSelectedVessel();
-    print('Selected vessel changed to: $currentSelectedVessel');
-    print('Previous selected vessel: $previousSelectedVessel');
-    if (previousSelectedVessel != currentSelectedVessel) {
-      _fetchLatestData();
-    }
+    _fetchLatestData();
   }
 
   int _getSelectedVessel() {
     return _selectedVesselProvider.selectedMMSI;
-  }
-
-  int _getPerviousSelectedVessel() {
-    return _selectedVesselProvider.previousMMSI;
   }
 
   void _fetchLatestData() async {
@@ -95,6 +83,10 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   }
 
   void _connectToStream() async {
+
+    // Ensure any existing stream subscription is cancelled before creating a new one
+    await _cancelStreamSubscription();
+
     _streamSubscription =
         AisDataService().streamVesselData(_getSelectedVessel()).listen(
       (sample) {
@@ -115,6 +107,13 @@ class _VisualizationSectionState extends State<VisualizationSection> {
       cancelOnError: true,
     );
   }
+
+  Future<void> _cancelStreamSubscription() async {
+  if (_streamSubscription != null) {
+    await _streamSubscription!.cancel();
+    _streamSubscription = null;
+  }
+}
 
   Future<void> showVesselsOnLG() async {
     if (mounted && _currentVessel == null) {

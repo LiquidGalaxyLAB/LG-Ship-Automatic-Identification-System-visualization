@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
@@ -7,6 +6,8 @@ import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
+import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -26,6 +27,7 @@ class _MapComponentState extends State<MapComponent> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isUplaoding = false;
+
 
   @override
   void initState() {
@@ -70,6 +72,11 @@ class _MapComponentState extends State<MapComponent> {
     String startDate,
     String endDate,
   ) async {
+    final routeTrackerStateProvider =
+      Provider.of<RouteTrackerState>(context, listen: false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      routeTrackerStateProvider.toggleIsFetching(true);
+    });
     try {
       print('Fetched track data for MMSI: $mmsi');
       final track = await AisDataService().fetchHistoricTrackData(
@@ -77,6 +84,10 @@ class _MapComponentState extends State<MapComponent> {
         startDate,
         endDate,
       );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        routeTrackerStateProvider.toggleIsFetching(false);
+        print('Doooooneeeeeeeee for state provider!!!!!!!!');
+      });
       print('Doooooneeeeeeeee');
       setState(() {
         markerIndex = 0;
@@ -84,13 +95,20 @@ class _MapComponentState extends State<MapComponent> {
       });
     } catch (e) {
       print('Exception during track data fetch: $e');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        routeTrackerStateProvider.toggleIsFetching(false);
+      });
     }
   }
 
   void updateSelectedVessel(int mmsi) {
+    resetMapComponents();
     final selectedVesselProvider =
         Provider.of<SelectedVesselProvider>(context, listen: false);
     selectedVesselProvider.updateSelectedVessel(mmsi);
+    final trackSatateProvider =
+        Provider.of<RouteTrackerState>(context, listen: false);
+    trackSatateProvider.resetState();
   }
 
   void startMarkerAnimation() {
@@ -167,11 +185,24 @@ class _MapComponentState extends State<MapComponent> {
     _isUplaoding = false;
   }
 
+  void resetMapComponents() {
+    setState(() {
+      selectedVesselTrack.clear();
+      markerIndex = 0;
+      _startDate = null;
+      _endDate = null;
+      if (markerTimer != null && markerTimer!.isActive) {
+        markerTimer!.cancel();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final connectionStatusProvider =
         Provider.of<LgConnectionStatusProvider>(context);
     final isConnected = connectionStatusProvider.isConnected;
+
     return Consumer<RouteTrackerState>(builder: (context, state, child) {
       fetchTrackDataFromProviderDates();
 

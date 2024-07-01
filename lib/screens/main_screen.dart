@@ -1,6 +1,7 @@
 import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart';
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
+import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
@@ -10,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/floating_arrow.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key});
@@ -24,6 +26,8 @@ class _MainScreenState extends State<MainScreen> {
   late String _selectedItem;
   bool _isRightSidebarOpen = true;
   bool _isLeftSidebarOpen = true;
+  bool _dialogShown = false;
+  late BuildContext _dialogContext;
 
   @override
   void initState() {
@@ -81,6 +85,69 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building MainScreen');
+    final routeTrackerState = Provider.of<RouteTrackerState>(context);
+    print('Fetching: ${routeTrackerState.isFetching}');
+    print("_dialogShown: $_dialogShown ");
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (routeTrackerState.isFetching && !_dialogShown) {
+        _dialogShown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            _dialogContext = context;
+            return AlertDialog(
+              title: Text(
+                AppTexts.dialogueTrackResponse,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineLarge!
+                    .copyWith(color: AppColors.success),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(
+                    AppTexts.waitTrackResponse,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    AppTexts.cancel,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium!
+                        .copyWith(color: AppColors.darkGrey),
+                  ),
+                  onPressed: () {
+                    print("Cancel pressed");
+                    routeTrackerState.toggleIsFetching(false);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        ).then((_) {
+          setState(() {
+            _dialogShown = false;
+          });
+        });
+      } else if (!routeTrackerState.isFetching && _dialogShown) {
+        Navigator.of(_dialogContext).pop();
+        setState(() {
+          _dialogShown = false;
+        });
+      }
+    });
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(5.0),

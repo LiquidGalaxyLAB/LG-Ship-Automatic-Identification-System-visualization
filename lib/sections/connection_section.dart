@@ -23,6 +23,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
   late TextEditingController _screenNumberController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -52,6 +53,9 @@ class _ConnectionSectionState extends State<ConnectionSection> {
 
   Future<void> _saveConnectionDetails() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
       final prefs = await SharedPreferences.getInstance();
       final lgConnectionModel = LgConnectionModel();
       lgConnectionModel.ip = _ipController.text;
@@ -66,6 +70,10 @@ class _ConnectionSectionState extends State<ConnectionSection> {
       if (isConnected != null && isConnected) {
         updateConnectionStatus(true);
         showSuccessSnackBar();
+        setState(() {
+          _isLoading = false;
+        });
+        
         await lgService.cleanKMLsAndVisualization(true);
         await lgService.sendLogo();
 
@@ -91,6 +99,9 @@ class _ConnectionSectionState extends State<ConnectionSection> {
       } else {
         updateConnectionStatus(false);
         showFailureSnackBar();
+        setState(() {
+        _isLoading = false;
+        });
       }
     }
   }
@@ -259,11 +270,13 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                       textStyle: Theme.of(context).textTheme.bodyLarge,
                       backgroundColor: AppColors.accent,
                     ),
-                    child: Text(
-                      AppTexts.connect,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
+                    child: _isLoading 
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                          AppTexts.connect,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                  ),  
                 ),
               ],
             ),

@@ -119,4 +119,8 @@ class AppTexts {
   static const String showVesselRoute = 'Show track on the map';
 
   static const String simulate = 'Route Simulation Media Player';
+
+  static const String waitTrackResponse = 'Waiting for OpenAIS response. Please wait...';
+  static const String dialogueTrackResponse = 'Fetching Tarck Data';
+
 }
