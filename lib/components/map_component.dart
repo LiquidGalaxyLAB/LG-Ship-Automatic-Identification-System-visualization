@@ -174,12 +174,13 @@ class _MapComponentState extends State<MapComponent> {
   }
 
   Future<void> showVesselsOnLG() async {
+    print('Uploading vessels to LG from map');
     if(samplesMap.isEmpty) {
       _isUplaoding = false;
       return;
     }
     VesselKmlModel kmlModel =
-        VesselKmlModel(vessels: samplesMap.values.toList().sublist(0, 4));
+        VesselKmlModel(vessels: samplesMap.values.toList());
     final kmlFile = await createFile('vessels.kml', kmlModel.generateKml());
     await LgService().uploadKml(kmlFile, 'vessels.kml');
     _isUplaoding = false;
@@ -208,7 +209,7 @@ class _MapComponentState extends State<MapComponent> {
 
       if (isConnected && !_isUplaoding) {
         _isUplaoding = true;
-        //showVesselsOnLG();
+        showVesselsOnLG();
       }
 
       if (state.isPlaying) {

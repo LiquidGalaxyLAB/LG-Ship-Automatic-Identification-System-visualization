@@ -41,11 +41,11 @@ class LgService {
             SftpFileOpenMode.truncate |
             SftpFileOpenMode.write);
     print('Uploading KML...');
+    await execute('echo "$_url/$fileName" > /var/www/html/kmls.txt',
+        'KML uploaded successfully');
     await file?.write(inputFile.openRead().cast());
     print('Done Upload!');
 
-    await execute('echo "$_url/$fileName" > /var/www/html/kmls.txt',
-        'KML uploaded successfully');
   }
 
   Future<SSHSession?> execute(cmd, successMessage) async {

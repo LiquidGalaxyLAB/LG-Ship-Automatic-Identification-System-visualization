@@ -14,10 +14,25 @@ class AisDataService {
   }
 
   final http.Client _client = http.Client();
+  http.Client _clientVesselStream = http.Client();
   StreamSubscription<VesselFull>? _activeStreamSubscription;
-  final StreamController<VesselFull> _streamController = StreamController<VesselFull>.broadcast();
+  StreamController<VesselFull> _streamController = StreamController<VesselFull>.broadcast();
 
-  Stream<VesselFull> get vesselStream => _streamController.stream;
+  Future<void> cancelActiveStreamSubscription() async {
+    if (_activeStreamSubscription != null) {
+      await _activeStreamSubscription!.cancel();
+      _activeStreamSubscription = null;
+    }
+    _clientVesselStream.close();
+  }
+
+  Future<void> initializeStreamController() async {
+    _clientVesselStream = http.Client();
+    if (_streamController.hasListener) {
+      await _streamController.close();
+      _streamController = StreamController<VesselFull>.broadcast();
+    }
+  }
 
   Future<List<VesselSampled>> fetchInitialData() async {
     final token = await AuthService.getToken();
@@ -92,6 +107,7 @@ class AisDataService {
   }
 
   Stream<VesselFull> streamVesselData(int mmsi) async* {
+    await cancelActiveStreamSubscription();
     final token = await AuthService.getToken();
     final url =
         Uri.parse('https://live.ais.barentswatch.no/live/v1/sse/combined');
@@ -105,13 +121,16 @@ class AisDataService {
       "downsample": true,
       "modelType": "Full"
     });
+    print('Streaming vessel data for MMSI: $mmsi');
+    await initializeStreamController();
 
     final request = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = body;
 
-    final response = await _client.send(request);
+    final response = await _clientVesselStream.send(request);
     final stream = response.stream;
+
 
     _activeStreamSubscription = stream
         .transform(utf8.decoder)
@@ -121,9 +140,9 @@ class AisDataService {
         .map((jsonData) => jsonDecode(jsonData))
         .map((jsonMap) => VesselFull.fromJson(jsonMap))
         .listen((sample) {
-          print('Emitting sample: $sample');
-        // Emit the sample to the stream
-        _streamController.add(sample);
+      print('Emitting sample: $sample');
+      // Emit the sample to the stream
+      _streamController.add(sample);
     }, onError: (error) {
       print('Error occurred in streamVesselData: $error');
     }, cancelOnError: true);
@@ -161,14 +180,6 @@ class AisDataService {
       // Handle any exceptions thrown during the process
       print('Error fetching historic track data: $e');
       rethrow; // Re-throw the exception for the caller to handle
-    }
-  }
-
-  Future<void> cancelActiveStreamSubscription() async {
-    if (_activeStreamSubscription != null) {
-      await _activeStreamSubscription!.cancel().timeout(Duration(seconds: 5));
-      _activeStreamSubscription = null;
-      print("Canceled active stream subscription");
     }
   }
 }
