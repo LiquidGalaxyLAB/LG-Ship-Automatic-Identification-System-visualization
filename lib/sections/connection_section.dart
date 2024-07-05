@@ -206,8 +206,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
-                        .copyWith(color: AppColors.darkGrey),
-                    keyboardType: TextInputType.number,
+                        .copyWith(color: AppColors.darkGrey),                    
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return AppTexts.usernameError;
@@ -229,7 +228,6 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                         .textTheme
                         .bodySmall!
                         .copyWith(color: AppColors.darkGrey),
-                    keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return AppTexts.passwordError;
