@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
@@ -6,12 +8,9 @@ import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
-import 'package:ais_visualizer/utils/constants/colors.dart';
-import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class MapComponent extends StatefulWidget {
@@ -27,12 +26,44 @@ class _MapComponentState extends State<MapComponent> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isUplaoding = false;
+  Completer<GoogleMapController> _controller = Completer();
+  double _selectedLat = 0.0;
+  double _selectedLng = 0.0;
+  double _selectedCog = 0.0;
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
 
+  late GoogleMapController _mapController;
+  double _zoomvalue = 591657550.500000 / pow(2, 13.15393352508545);
+  late double _latvalue;
+  late double _longvalue;
+  late double _tiltvalue;
+  late double _bearingvalue;
+  late LatLng _center;
 
   @override
   void initState() {
+    addCustomIcon();
     super.initState();
     fetchInitialData();
+    _latvalue = 33.26;
+    _longvalue = 73.38;
+    _tiltvalue = 0;
+    _bearingvalue = 0;
+    _center = LatLng(_latvalue, _longvalue);
+
+  }
+
+  void addCustomIcon() {
+    BitmapDescriptor.asset(
+            const ImageConfiguration(), "assets/img/vessel_marker_medium.png")
+        .then(
+      (icon) {
+        setState(() {
+          print("Icon added");
+          markerIcon = icon;
+        });
+      },
+    );
   }
 
   void fetchInitialData() async {
@@ -53,11 +84,7 @@ class _MapComponentState extends State<MapComponent> {
     AisDataService().streamVesselsData().listen(
       (sample) {
         setState(() {
-          if (samplesMap.containsKey(sample.mmsi)) {
-            samplesMap[sample.mmsi!] = sample;
-          } else {
-            samplesMap[sample.mmsi!] = sample;
-          }
+          samplesMap[sample.mmsi!] = sample;
         });
       },
       onError: (error) {
@@ -67,14 +94,51 @@ class _MapComponentState extends State<MapComponent> {
     );
   }
 
+  // for map sync
+  motionControls(double updownflag, double rightleftflag, double zoomflag,
+      double tiltflag, double bearingflag) async {
+
+    LookAtKmlModel flyto = LookAtKmlModel(
+      lng: rightleftflag,
+      lat: updownflag,
+      range: zoomflag.toString(),
+      tilt: tiltflag.toString(),
+      heading: bearingflag.toString(),
+    );
+    try {
+      await LgService().flyTo(flyto.linearTag);
+    } catch (e) {
+      print('Could not connect to host LG');
+      return Future.error(e);
+    }
+  }
+
+  void _onCameraMove(CameraPosition position) {
+    _bearingvalue = position.bearing;
+    _longvalue = position.target.longitude;
+    _latvalue = position.target.latitude;
+    _tiltvalue = position.tilt;
+    _zoomvalue = 591657550.500000 / pow(2, position.zoom);
+  }
+
+  void _onCameraIdle() {
+    int rigcount = LgService().getScreenNumber();
+    motionControls(_latvalue, _longvalue, _zoomvalue / rigcount, _tiltvalue,
+        _bearingvalue);
+  }
+
+  void _onMapCreated(GoogleMapController mapController) {
+    _mapController = mapController;
+  }
+
   Future<void> fetchTrackDataForSelectedDates(
     int mmsi,
     String startDate,
     String endDate,
   ) async {
     final routeTrackerStateProvider =
-      Provider.of<RouteTrackerState>(context, listen: false);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<RouteTrackerState>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       routeTrackerStateProvider.toggleIsFetching(true);
     });
     try {
@@ -109,6 +173,9 @@ class _MapComponentState extends State<MapComponent> {
     final trackSatateProvider =
         Provider.of<RouteTrackerState>(context, listen: false);
     trackSatateProvider.resetState();
+    _selectedLat = samplesMap[mmsi]!.latitude!;
+    _selectedLng = samplesMap[mmsi]!.longitude!;
+    _selectedCog = samplesMap[mmsi]!.courseOverGround!;
   }
 
   void startMarkerAnimation() {
@@ -175,7 +242,7 @@ class _MapComponentState extends State<MapComponent> {
 
   Future<void> showVesselsOnLG() async {
     print('Uploading vessels to LG from map');
-    if(samplesMap.isEmpty) {
+    if (samplesMap.isEmpty) {
       _isUplaoding = false;
       return;
     }
@@ -183,6 +250,7 @@ class _MapComponentState extends State<MapComponent> {
         VesselKmlModel(vessels: samplesMap.values.toList());
     final kmlFile = await createFile('vessels.kml', kmlModel.generateKml());
     await LgService().uploadKml(kmlFile, 'vessels.kml');
+    print("UHGHHH");
     _isUplaoding = false;
   }
 
@@ -198,6 +266,83 @@ class _MapComponentState extends State<MapComponent> {
     });
   }
 
+  Set<Marker> _buildMarkers() {
+    final routeTrackerStateProvider =
+        Provider.of<RouteTrackerState>(context, listen: false);
+
+    if (routeTrackerStateProvider.showVesselRoute) {
+      final selectedVesselMarker = _buildSelectedVesselMarker();
+      final lastPositionMarker = _buildSelectedVesselPositionMarker();
+      return selectedVesselMarker != null
+          ? {selectedVesselMarker, lastPositionMarker!}
+          : {lastPositionMarker!};
+    } else {
+      return samplesMap.values.map((sample) {
+        return Marker(
+          markerId: MarkerId(sample.mmsi.toString()),
+          position: LatLng(sample.latitude!, sample.longitude!),
+          rotation: sample.courseOverGround ?? 0,
+          zIndex: 0.0,
+          onTap: () {
+            updateSelectedVessel(sample.mmsi!);
+          },
+          //icon: markerIcon,
+        );
+      }).toSet();
+    }
+  }
+
+  Set<Polyline> _buildPolylines() {
+    final routeTrackerStateProvider =
+        Provider.of<RouteTrackerState>(context, listen: false);
+
+    if (routeTrackerStateProvider.showVesselRoute &&
+        selectedVesselTrack.isNotEmpty) {
+      print("Building polylines");
+      return {
+        Polyline(
+          polylineId: PolylineId('route'),
+          points: selectedVesselTrack
+              .map((sample) => LatLng(sample.latitude!, sample.longitude!))
+              .toList(),
+          width: 4,
+          zIndex: 1,
+          startCap: Cap.roundCap,
+          endCap: Cap.buttCap,
+        ),
+      };
+    }
+    return {};
+  }
+
+  Marker? _buildSelectedVesselMarker() {
+    if (selectedVesselTrack.isEmpty) {
+      return null;
+    }
+    final selectedSample = selectedVesselTrack[markerIndex];
+    return Marker(
+      markerId: MarkerId('selected_vessel'),
+      position: LatLng(selectedSample.latitude!, selectedSample.longitude!),
+      rotation: selectedSample.courseOverGround ?? 0,
+      //icon: markerIcon,
+    );
+  }
+
+  Marker? _buildSelectedVesselPositionMarker() {
+    return Marker(
+      markerId: MarkerId('last_position_vessel'),
+      position: LatLng(_selectedLat, _selectedLng),
+      rotation: _selectedCog,
+      //icon: markerIcon,
+    );
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final connectionStatusProvider =
@@ -208,6 +353,7 @@ class _MapComponentState extends State<MapComponent> {
       fetchTrackDataFromProviderDates();
 
       if (isConnected && !_isUplaoding) {
+        print("hiiiiiiiiiiii");
         _isUplaoding = true;
         showVesselsOnLG();
       }
@@ -221,79 +367,34 @@ class _MapComponentState extends State<MapComponent> {
         resetMarkerAnimation();
       }
 
-      return FlutterMap(
-        options: const MapOptions(
-          initialCenter: LatLng(60.38, 3.26),
-          initialZoom: 5.0,
-          interactionOptions: InteractionOptions(
-            flags: InteractiveFlag.all,
-          ),
+      final markers = _buildMarkers();
+      final polylines = _buildPolylines();
+
+      return GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: _center,
+          zoom: 3,
+          bearing: _bearingvalue,
+          tilt: _tiltvalue,
         ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+        polylines: polylines,
+        markers: markers,
+        circles: {
+          Circle(
+            circleId: CircleId('selected_vessel'),
+            center: LatLng(_selectedLat, _selectedLng),
+            radius: 430,
+            fillColor: Color.fromARGB(182, 0, 0, 0).withOpacity(0.1),
+            strokeWidth: 0,
           ),
-          MarkerLayer(
-            markers: samplesMap.values.map((sample) {
-              return Marker(
-                width: 80.0,
-                height: 80.0,
-                point: LatLng(sample.latitude!, sample.longitude!),
-                rotate: true,
-                child: Transform.rotate(
-                  angle: (sample.courseOverGround ?? 0) *
-                      (3.141592653589793 / 180),
-                  child: GestureDetector(
-                    onTap: () {
-                      updateSelectedVessel(sample.mmsi!);
-                    },
-                    child: Icon(
-                      Icons.directions_boat,
-                      color: Colors.blue,
-                      size: 40.0,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          if (state.showVesselRoute && selectedVesselTrack.isNotEmpty)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: selectedVesselTrack
-                      .map((sample) =>
-                          LatLng(sample.latitude!, sample.longitude!))
-                      .toList(),
-                  color: const Color.fromARGB(255, 243, 33, 33),
-                  strokeWidth: 3.0,
-                ),
-              ],
-            ),
-          if (state.showVesselRoute && selectedVesselTrack.isNotEmpty)
-            MarkerLayer(
-              markers: [
-                Marker(
-                  width: 80.0,
-                  height: 80.0,
-                  point: LatLng(selectedVesselTrack[markerIndex].latitude!,
-                      selectedVesselTrack[markerIndex].longitude!),
-                  rotate: true,
-                  child: Transform.rotate(
-                    angle: (selectedVesselTrack[markerIndex].courseOverGround ??
-                            0) *
-                        (3.141592653589793 / 180),
-                    child: Icon(
-                      Icons.directions_boat,
-                      color: Colors.green,
-                      size: 40.0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-        ],
+        },
+        tiltGesturesEnabled: true,
+        zoomControlsEnabled: true,
+        zoomGesturesEnabled: true,
+        scrollGesturesEnabled: true,
+        onCameraMove: _onCameraMove,
+        onCameraIdle: _onCameraIdle,
+        onMapCreated: _onMapCreated,
       );
     });
   }

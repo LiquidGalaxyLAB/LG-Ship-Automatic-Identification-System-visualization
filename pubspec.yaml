@@ -49,6 +49,8 @@ dependencies:
   omni_datetime_picker: ^2.0.0
   path_provider: ^2.0.2
   flutter_launcher_icons: ^0.13.1
+  google_maps_flutter: ^2.7.0
+  syncfusion_flutter_maps: ^26.1.40
 
 dev_dependencies:
   flutter_test:

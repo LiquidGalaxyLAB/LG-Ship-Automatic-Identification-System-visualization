@@ -87,8 +87,8 @@ class _ConnectionSectionState extends State<ConnectionSection> {
         await lgService.sendBallonKml(aboutKml);
 
         LookAtKmlModel lookAtModel = LookAtKmlModel(
-          lat: 54.623032,
-          lng: 6.640915,
+          lat: 65.623032,
+          lng: 22.640915,
           range: '5000',
           tilt: '0',
           heading: '0',
@@ -224,6 +224,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                       labelText: AppTexts.password,
                       hintText: AppTexts.passwordHint,
                     ),
+                    obscureText: true,
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
