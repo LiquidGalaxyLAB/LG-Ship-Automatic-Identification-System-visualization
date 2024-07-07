@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
+import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
@@ -54,10 +55,9 @@ class _MapComponentState extends State<MapComponent> {
     super.initState();
     addCustomIcon();
     _initClusterManager();
-    fetchInitialData();
     //_loadPolygons();
-    _latvalue = 65.26;
-    _longvalue = 23.38;
+    _latvalue = 67.26;
+    _longvalue = 14.38;
     _tiltvalue = 0;
     _bearingvalue = 0;
     _center = LatLng(_latvalue, _longvalue);
@@ -65,32 +65,35 @@ class _MapComponentState extends State<MapComponent> {
 
   Future<void> _loadPolygons() async {
     List<List<LatLng>> polygons = await drawAisAreaPolygone();
-    
+
     setState(() {
       _polygons.clear();
-      _polygons.addAll(polygons.map((points) => Polygon(
-        polygonId: PolygonId('polygon_id_${polygons.indexOf(points)}'),
-        points: points,
-        strokeWidth: 2,
-        strokeColor: const Color.fromARGB(255, 243, 33, 107),
-        fillColor: Color.fromARGB(0, 0, 0, 0).withOpacity(0.3),
-      )).toSet());
+      _polygons.addAll(polygons
+          .map((points) => Polygon(
+                polygonId: PolygonId('polygon_id_${polygons.indexOf(points)}'),
+                points: points,
+                strokeWidth: 2,
+                strokeColor: const Color.fromARGB(255, 243, 33, 107),
+                fillColor: Color.fromARGB(0, 0, 0, 0).withOpacity(0.3),
+              ))
+          .toSet());
     });
   }
 
   Future<List<List<LatLng>>> drawAisAreaPolygone() async {
-    String jsonContent = await rootBundle.loadString('assets/data/open_ais_area.json');
+    String jsonContent =
+        await rootBundle.loadString('assets/data/open_ais_area.json');
     Map<String, dynamic> jsonData = json.decode(jsonContent);
-    
+
     List<dynamic> coordinates = jsonData['coordinates'][0][0];
     List<List<LatLng>> polygons = [];
-    
+
     for (var polygonCoordinates in coordinates) {
       double lat = polygonCoordinates[1].toDouble();
       double lng = polygonCoordinates[0].toDouble();
       polygons.add([LatLng(lat, lng)]);
     }
-    
+
     return polygons;
   }
 
@@ -119,7 +122,7 @@ class _MapComponentState extends State<MapComponent> {
         return Marker(
           markerId: MarkerId(c.getId()),
           position: c.location,
-          icon: await _getMarkerBitmap(c.isMultiple ? 75 : 50,
+          icon: await _getMarkerBitmap(c.isMultiple ? 50 : 50,
               text: c.isMultiple ? c.count.toString() : '1'),
           onTap: () {
             if (c.isMultiple) {
@@ -144,7 +147,7 @@ class _MapComponentState extends State<MapComponent> {
         onTap: () => updateSelectedVessel(item.mmsi!),
       ));
     }
-    if(_clusterdMarkers.isEmpty) {
+    if (_clusterdMarkers.isEmpty) {
       _clusterdMarkers.addAll(_markers);
     }
     setState(() {
@@ -153,12 +156,18 @@ class _MapComponentState extends State<MapComponent> {
       _markers.addAll(_clusterdMarkers);
       _markers.removeWhere((marker) => marker.markerId == MarkerId(c.getId()));
     });
+    final selectedVesselProvider =
+        Provider.of<SelectedVesselProvider>(context, listen: false);
+    selectedVesselProvider.updateSelectedVessel(-1);
+    final trackSatateProvider =
+        Provider.of<RouteTrackerState>(context, listen: false);
+    trackSatateProvider.resetState();
   }
 
   Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint = Paint()..color = Color.fromARGB(255, 154,60,52);
+    final Paint paint = Paint()..color = Color.fromARGB(255, 154, 60, 52);
 
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint);
 
@@ -227,6 +236,11 @@ class _MapComponentState extends State<MapComponent> {
   // for map sync
   motionControls(double updownflag, double rightleftflag, double zoomflag,
       double tiltflag, double bearingflag) async {
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context, listen: false);
+    if (!connectionStatusProvider.isConnected) {
+      return;
+    }
     LookAtKmlModel flyto = LookAtKmlModel(
       lng: rightleftflag,
       lat: updownflag,
@@ -342,7 +356,6 @@ class _MapComponentState extends State<MapComponent> {
 
   void resetMarkerAnimation() {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      print('Resetting marker animation or stopping');
       setState(() {
         markerIndex = 0;
       });
@@ -477,14 +490,17 @@ class _MapComponentState extends State<MapComponent> {
 
   @override
   Widget build(BuildContext context) {
-    final connectionStatusProvider =
+    final connectionStatusProviderLg =
         Provider.of<LgConnectionStatusProvider>(context);
-    final isConnected = connectionStatusProvider.isConnected;
+    final isConnectedLg = connectionStatusProviderLg.isConnected;
+    final connectionStatusProviderAis =
+        Provider.of<AisConnectionStatusProvider>(context);
+    final isConnectedAis = connectionStatusProviderAis.isConnected;
 
     return Consumer<RouteTrackerState>(builder: (context, state, child) {
       fetchTrackDataFromProviderDates();
 
-      if (isConnected && !_isUplaoding) {
+      if (isConnectedLg && !_isUplaoding) {
         print("hiiiiiiiiiiii");
         _isUplaoding = true;
         showVesselsOnLG();
@@ -499,14 +515,16 @@ class _MapComponentState extends State<MapComponent> {
         resetMarkerAnimation();
       }
 
-      //final markers = _buildMarkers();
-      if (_markers.isEmpty == false) print(_markers.first.mapsId);
+      if (isConnectedAis && samplesMap.isEmpty) {
+        fetchInitialData();
+      }
+
       final polylines = _buildPolylines();
 
       return GoogleMap(
         initialCameraPosition: CameraPosition(
           target: _center,
-          zoom: 5,
+          zoom: 6,
           bearing: _bearingvalue,
           tilt: _tiltvalue,
         ),
