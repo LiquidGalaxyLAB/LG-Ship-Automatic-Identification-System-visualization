@@ -2,6 +2,7 @@ import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart'
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
+import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
@@ -24,7 +25,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late List<String> _navbarItems;
   late List<IconData> _navbarIcons;
-  late String _selectedItem;
   bool _isRightSidebarOpen = true;
   bool _isLeftSidebarOpen = true;
   bool _dialogShown = false;
@@ -43,7 +43,6 @@ class _MainScreenState extends State<MainScreen> {
       FontAwesomeIcons.gears,
       FontAwesomeIcons.key,
     ];
-    _selectedItem = _navbarItems[_navbarItems.length - 1];
   }
 
   void _toggleRightSidebar() {
@@ -58,14 +57,8 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void _handleNavbarItemTap(String selectedItem) {
-    setState(() {
-      _selectedItem = selectedItem;
-    });
-  }
-
-  Widget _getSelectedItemWidget() {
-    switch (_selectedItem) {
+  Widget _getSelectedItemWidget(selectedItem) {
+    switch (selectedItem) {
       case AppTexts.visualization:
         return const VisualizationSection();
       case AppTexts.collision:
@@ -89,10 +82,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building MainScreen');
     final routeTrackerState = Provider.of<RouteTrackerState>(context);
-    print('Fetching: ${routeTrackerState.isFetching}');
-    print("_dialogShown: $_dialogShown ");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (routeTrackerState.isFetching && !_dialogShown) {
@@ -175,15 +165,11 @@ class _MainScreenState extends State<MainScreen> {
                     ? OpenedLeftSidebarComponent(
                         navbarItems: _navbarItems,
                         navbarIcons: _navbarIcons,
-                        selectedItem: _selectedItem,
-                        handleNavbarItemTap: _handleNavbarItemTap,
                         toggleLeftSidebar: _toggleLeftSidebar,
                       )
                     : CollapsedLeftSidebarComponent(
                         navbarItems: _navbarItems,
                         navbarIcons: _navbarIcons,
-                        selectedItem: _selectedItem,
-                        handleNavbarItemTap: _handleNavbarItemTap,
                         toggleLeftSidebar: _toggleLeftSidebar,
                       ),
               ),
@@ -203,29 +189,33 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildRightSidebar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.primaryBackground,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(40.0),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.softGrey,
-            spreadRadius: 3,
-            blurRadius: 20,
-            offset: Offset(10, 10),
+    return Consumer<SelectedNavItemProvider>(
+      builder: (context, selectedNavItemProvider, child) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.primaryBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(40.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.softGrey,
+                spreadRadius: 3,
+                blurRadius: 20,
+                offset: Offset(10, 10),
+              ),
+            ],
           ),
-        ],
-      ),
-      width: 400,
-      child: Column(
-        children: [
-          Expanded(
-            child: _getSelectedItemWidget(),
+          width: 400,
+          child: Column(
+            children: [
+              Expanded(
+                child: _getSelectedItemWidget(selectedNavItemProvider.selectedItem),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 

@@ -1,28 +1,28 @@
 import 'package:ais_visualizer/components/connection_indicator_component.dart';
+import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class CollapsedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
   final List<IconData> navbarIcons;
-  final String selectedItem;
-  final Function(String) handleNavbarItemTap;
   final Function() toggleLeftSidebar;
 
   const CollapsedLeftSidebarComponent({
     Key? key,
     required this.navbarItems,
     required this.navbarIcons,
-    required this.selectedItem,
-    required this.handleNavbarItemTap,
     required this.toggleLeftSidebar,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final selectedNavItemProvider =
+        Provider.of<SelectedNavItemProvider>(context, listen: false);
     return Container(
       width: 80,
       decoration: const BoxDecoration(
@@ -91,10 +91,8 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     NavbarItemComponent(
-                      onPressed: () => handleNavbarItemTap(navbarItems[index]),
                       label: navbarItems[index],
                       iconData: navbarIcons[index],
-                      isSelected: selectedItem == navbarItems[index],
                       isSidebarOpen: false,
                     ),
                   ],
@@ -118,7 +116,8 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      handleNavbarItemTap(navbarItems.last);
+                      selectedNavItemProvider
+                          .updateNavItem(navbarItems[navbarItems.length - 1]);
                     },
                     child: Container(
                       decoration: BoxDecoration(
