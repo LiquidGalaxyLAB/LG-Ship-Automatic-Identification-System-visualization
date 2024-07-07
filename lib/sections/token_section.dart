@@ -81,7 +81,7 @@ class _TokenSectionState extends State<TokenSection> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(AppTexts.connectedAisSuccessfully),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 5),
         backgroundColor: Color.fromARGB(163, 0, 255, 8),
       ),
     );
