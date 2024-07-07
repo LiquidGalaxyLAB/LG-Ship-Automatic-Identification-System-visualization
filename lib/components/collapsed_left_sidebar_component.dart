@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CollapsedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
@@ -23,7 +24,7 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
+      width: 80,
       decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
         borderRadius: BorderRadius.only(
@@ -32,10 +33,7 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.softGrey,
-            spreadRadius: 3,
-            blurRadius: 20,
-            offset: Offset(10, 0),
+            color: AppColors.darkerGrey,
           ),
         ],
       ),
@@ -48,39 +46,39 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                 Icons.arrow_forward_ios,
                 color: AppColors.softGrey,
                 size: 20.0,
-                ),
+              ),
               onPressed: toggleLeftSidebar,
             ),
           ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 5.0),
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       Image.asset(
+          //         ImagePath.appLogoNoname,
+          //         width: 60,
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // Padding(
+          //   padding: EdgeInsets.symmetric(vertical: 20.0),
+          //   child: Image.asset(
+          //     ImagePath.lgLogo,
+          //     width: 46,
+          //   ),
+          // ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  ImagePath.appLogoNoname,
-                  width: 60,
-                ),
-              ],
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Center(
+              child: ConnectionIndicatorComponent(isOpened: false),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
-            child: Image.asset(
-              ImagePath.lgLogo,
-              width: 46,
-            ),
-          ),
-          Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Center(
-                  child: ConnectionIndicatorComponent(isOpened: false),
-                ),
-              ),
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
-              height: 5,
+              height: 2,
               margin: const EdgeInsets.symmetric(horizontal: 20),
               color: AppColors.borderPrimary,
             ),
@@ -105,6 +103,14 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
             ),
           ),
           Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              height: 2,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              color: AppColors.borderPrimary,
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.all(20.0),
             child: Align(
               alignment: Alignment.center,
@@ -120,12 +126,13 @@ class CollapsedLeftSidebarComponent extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset(
-                            ImagePath.aboutIcon,
-                            width: 32,
+                          FaIcon(
+                            FontAwesomeIcons.circleInfo,
+                            size: 24,
+                            color: AppColors.darkGrey,
                           ),
                         ],
                       ),

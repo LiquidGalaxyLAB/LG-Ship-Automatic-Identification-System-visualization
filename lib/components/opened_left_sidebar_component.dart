@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/image_path.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OpenedLeftSidebarComponent extends StatelessWidget {
   final List<String> navbarItems;
@@ -23,7 +24,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 230,
+      width: 200,
       decoration: const BoxDecoration(
         color: AppColors.primaryBackground,
         borderRadius: BorderRadius.only(
@@ -32,10 +33,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.softGrey,
-            spreadRadius: 3,
-            blurRadius: 20,
-            offset: Offset(10, 0),
+            color: AppColors.darkerGrey,
           ),
         ],
       ),
@@ -51,7 +49,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                     Icons.arrow_back_ios,
                     color: AppColors.softGrey,
                     size: 20.0,
-                    ),
+                  ),
                   onPressed: toggleLeftSidebar,
                 ),
               ),
@@ -62,7 +60,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                   children: [
                     Image.asset(
                       ImagePath.appLogoNoname,
-                      width: 80,
+                      width: 60,
                     ),
                     Text(
                       'AIS Visualizer',
@@ -71,15 +69,15 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                   ],
                 ),
               ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 10.0),
+              //   child: Image.asset(
+              //     ImagePath.lgLogo,
+              //     width: 60,
+              //   ),
+              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Image.asset(
-                  ImagePath.lgLogo,
-                  width: 60,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Center(
                   child: ConnectionIndicatorComponent(isOpened: true),
                 ),
@@ -89,7 +87,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
-              height: 5,
+              height: 2,
               margin: const EdgeInsets.symmetric(horizontal: 20),
               color: AppColors.borderPrimary,
             ),
@@ -106,6 +104,14 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                   isSidebarOpen: true,
                 );
               },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              height: 2,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              color: AppColors.borderPrimary,
             ),
           ),
           Padding(
@@ -127,9 +133,10 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset(
-                            ImagePath.aboutIcon,
-                            width: 32,
+                          const FaIcon(
+                            FontAwesomeIcons.circleInfo,
+                            size: 24,
+                            color: AppColors.darkGrey,
                           ),
                           const SizedBox(width: 8),
                           Text(

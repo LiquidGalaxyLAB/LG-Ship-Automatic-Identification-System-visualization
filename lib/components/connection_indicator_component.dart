@@ -1,4 +1,5 @@
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
+import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +28,10 @@ class ConnectionIndicatorComponent extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             isConnected ? AppTexts.connected : AppTexts.disconnected,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.labelSmall
+            !.copyWith(
+              color: isConnected ? AppColors.darkerGrey : AppColors.darkerGrey,
+            )
           ),
         ],
       ],

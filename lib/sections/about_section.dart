@@ -47,7 +47,7 @@ class AboutSection extends StatelessWidget {
                       // Implement onPressed logic here
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
                       textStyle: Theme.of(context).textTheme.bodyLarge,
                       backgroundColor: AppColors.accent,
                     ),
@@ -72,10 +72,13 @@ class AboutSection extends StatelessWidget {
         children: [
           const Icon(Icons.circle, color: AppColors.textSecondary, size: 10),
           const SizedBox(width: 10.0),
-          Text(
+          Flexible(
+          child: Text(
             feature,
             style: Theme.of(context).textTheme.bodyLarge,
+            softWrap: true,
           ),
+        ),
         ],
       ),
     );

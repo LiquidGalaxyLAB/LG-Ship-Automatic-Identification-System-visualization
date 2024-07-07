@@ -28,20 +28,21 @@ class _NavbarItemComponentState extends State<NavbarItemComponent> {
     return TextButton(
       onPressed: widget.onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: widget.isSelected ? AppColors.accent : AppColors.primaryBackground,
+        backgroundColor:
+            widget.isSelected ? AppColors.accent : AppColors.primaryBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 0),
         child: Row(
           children: [
-            FaIcon(
-              widget.iconData,
-              size: widget.isSidebarOpen ? 24 : 28,
-              color: widget.isSelected ? AppColors.lightGrey : AppColors.secondary
-            ),
+            FaIcon(widget.iconData,
+                size: widget.isSidebarOpen ? 20 : 20,
+                color: widget.isSelected
+                    ? AppColors.lightGrey
+                    : AppColors.secondary),
             if (widget.isSidebarOpen) ...[
               const SizedBox(width: 8),
               Text(
