@@ -13,9 +13,10 @@ class ConnectionIndicatorComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final connectionStatusProvider = Provider.of<LgConnectionStatusProvider>(context);
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context);
     final isConnected = connectionStatusProvider.isConnected;
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -28,10 +29,10 @@ class ConnectionIndicatorComponent extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             isConnected ? AppTexts.connected : AppTexts.disconnected,
-            style: Theme.of(context).textTheme.labelSmall
-            !.copyWith(
-              color: isConnected ? AppColors.darkerGrey : AppColors.darkerGrey,
-            )
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall!
+                .copyWith(color: AppColors.darkGrey),
           ),
         ],
       ],
