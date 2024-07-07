@@ -8,6 +8,7 @@ class AppTexts {
   static const String filter = 'Filter';
   static const String lgConnection = 'LG Connection';
   static const String lgServices = 'LG Services';
+  static const String aisCrendentials = 'Credentials';
   static const String about = 'About';
 
   static const List<String> navBarItems = [
@@ -17,6 +18,7 @@ class AppTexts {
     filter,
     lgConnection,
     lgServices,
+    aisCrendentials,
     about,
   ];
   static const String connected = 'Connected';
@@ -35,6 +37,8 @@ class AppTexts {
     'Change What Region You See'
   ];
   static const String getStarted = 'Get Started Now!';
+
+  static const String credentialsTitle = 'Enter your BarentsWatch OpenAIS credentials';
 
   static const String ip = 'Master Machine IP Address';
   static const String ipHint = 'xxx.xxx.xxx.xxx';
@@ -56,6 +60,18 @@ class AppTexts {
   static const String connectionLG = 'Liquid Galaxy Rig Connection Manager';
   static const String connectedSuccessfully = 'Connected to LG Successfully';
   static const String connectionFailed = 'Failed to Connect to LG';
+
+  static const String clientId = 'Client ID';
+  static const String clientIdHint = 'admin@example.com:adm';
+  static const String clientSecret = 'Client Secret';
+  static const String clientSecretHint = '1i28ajduw9';
+  static const String clientIdError = 'Please enter Client ID and Client Secret';
+  static const String clientSecretError = 'Please enter Client Secret';
+  static const String getTokens = 'Get Token';
+  static const String connectedAisSuccessfully = 'Token fetched successfully, you are now connected to OpenAIS data!\n Wait for Vessels...';
+  static const String connectionAisFailed = 'Failed to fetch token';
+  static const String connectionAisFailedExplanation = 'Make sure you have entered the correct credentials and you have a stable internet connection, then try again.';
+
 
   static const String lgServicesDescription =
       'This service is responsible for sending commands to Liquid Galaxy rig if you are connected to it.';
@@ -122,5 +138,7 @@ class AppTexts {
 
   static const String waitTrackResponse = 'Waiting for OpenAIS response. Please wait...';
   static const String dialogueTrackResponse = 'Fetching Tarck Data';
+
+
 
 }
