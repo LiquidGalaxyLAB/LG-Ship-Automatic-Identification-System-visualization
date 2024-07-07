@@ -5,6 +5,7 @@ import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
+import 'package:ais_visualizer/sections/token_section.dart';
 import 'package:ais_visualizer/sections/visualization_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
       FontAwesomeIcons.filter,
       FontAwesomeIcons.link,
       FontAwesomeIcons.gears,
+      FontAwesomeIcons.key,
     ];
     _selectedItem = _navbarItems[_navbarItems.length - 1];
   }
@@ -76,6 +78,8 @@ class _MainScreenState extends State<MainScreen> {
         return const ConnectionSection();
       case AppTexts.lgServices:
         return const LgServiceSection();
+      case AppTexts.AisCrendentials:
+        return const TokenSection();
       case AppTexts.about:
         return const AboutSection();
       default:
@@ -214,7 +218,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      width: 450,
+      width: 400,
       child: Column(
         children: [
           Expanded(

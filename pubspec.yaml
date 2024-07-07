@@ -52,6 +52,7 @@ dependencies:
   google_maps_flutter: ^2.5.3
   google_maps_cluster_manager: ^3.0.0+1
   google_maps_flutter_platform_interface: 2.4.3
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

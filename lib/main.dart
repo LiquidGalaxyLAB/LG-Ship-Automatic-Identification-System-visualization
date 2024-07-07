@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
@@ -11,13 +12,14 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
-  await AuthService.fetchToken();
+  AuthService.removeToken();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LgConnectionStatusProvider()),
         ChangeNotifierProvider(create: (_) => SelectedVesselProvider()),
         ChangeNotifierProvider(create: (_) => RouteTrackerState()),
+        ChangeNotifierProvider(create: (_) => AisConnectionStatusProvider()),
       ],
       child: const AISVisualizerApp(),
     ),

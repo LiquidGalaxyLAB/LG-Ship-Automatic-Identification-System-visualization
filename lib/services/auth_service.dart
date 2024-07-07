@@ -9,8 +9,8 @@ class AuthService {
   static final AuthService _singleton = AuthService._internal();
   
   static const _authUrl = ApiConstants.authenticationURL;
-  static final String? _clientId = dotenv.env['CLIENT_ID'];
-  static final String? _clientSecret = dotenv.env['CLIENT_SECRET'];
+  // static final String? _clientId = dotenv.env['CLIENT_ID'];
+  // static final String? _clientSecret = dotenv.env['CLIENT_SECRET'];
   static final String? _scope = dotenv.env['SCOPE'];
   static final String? _grantType = dotenv.env['GRANT_TYPE'];
 
@@ -23,7 +23,12 @@ class AuthService {
     return prefs.getString('access_token');
   }
 
-  static Future<bool> fetchToken() async {
+  static Future<void> removeToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+  }
+
+  static Future<bool> fetchToken(String clientId, String clientSecret) async {
     final http.Client client = http.Client();
     
     try {
@@ -33,8 +38,8 @@ class AuthService {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: {
-          'client_id': _clientId,
-          'client_secret': _clientSecret,
+          'client_id': clientId,
+          'client_secret': clientSecret,
           'scope': _scope,
           'grant_type': _grantType,
         },
@@ -48,9 +53,13 @@ class AuthService {
         return true;
       } else {
         print('Failed to fetch token: ${response.statusCode}');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('access_token');
         return false;
       }
     } catch (e) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access_token');
       print('Exception during token fetch: $e');
       return false;
     } finally {
