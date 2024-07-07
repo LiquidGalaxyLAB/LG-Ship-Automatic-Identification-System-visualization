@@ -71,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
         return const ConnectionSection();
       case AppTexts.lgServices:
         return const LgServiceSection();
-      case AppTexts.AisCrendentials:
+      case AppTexts.aisCrendentials:
         return const TokenSection();
       case AppTexts.about:
         return const AboutSection();
@@ -190,33 +190,33 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildRightSidebar() {
     return Consumer<SelectedNavItemProvider>(
-      builder: (context, selectedNavItemProvider, child) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.primaryBackground,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(40.0),
+        builder: (context, selectedNavItemProvider, child) {
+      return Container(
+        decoration: const BoxDecoration(
+          color: AppColors.primaryBackground,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(40.0),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.softGrey,
+              spreadRadius: 3,
+              blurRadius: 20,
+              offset: Offset(10, 10),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.softGrey,
-                spreadRadius: 3,
-                blurRadius: 20,
-                offset: Offset(10, 10),
-              ),
-            ],
-          ),
-          width: 400,
-          child: Column(
-            children: [
-              Expanded(
-                child: _getSelectedItemWidget(selectedNavItemProvider.selectedItem),
-              ),
-            ],
-          ),
-        );
-      }
-    );
+          ],
+        ),
+        width: 400,
+        child: Column(
+          children: [
+            Expanded(
+              child:
+                  _getSelectedItemWidget(selectedNavItemProvider.selectedItem),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildCollapsedRightSidebar() {
