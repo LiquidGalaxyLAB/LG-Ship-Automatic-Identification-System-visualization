@@ -7,7 +7,7 @@ import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-class OpenedLeftSidebarComponent extends StatelessWidget {
+class OpenedLeftSidebarComponent extends StatefulWidget {
   final List<String> navbarItems;
   final List<IconData> navbarIcons;
   final Function() toggleLeftSidebar;
@@ -18,6 +18,25 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
     required this.navbarIcons,
     required this.toggleLeftSidebar,
   }) : super(key: key);
+
+  @override
+  State<OpenedLeftSidebarComponent> createState() => _OpenedLeftSidebarComponentState();
+}
+
+class _OpenedLeftSidebarComponentState extends State<OpenedLeftSidebarComponent> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +69,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                     color: AppColors.softGrey,
                     size: 20.0,
                   ),
-                  onPressed: toggleLeftSidebar,
+                  onPressed: widget.toggleLeftSidebar,
                 ),
               ),
               Padding(
@@ -93,13 +112,34 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: navbarItems.length - 1,
-              itemBuilder: (context, index) {
-                return NavbarItemComponent(
-                  label: navbarItems[index],
-                  iconData: navbarIcons[index],
-                  isSidebarOpen: true,
+            child: Consumer<SelectedNavItemProvider>(
+              builder: (context, selectedNavItemProvider, child) {
+                // Get the selected index
+                final int selectedIndex = widget.navbarItems.indexOf(
+                    selectedNavItemProvider.selectedItem);
+
+                // Scroll to the position if the selectedIndex is valid
+                if (selectedIndex >= 0 && selectedIndex < widget.navbarItems.length - 1) {
+                  const double itemHeight = 60.0;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollController.animateTo(
+                      selectedIndex * itemHeight,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  });
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: widget.navbarItems.length - 1,
+                  itemBuilder: (context, index) {
+                    return NavbarItemComponent(
+                      label: widget.navbarItems[index],
+                      iconData: widget.navbarIcons[index],
+                      isSidebarOpen: true,
+                    );
+                  },
                 );
               },
             ),
@@ -121,7 +161,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       selectedNavItemProvider
-                          .updateNavItem(navbarItems[navbarItems.length - 1]);
+                          .updateNavItem(widget.navbarItems[widget.navbarItems.length - 1]);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -139,7 +179,7 @@ class OpenedLeftSidebarComponent extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            navbarItems.last,
+                            widget.navbarItems.last,
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                         ],
