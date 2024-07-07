@@ -1,12 +1,21 @@
+import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:provider/provider.dart';
 
 class AboutSection extends StatelessWidget {
   const AboutSection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
+    void _navigateToVisualization() {
+      final selectedNavItemProvider =
+          Provider.of<SelectedNavItemProvider>(context, listen: false);
+      selectedNavItemProvider.updateNavItem(AppTexts.visualization);
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -43,9 +52,7 @@ class AboutSection extends StatelessWidget {
                 const SizedBox(height: 20.0),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Implement onPressed logic here
-                    },
+                    onPressed: _navigateToVisualization,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
                       textStyle: Theme.of(context).textTheme.bodyLarge,
