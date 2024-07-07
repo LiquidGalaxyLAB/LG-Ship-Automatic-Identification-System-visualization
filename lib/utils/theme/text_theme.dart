@@ -5,19 +5,19 @@ class AppTextTheme {
   AppTextTheme._();
 
   static TextTheme lightTheme = TextTheme(
-    headlineLarge: const TextStyle().copyWith(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-    headlineMedium: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-    headlineSmall: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+    headlineLarge: const TextStyle().copyWith(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+    headlineMedium: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+    headlineSmall: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
 
-    bodyLarge: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-    bodyMedium: const TextStyle().copyWith(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-    bodySmall: const TextStyle().copyWith(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+    bodyLarge: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+    bodyMedium: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+    bodySmall: const TextStyle().copyWith(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
 
-    labelLarge: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textWhite),
-    labelMedium: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w400, color: AppColors.error),
-    labelSmall: const TextStyle().copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.grey),
+    labelLarge: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textWhite),
+    labelMedium: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.error),
+    labelSmall: const TextStyle().copyWith(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.grey),
 
-    titleMedium: const TextStyle().copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.secondary),
+    titleMedium: const TextStyle().copyWith(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.secondary),
     
   );
 }
