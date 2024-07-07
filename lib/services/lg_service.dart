@@ -39,8 +39,9 @@ class LgService {
     print("uploading kml");
     final sftp = await _client?.sftp();
     final file = await sftp?.open('/var/www/html/$fileName',
-        mode: SftpFileOpenMode.truncate |
-            SftpFileOpenMode.write);
+          mode: SftpFileOpenMode.truncate |
+          SftpFileOpenMode.create |
+          SftpFileOpenMode.write);
     print('Uploading KML...');
     await execute('echo "$_url/$fileName" > /var/www/html/kmls.txt',
         'KML file written successfully');
@@ -120,11 +121,11 @@ class LgService {
   Future<bool> cleanKMLsAndVisualization(bool keepLogo) async {
     bool allSuccessful = true;
 
-    //String query =
-        //'echo "exittour=true" > /tmp/query.txt && > /var/www/html/kmls.txt';
-    //final queryResult = await execute(
-        //query, 'Liquid Galaxy exited tour and cleared kmls.txt successfully');
-    //allSuccessful = allSuccessful && (queryResult != null);
+    String query =
+        'echo "exittour=true" > /tmp/query.txt && > /var/www/html/kmls.txt';
+    final queryResult = await execute(
+        query, 'Liquid Galaxy exited tour and cleared kmls.txt successfully');
+    allSuccessful = allSuccessful && (queryResult != null);
 
     for (int i = 2; i <= _lgConnectionModel.screenNumber; i++) {
       String kmlContent = BlankKmlModel.generateBlankKml('slave_$i');

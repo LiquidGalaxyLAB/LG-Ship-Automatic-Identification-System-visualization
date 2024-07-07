@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
+import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ais_visualizer/models/lg_connection_model.dart';
@@ -39,14 +44,16 @@ class _ConnectionSectionState extends State<ConnectionSection> {
   Future<void> _loadConnectionDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final lgConnectionModel = LgConnectionModel();
-    bool isPresent = await lgConnectionModel.isPresentInSharedPreferences(prefs);
+    bool isPresent =
+        await lgConnectionModel.isPresentInSharedPreferences(prefs);
     if (isPresent) {
       setState(() {
         _ipController.text = lgConnectionModel.ip;
         _portController.text = lgConnectionModel.port.toString();
         _usernameController.text = lgConnectionModel.userName;
         _passwordController.text = lgConnectionModel.password;
-        _screenNumberController.text = lgConnectionModel.screenNumber.toString();
+        _screenNumberController.text =
+            lgConnectionModel.screenNumber.toString();
       });
     }
   }
@@ -64,7 +71,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
       lgConnectionModel.password = _passwordController.text;
       lgConnectionModel.screenNumber = int.parse(_screenNumberController.text);
       await lgConnectionModel.saveToSharedPreferences(prefs);
-      
+
       final lgService = LgService();
       bool? isConnected = await lgService.connectToLG();
       if (isConnected != null && isConnected) {
@@ -73,7 +80,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
         setState(() {
           _isLoading = false;
         });
-        
+
         await lgService.cleanKMLsAndVisualization(true);
         await lgService.sendLogo();
 
@@ -81,9 +88,9 @@ class _ConnectionSectionState extends State<ConnectionSection> {
           id: '1',
           name: 'About AIS Visualization Tool',
           lat: 54.623032,
-          lng: 6.640915, 
+          lng: 6.640915,
         );
-        String aboutKml = aboutModel.generateKml(); 
+        String aboutKml = aboutModel.generateKml();
         await lgService.sendBallonKml(aboutKml);
 
         LookAtKmlModel lookAtModel = LookAtKmlModel(
@@ -96,11 +103,20 @@ class _ConnectionSectionState extends State<ConnectionSection> {
           altitudeMode: 'relativeToGround',
         );
         await lgService.flyTo(lookAtModel.linearTag);
+
+        // send openAis area
+        // String jsonContent =
+        //     await rootBundle.loadString('assets/data/open_ais_area.json');
+        //Map<String, dynamic> jsonData = jsonDecode(jsonContent);
+        MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
+        String kmlText = await multiPolygon.generateKml();
+        final kmlFile = await createFile('polygone.kml', kmlText);
+        await LgService().uploadKml(kmlFile, 'polygone.kml');
       } else {
         updateConnectionStatus(false);
         showFailureSnackBar();
         setState(() {
-        _isLoading = false;
+          _isLoading = false;
         });
       }
     }
@@ -206,7 +222,7 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
-                        .copyWith(color: AppColors.darkGrey),                    
+                        .copyWith(color: AppColors.darkGrey),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return AppTexts.usernameError;
@@ -269,13 +285,13 @@ class _ConnectionSectionState extends State<ConnectionSection> {
                       textStyle: Theme.of(context).textTheme.bodyLarge,
                       backgroundColor: AppColors.accent,
                     ),
-                    child: _isLoading 
+                    child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                          AppTexts.connect,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                  ),  
+                            AppTexts.connect,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                  ),
                 ),
               ],
             ),
