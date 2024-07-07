@@ -1,4 +1,7 @@
-class VesselSampled {
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+class VesselSampled with ClusterItem {
   double? courseOverGround;
   double? latitude;
   double? longitude;
@@ -40,4 +43,7 @@ class VesselSampled {
       msgtime: json['msgtime'] != null ? DateTime.parse(json['msgtime']) : null,
     );
   }
+
+  @override
+  LatLng get location => LatLng(latitude!, longitude!);
 }

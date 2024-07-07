@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+import 'dart:ui';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
@@ -10,8 +12,11 @@ import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart'
+    as cluster_manager;
 
 class MapComponent extends StatefulWidget {
   @override
@@ -26,7 +31,6 @@ class _MapComponentState extends State<MapComponent> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isUplaoding = false;
-  Completer<GoogleMapController> _controller = Completer();
   double _selectedLat = 0.0;
   double _selectedLng = 0.0;
   double _selectedCog = 0.0;
@@ -40,22 +44,146 @@ class _MapComponentState extends State<MapComponent> {
   late double _bearingvalue;
   late LatLng _center;
 
+  late cluster_manager.ClusterManager _manager;
+  Set<Marker> _markers = {};
+  Set<Marker> _clusterdMarkers = {};
+  Set<Polygon> _polygons = {};
+
   @override
   void initState() {
-    addCustomIcon();
     super.initState();
+    addCustomIcon();
+    _initClusterManager();
     fetchInitialData();
-    _latvalue = 33.26;
-    _longvalue = 73.38;
+    //_loadPolygons();
+    _latvalue = 65.26;
+    _longvalue = 23.38;
     _tiltvalue = 0;
     _bearingvalue = 0;
     _center = LatLng(_latvalue, _longvalue);
+  }
 
+  Future<void> _loadPolygons() async {
+    List<List<LatLng>> polygons = await drawAisAreaPolygone();
+    
+    setState(() {
+      _polygons.clear();
+      _polygons.addAll(polygons.map((points) => Polygon(
+        polygonId: PolygonId('polygon_id_${polygons.indexOf(points)}'),
+        points: points,
+        strokeWidth: 2,
+        strokeColor: const Color.fromARGB(255, 243, 33, 107),
+        fillColor: Color.fromARGB(0, 0, 0, 0).withOpacity(0.3),
+      )).toSet());
+    });
+  }
+
+  Future<List<List<LatLng>>> drawAisAreaPolygone() async {
+    String jsonContent = await rootBundle.loadString('assets/data/open_ais_area.json');
+    Map<String, dynamic> jsonData = json.decode(jsonContent);
+    
+    List<dynamic> coordinates = jsonData['coordinates'][0][0];
+    List<List<LatLng>> polygons = [];
+    
+    for (var polygonCoordinates in coordinates) {
+      double lat = polygonCoordinates[1].toDouble();
+      double lng = polygonCoordinates[0].toDouble();
+      polygons.add([LatLng(lat, lng)]);
+    }
+    
+    return polygons;
+  }
+
+  void _initClusterManager() {
+    _manager = cluster_manager.ClusterManager<VesselSampled>(
+      [],
+      _updateMarkers,
+      markerBuilder: _markerBuilder,
+    );
+  }
+
+  void _updateMarkers(Set<Marker> markers) {
+    setState(() {
+      _markers.clear();
+      _markers.addAll(markers);
+    });
+  }
+
+  void _onClusterUpdate() {
+    _manager.setItems(samplesMap.values.toList());
+  }
+
+  Future<Marker> Function(dynamic) get _markerBuilder =>
+      (dynamic cluster) async {
+        final c = cluster as cluster_manager.Cluster<VesselSampled>;
+        return Marker(
+          markerId: MarkerId(c.getId()),
+          position: c.location,
+          icon: await _getMarkerBitmap(c.isMultiple ? 75 : 50,
+              text: c.isMultiple ? c.count.toString() : '1'),
+          onTap: () {
+            if (c.isMultiple) {
+              // Show all items in the cluster
+              _showClusterItems(c.items, c);
+            } else {
+              // Handle single item tap
+              updateSelectedVessel(c.items.first.mmsi!);
+            }
+          },
+        );
+      };
+
+  void _showClusterItems(Iterable<VesselSampled> items, dynamic c) {
+    Set<Marker> newMarkers = {};
+    for (var item in items) {
+      newMarkers.add(Marker(
+        markerId: MarkerId(item.mmsi.toString()),
+        position: LatLng(item.latitude!, item.longitude!),
+        rotation: item.courseOverGround ?? 0,
+        icon: markerIcon,
+        onTap: () => updateSelectedVessel(item.mmsi!),
+      ));
+    }
+    if(_clusterdMarkers.isEmpty) {
+      _clusterdMarkers.addAll(_markers);
+    }
+    setState(() {
+      _markers.clear();
+      _markers.addAll(newMarkers);
+      _markers.addAll(_clusterdMarkers);
+      _markers.removeWhere((marker) => marker.markerId == MarkerId(c.getId()));
+    });
+  }
+
+  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint = Paint()..color = Color.fromARGB(255, 154,60,52);
+
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint);
+
+    if (text != null) {
+      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+      painter.text = TextSpan(
+        text: text,
+        style: TextStyle(
+            fontSize: size / 3,
+            color: Colors.white,
+            fontWeight: FontWeight.normal),
+      );
+      painter.layout();
+      painter.paint(canvas,
+          Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2));
+    }
+
+    final img = await pictureRecorder.endRecording().toImage(size, size);
+    final data = await img.toByteData(format: ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
   }
 
   void addCustomIcon() {
-    BitmapDescriptor.asset(
-            const ImageConfiguration(), "assets/img/vessel_marker_medium.png")
+    BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(), "assets/img/vessel_marker_large.png")
         .then(
       (icon) {
         setState(() {
@@ -69,11 +197,13 @@ class _MapComponentState extends State<MapComponent> {
   void fetchInitialData() async {
     try {
       final vessels = await AisDataService().fetchInitialData();
+      print("DOOOOOOOOOOOOONEEEEEEEEEEEEEEEEE FEEEEEEETCHHHHHHIIIIIINGGGGGGG");
       setState(() {
         for (var sample in vessels) {
           samplesMap[sample.mmsi!] = sample;
         }
       });
+      _onClusterUpdate();
       connectToSSE();
     } catch (e) {
       print('Exception during initial data fetch: $e');
@@ -97,7 +227,6 @@ class _MapComponentState extends State<MapComponent> {
   // for map sync
   motionControls(double updownflag, double rightleftflag, double zoomflag,
       double tiltflag, double bearingflag) async {
-
     LookAtKmlModel flyto = LookAtKmlModel(
       lng: rightleftflag,
       lat: updownflag,
@@ -119,16 +248,19 @@ class _MapComponentState extends State<MapComponent> {
     _latvalue = position.target.latitude;
     _tiltvalue = position.tilt;
     _zoomvalue = 591657550.500000 / pow(2, position.zoom);
+    _manager.onCameraMove;
   }
 
   void _onCameraIdle() {
     int rigcount = LgService().getScreenNumber();
     motionControls(_latvalue, _longvalue, _zoomvalue / rigcount, _tiltvalue,
         _bearingvalue);
+    _manager.updateMap;
   }
 
   void _onMapCreated(GoogleMapController mapController) {
     _mapController = mapController;
+    _manager.setMapId(mapController.mapId);
   }
 
   Future<void> fetchTrackDataForSelectedDates(
@@ -367,18 +499,20 @@ class _MapComponentState extends State<MapComponent> {
         resetMarkerAnimation();
       }
 
-      final markers = _buildMarkers();
+      //final markers = _buildMarkers();
+      if (_markers.isEmpty == false) print(_markers.first.mapsId);
       final polylines = _buildPolylines();
 
       return GoogleMap(
         initialCameraPosition: CameraPosition(
           target: _center,
-          zoom: 3,
+          zoom: 5,
           bearing: _bearingvalue,
           tilt: _tiltvalue,
         ),
         polylines: polylines,
-        markers: markers,
+        markers: _markers,
+        //polygons: _polygons,
         circles: {
           Circle(
             circleId: CircleId('selected_vessel'),
