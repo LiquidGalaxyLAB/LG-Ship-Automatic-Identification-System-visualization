@@ -438,6 +438,32 @@ class _RouteTrackerExpansionPanelBodyState
     }
   }
 
+  Future<void> _selectDateRange(
+      BuildContext context, RouteTrackerState state) async {
+    DateTime now = DateTime.now();
+    DateTime? pickedStartDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now.subtract(const Duration(days: 14)), // 14 days ago
+      lastDate: now,
+      helpText: "Start date",
+    );
+
+    if (pickedStartDate != null) {
+      DateTime? pickedEndDate = await showDatePicker(
+        context: context,
+        initialDate: pickedStartDate,
+        firstDate: pickedStartDate,
+        lastDate: now,
+        helpText: "End date",
+      );
+
+      if (pickedEndDate != null) {
+        state.updateDates(pickedStartDate, pickedEndDate);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -509,54 +535,8 @@ class _RouteTrackerExpansionPanelBodyState
                         hintText: AppTexts.chooseDate,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today),
-                          onPressed: () async {
-                            DateTime now = DateTime.now();
-                            DateTime sevenDaysAgo =
-                                now.subtract(const Duration(days: 14));
-                            List<DateTime>? dateTimeList =
-                                await showOmniDateTimeRangePicker(
-                              context: context,
-                              startInitialDate: now,
-                              startFirstDate: sevenDaysAgo,
-                              startLastDate: now,
-                              endInitialDate: now,
-                              endFirstDate: sevenDaysAgo,
-                              endLastDate: now,
-                              is24HourMode: false,
-                              isShowSeconds: false,
-                              minutesInterval: 1,
-                              secondsInterval: 1,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(16)),
-                              constraints: const BoxConstraints(
-                                maxWidth: 350,
-                                maxHeight: 650,
-                              ),
-                              transitionBuilder:
-                                  (context, anim1, anim2, child) {
-                                return FadeTransition(
-                                  opacity: anim1.drive(
-                                    Tween(
-                                      begin: 0,
-                                      end: 1,
-                                    ),
-                                  ),
-                                  child: child,
-                                );
-                              },
-                              transitionDuration:
-                                  const Duration(milliseconds: 200),
-                              barrierDismissible: true,
-                              endSelectableDayPredicate: (dateTime) {
-                                return dateTime != DateTime(2023, 2, 25);
-                              },
-                            );
-
-                            if (dateTimeList != null &&
-                                dateTimeList.length == 2) {
-                              state.updateDates(
-                                  dateTimeList[0], dateTimeList[1]);
-                            }
+                          onPressed: () {
+                            _selectDateRange(context, state);
                           },
                         ),
                       ),
