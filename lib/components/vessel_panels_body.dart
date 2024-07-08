@@ -439,8 +439,12 @@ class _RouteTrackerExpansionPanelBodyState
   }
 
   Future<void> _selectDateRange(
-      BuildContext context, RouteTrackerState state) async {
+    BuildContext context,
+    RouteTrackerState state,
+  ) async {
     DateTime now = DateTime.now();
+
+    // Pick start date
     DateTime? pickedStartDate = await showDatePicker(
       context: context,
       initialDate: now,
@@ -450,16 +454,48 @@ class _RouteTrackerExpansionPanelBodyState
     );
 
     if (pickedStartDate != null) {
-      DateTime? pickedEndDate = await showDatePicker(
-        context: context,
-        initialDate: pickedStartDate,
-        firstDate: pickedStartDate,
-        lastDate: now,
-        helpText: "End date",
-      );
+      // Pick start time
+      TimeOfDay? pickedStartTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(pickedStartDate));
 
-      if (pickedEndDate != null) {
-        state.updateDates(pickedStartDate, pickedEndDate);
+      if (pickedStartTime != null) {
+        pickedStartDate = DateTime(
+          pickedStartDate.year,
+          pickedStartDate.month,
+          pickedStartDate.day,
+          pickedStartTime.hour,
+          pickedStartTime.minute,
+        );
+
+        // Pick end date
+        DateTime? pickedEndDate = await showDatePicker(
+          context: context,
+          initialDate: pickedStartDate,
+          firstDate: pickedStartDate,
+          lastDate: now,
+          helpText: "End date",
+        );
+
+        if (pickedEndDate != null) {
+          // Pick end time
+          TimeOfDay? pickedEndTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(pickedEndDate),
+          );
+
+          if (pickedEndTime != null) {
+            pickedEndDate = DateTime(
+              pickedEndDate.year,
+              pickedEndDate.month,
+              pickedEndDate.day,
+              pickedEndTime.hour,
+              pickedEndTime.minute,
+            );
+
+            state.updateDates(pickedStartDate, pickedEndDate);
+          }
+        }
       }
     }
   }
