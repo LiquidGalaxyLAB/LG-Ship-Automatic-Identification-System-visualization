@@ -54,7 +54,8 @@ class _TokenSectionState extends State<TokenSection> {
       aisConnectionModel.clientSecret = _clientSecretController.text;
       await aisConnectionModel.saveToSharedPreferences(prefs);
 
-      bool isTokenValid = await AuthService.fetchToken(aisConnectionModel.clientId, aisConnectionModel.clientSecret);
+      bool isTokenValid = await AuthService.fetchToken(
+          aisConnectionModel.clientId, aisConnectionModel.clientSecret);
       if (isTokenValid) {
         setState(() {
           _isLoading = false;
@@ -242,6 +243,14 @@ class _TokenSectionState extends State<TokenSection> {
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                   ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Note: Tokens expire after 1 hour. You need to generate a new token to continue making requests.",
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: AppColors.darkGrey,
+                      ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
