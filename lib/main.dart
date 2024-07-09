@@ -1,8 +1,10 @@
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
+import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
+import 'package:ais_visualizer/screens/animated_splash_screen.dart';
 import 'package:ais_visualizer/screens/main_screen.dart';
 import 'package:ais_visualizer/services/auth_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -22,6 +24,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => RouteTrackerState()),
         ChangeNotifierProvider(create: (_) => AisConnectionStatusProvider()),
         ChangeNotifierProvider(create: (_) => SelectedNavItemProvider()),
+        ChangeNotifierProvider(create: (_) => SelectedKmlFileProvider()),
       ],
       child: const AISVisualizerApp(),
     ),
@@ -38,7 +41,7 @@ class AISVisualizerApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme,
       title: AppTexts.appName,
-      home: const MainScreen(),
+      home: const AnimatedSplash(),
     );
   }
 }

@@ -4,11 +4,13 @@ import 'package:ais_visualizer/components/vessel_panels_body.dart';
 import 'package:ais_visualizer/models/kml/vessel_info_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
@@ -101,8 +103,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   // To see if the mmsi exists
   Future<bool> _checkValidSearch(int mmsi) async {
     try {
-      final vessel =
-          await AisDataService().fetchVesselData(mmsi);
+      final vessel = await AisDataService().fetchVesselData(mmsi);
       if (mounted && vessel != null) {
         return true;
       } else {
@@ -219,6 +220,18 @@ class _VisualizationSectionState extends State<VisualizationSection> {
     );
   }
 
+  void _showAllVesselsOnLG() {
+    final selectedFileProvider =
+        Provider.of<SelectedKmlFileProvider>(context, listen: false);
+    selectedFileProvider.updateConnectionStatus("vesselsAis.kml");
+  }
+
+  void _showOrbitSelectedVessel() {
+    final selectedFileProvider =
+        Provider.of<SelectedKmlFileProvider>(context, listen: false);
+    selectedFileProvider.updateConnectionStatus("vessel.kml");
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -296,104 +309,201 @@ class _VisualizationSectionState extends State<VisualizationSection> {
               : _currentVessel == null &&
                       _selectedVesselProvider.selectedMMSI == -1
                   // Case for no vessel selected
-                  ? Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 40.0),
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: AppColors.secondary, width: 2),
-                          borderRadius: BorderRadius.circular(8.0),
+                  ? Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _showAllVesselsOnLG,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30.0, vertical: 0),
+                            textStyle: Theme.of(context).textTheme.bodyLarge,
+                            backgroundColor: AppColors.textContainerBackground,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                ImagePath.lgLogo,
+                                width: 30.0,
+                                height: 30.0,
+                              ),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                'Show all vessels on LG',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium!
+                                    .copyWith(color: AppColors.darkerGrey),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            Row(
+                        const SizedBox(height: 20.0),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 40.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: AppColors.secondary, width: 2),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Column(
                               children: [
-                                Text(
-                                  "No vessel selected",
-                                  style:
-                                      Theme.of(context).textTheme.headlineLarge,
+                                Row(
+                                  children: [
+                                    Text(
+                                      "No vessel selected",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge,
+                                    ),
+                                    const SizedBox(width: 10.0),
+                                    const FaIcon(
+                                      FontAwesomeIcons.exclamation,
+                                      color: AppColors.error,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 10.0),
-                                const FaIcon(
-                                  FontAwesomeIcons.exclamation,
-                                  color: AppColors.error,
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.textContainerBackground,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Text(
+                                    "Choose a vessel from the map, or enter its MMSI to show details and visualize its journey on the map.",
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ),
+                                const SizedBox(height: 10.0),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: [
+                                      TextFormField(
+                                        controller: _mmsiController,
+                                        decoration: const InputDecoration(
+                                          labelText: "Enter MMSI",
+                                          hintText: "258117000",
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                                color: AppColors.darkGrey),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please enter an MMSI';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      ElevatedButton(
+                                        onPressed: _searchByMMSI,
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 30.0, vertical: 15.0),
+                                          textStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge,
+                                          backgroundColor: AppColors.accent,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              "Search",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelLarge,
+                                            ),
+                                            const SizedBox(width: 8.0),
+                                            const Icon(
+                                              Icons.search,
+                                              size: 18.0,
+                                              color: Colors.white,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10.0),
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                color: AppColors.textContainerBackground,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Text(
-                                "Choose a vessel from the map, or enter its MMSI to show details and visualize its journey on the map.",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            const SizedBox(height: 10.0),
-                            Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: _mmsiController,
-                                    decoration: const InputDecoration(
-                                      labelText: "Enter MMSI",
-                                      hintText: "258117000",
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(color: AppColors.darkGrey),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter an MMSI';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 10.0),
-                                  ElevatedButton(
-                                    onPressed: _searchByMMSI,
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 30.0, vertical: 15.0),
-                                      textStyle:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                      backgroundColor: AppColors.accent,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "Search",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelLarge,
-                                        ),
-                                        const SizedBox(width: 8.0),
-                                        const Icon(
-                                          Icons.search,
-                                          size: 18.0,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     )
                   : _fetchingNewVessel
                       ? const Center(child: CircularProgressIndicator())
                       : Column(children: [
+                          ElevatedButton(
+                            onPressed: _showAllVesselsOnLG,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30.0, vertical: 0),
+                              textStyle: Theme.of(context).textTheme.bodySmall,
+                              backgroundColor:
+                                  AppColors.textContainerBackground,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  ImagePath.lgLogo,
+                                  width: 30.0,
+                                  height: 30.0,
+                                ),
+                                const SizedBox(width: 8.0),
+                                Text(
+                                  'Show all vessels on LG',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium!
+                                      .copyWith(color: AppColors.darkerGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: _showOrbitSelectedVessel,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30.0, vertical: 0),
+                              textStyle: Theme.of(context).textTheme.bodySmall,
+                              backgroundColor:
+                                  AppColors.textContainerBackground,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(width: 8.0),
+                                Text(
+                                  'Show selected vessel on LG',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium!
+                                      .copyWith(color: AppColors.darkerGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
                           Text(
                             textAlign: TextAlign.center,
                             _currentVessel!.name!,
@@ -402,11 +512,11 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                           const SizedBox(height: 20.0),
                           Row(
                             children: [
-                              Image.asset(
-                                "assets/img/app_logo.png",
-                                width: 30.0,
-                                height: 30.0,
-                              ),
+                              // Image.asset(
+                              //   "assets/img/app_logo.png",
+                              //   width: 30.0,
+                              //   height: 30.0,
+                              // ),
                               const SizedBox(width: 10.0),
                               Text(
                                 "${_currentVessel!.destination!} | ${_currentVessel!.shipType!}",

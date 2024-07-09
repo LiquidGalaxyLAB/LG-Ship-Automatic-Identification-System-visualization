@@ -80,38 +80,6 @@ class _ConnectionSectionState extends State<ConnectionSection> {
         setState(() {
           _isLoading = false;
         });
-
-        await lgService.cleanKMLsAndVisualization(true);
-        await lgService.sendLogo();
-
-        AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
-          id: '1',
-          name: 'About AIS Visualization Tool',
-          lat: 54.623032,
-          lng: 6.640915,
-        );
-        String aboutKml = aboutModel.generateKml();
-        await lgService.sendBallonKml(aboutKml);
-
-        LookAtKmlModel lookAtModel = LookAtKmlModel(
-          lat: 65.623032,
-          lng: 22.640915,
-          range: '5000',
-          tilt: '0',
-          heading: '0',
-          altitude: 7000000,
-          altitudeMode: 'relativeToGround',
-        );
-        await lgService.flyTo(lookAtModel.linearTag);
-
-        // send openAis area
-        // String jsonContent =
-        //     await rootBundle.loadString('assets/data/open_ais_area.json');
-        //Map<String, dynamic> jsonData = jsonDecode(jsonContent);
-        MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
-        String kmlText = await multiPolygon.generateKml();
-        final kmlFile = await createFile('polygone.kml', kmlText);
-        await LgService().uploadKml(kmlFile, 'polygone.kml');
       } else {
         updateConnectionStatus(false);
         showFailureSnackBar();

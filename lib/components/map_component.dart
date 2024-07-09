@@ -2,12 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
+import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
+import 'package:ais_visualizer/models/kml/orbit_kml_model.dart';
+import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
+import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
@@ -31,7 +35,8 @@ class _MapComponentState extends State<MapComponent> {
   int markerIndex = 0;
   DateTime? _startDate;
   DateTime? _endDate;
-  bool _isUplaoding = false;
+  bool _isUploading = false;
+  bool _isFetching = false;
   double _selectedLat = 0.0;
   double _selectedLng = 0.0;
   double _selectedCog = 0.0;
@@ -49,6 +54,9 @@ class _MapComponentState extends State<MapComponent> {
   Set<Marker> _markers = {};
   Set<Marker> _clusterdMarkers = {};
   Set<Polygon> _polygons = {};
+  late AisConnectionStatusProvider _aisConnectionStatusProvider;
+  late LgConnectionStatusProvider _lgConnectionStatusProvider;
+  late SelectedKmlFileProvider _selectedKmlFileProvider;
 
   @override
   void initState() {
@@ -61,6 +69,50 @@ class _MapComponentState extends State<MapComponent> {
     _tiltvalue = 0;
     _bearingvalue = 0;
     _center = LatLng(_latvalue, _longvalue);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _aisConnectionStatusProvider =
+          Provider.of<AisConnectionStatusProvider>(context, listen: false);
+      _lgConnectionStatusProvider =
+          Provider.of<LgConnectionStatusProvider>(context, listen: false);
+      _selectedKmlFileProvider =
+          Provider.of<SelectedKmlFileProvider>(context, listen: false);
+
+      _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
+      _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
+      _selectedKmlFileProvider.addListener(_onKmlFileChange);
+    });
+  }
+
+  Future<void> _onAisConnectionChange() async {
+    if (_aisConnectionStatusProvider.isConnected && !_isFetching) {
+      await fetchInitialData();
+      if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
+        await showVesselsOnLGFirstConnect();
+      }
+    }
+  }
+
+  Future<void> _onLgConnectionChange() async {
+    if (_lgConnectionStatusProvider.isConnected) {
+      if (_aisConnectionStatusProvider.isConnected &&
+          !_isUploading &&
+          samplesMap.isNotEmpty) {
+        await showVesselsOnLGFirstConnect();
+      }
+    }
+  }
+
+  Future<void> _onKmlFileChange() async {
+    if (_lgConnectionStatusProvider.isConnected) {
+      if (_selectedKmlFileProvider.selectedKmlFile == 'vesselsAis.kml' &&
+          !_isUploading &&
+          samplesMap.isNotEmpty) {
+        await showVesselsOnLG();
+      } else if (_selectedKmlFileProvider.selectedKmlFile == 'vessel.kml' &&
+          !_isUploading) {
+        await showSelectedVesselOnLG();
+      }
+    }
   }
 
   Future<void> _loadPolygons() async {
@@ -106,13 +158,14 @@ class _MapComponentState extends State<MapComponent> {
   }
 
   void _updateMarkers(Set<Marker> markers) {
+    print('Updating markers with ${markers.length} items');
     setState(() {
       _markers.clear();
       _markers.addAll(markers);
     });
   }
 
-  void _onClusterUpdate() {
+  Future<void> _onClusterUpdate() async {
     _manager.setItems(samplesMap.values.toList());
   }
 
@@ -150,6 +203,7 @@ class _MapComponentState extends State<MapComponent> {
     if (_clusterdMarkers.isEmpty) {
       _clusterdMarkers.addAll(_markers);
     }
+
     setState(() {
       _markers.clear();
       _markers.addAll(newMarkers);
@@ -203,8 +257,11 @@ class _MapComponentState extends State<MapComponent> {
     );
   }
 
-  void fetchInitialData() async {
+  Future<void> fetchInitialData() async {
     try {
+      if (_isFetching) {
+        return;
+      }
       final vessels = await AisDataService().fetchInitialData();
       print("DOOOOOOOOOOOOONEEEEEEEEEEEEEEEEE FEEEEEEETCHHHHHHIIIIIINGGGGGGG");
       setState(() {
@@ -212,9 +269,11 @@ class _MapComponentState extends State<MapComponent> {
           samplesMap[sample.mmsi!] = sample;
         }
       });
-      _onClusterUpdate();
+      await _onClusterUpdate();
       connectToSSE();
+      _isFetching = false;
     } catch (e) {
+      _isFetching = false;
       print('Exception during initial data fetch: $e');
     }
   }
@@ -263,6 +322,7 @@ class _MapComponentState extends State<MapComponent> {
     _tiltvalue = position.tilt;
     _zoomvalue = 591657550.500000 / pow(2, position.zoom);
     _manager.onCameraMove;
+    print('Camera Zoom: ${position.zoom}');
   }
 
   void _onCameraIdle() {
@@ -385,18 +445,119 @@ class _MapComponentState extends State<MapComponent> {
     }
   }
 
-  Future<void> showVesselsOnLG() async {
-    print('Uploading vessels to LG from map');
-    if (samplesMap.isEmpty) {
-      _isUplaoding = false;
+  Future<void> showVesselsOnLGFirstConnect() async {
+    if (_isUploading) {
       return;
     }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    await LgService().cleanKMLsAndVisualization(true);
+    await LgService().sendLogo();
+
+    AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
+      id: '1',
+      name: 'About AIS Visualization Tool',
+      lat: 54.623032,
+      lng: 6.640915,
+    );
+    String aboutKml = aboutModel.generateKml();
+    await LgService().sendBallonKml(aboutKml);
+
+    LookAtKmlModel lookAtModel = LookAtKmlModel(
+      lat: 65.623032,
+      lng: 22.640915,
+      range: '5000',
+      tilt: '0',
+      heading: '0',
+      altitude: 7000000,
+      altitudeMode: 'relativeToGround',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
     VesselKmlModel kmlModel =
         VesselKmlModel(vessels: samplesMap.values.toList());
-    final kmlFile = await createFile('vessels.kml', kmlModel.generateKml());
-    await LgService().uploadKml(kmlFile, 'vessels.kml');
-    print("UHGHHH");
-    _isUplaoding = false;
+    String kmlContent = await kmlModel.generateKmlWithArea();
+    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
+    setState(() {
+      _isUploading = false;
+    });
+  }
+
+  Future<void> showVesselsOnLG() async {
+    if (_isUploading) {
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
+      id: '1',
+      name: 'About AIS Visualization Tool',
+      lat: 54.623032,
+      lng: 6.640915,
+    );
+    String aboutKml = aboutModel.generateKml();
+    await LgService().sendBallonKml(aboutKml);
+
+    LookAtKmlModel lookAtModel = LookAtKmlModel(
+      lat: 65.623032,
+      lng: 22.640915,
+      range: '5000',
+      tilt: '0',
+      heading: '0',
+      altitude: 7000000,
+      altitudeMode: 'relativeToGround',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
+    VesselKmlModel kmlModel =
+        VesselKmlModel(vessels: samplesMap.values.toList());
+    String kmlContent = await kmlModel.generateKmlWithArea();
+    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
+    setState(() {
+      _isUploading = false;
+    });
+  }
+
+  Future<void> showSelectedVesselOnLG() async {
+    if (_isUploading) {
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    final selectedVesselProvider =
+        Provider.of<SelectedVesselProvider>(context, listen: false);
+
+    LookAtKmlModel lookAtModel = LookAtKmlModel(
+      lat: samplesMap[selectedVesselProvider.selectedMMSI]!.latitude!,
+      lng: samplesMap[selectedVesselProvider.selectedMMSI]!.longitude!,
+      range: '5000',
+      tilt: '0',
+      heading: '0',
+      altitude: 700000,
+      altitudeMode: 'relativeToGround',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
+
+    SelectedVesselKmlModel kmlModel = SelectedVesselKmlModel(
+        vessel: samplesMap[selectedVesselProvider.selectedMMSI]!);
+    String kmlContent = await kmlModel.generateKmlWithArea();
+    await LgService().uploadKml(kmlContent, 'vessel.kml');
+
+    // String orbitContent =
+    //     OrbitKmlModel.buildOrbit(OrbitKmlModel.tag(lookAtModel));
+    // await LgService().uploadKml(orbitContent, 'Orbit.kml');
+    // LgService().startTour('Orbit');
+
+    setState(() {
+      _isUploading = false;
+    });
   }
 
   void resetMapComponents() {
@@ -409,32 +570,6 @@ class _MapComponentState extends State<MapComponent> {
         markerTimer!.cancel();
       }
     });
-  }
-
-  Set<Marker> _buildMarkers() {
-    final routeTrackerStateProvider =
-        Provider.of<RouteTrackerState>(context, listen: false);
-
-    if (routeTrackerStateProvider.showVesselRoute) {
-      final selectedVesselMarker = _buildSelectedVesselMarker();
-      final lastPositionMarker = _buildSelectedVesselPositionMarker();
-      return selectedVesselMarker != null
-          ? {selectedVesselMarker, lastPositionMarker!}
-          : {lastPositionMarker!};
-    } else {
-      return samplesMap.values.map((sample) {
-        return Marker(
-          markerId: MarkerId(sample.mmsi.toString()),
-          position: LatLng(sample.latitude!, sample.longitude!),
-          rotation: sample.courseOverGround ?? 0,
-          zIndex: 0.0,
-          onTap: () {
-            updateSelectedVessel(sample.mmsi!);
-          },
-          //icon: markerIcon,
-        );
-      }).toSet();
-    }
   }
 
   Set<Polyline> _buildPolylines() {
@@ -460,51 +595,36 @@ class _MapComponentState extends State<MapComponent> {
     return {};
   }
 
-  Marker? _buildSelectedVesselMarker() {
-    if (selectedVesselTrack.isEmpty) {
-      return null;
-    }
-    final selectedSample = selectedVesselTrack[markerIndex];
-    return Marker(
-      markerId: MarkerId('selected_vessel'),
-      position: LatLng(selectedSample.latitude!, selectedSample.longitude!),
-      rotation: selectedSample.courseOverGround ?? 0,
-      //icon: markerIcon,
-    );
-  }
-
   Marker? _buildSelectedVesselPositionMarker() {
-    return Marker(
-      markerId: MarkerId('last_position_vessel'),
-      position: LatLng(_selectedLat, _selectedLng),
-      rotation: _selectedCog,
-      //icon: markerIcon,
-    );
+    final routeTrackerStateProvider =
+        Provider.of<RouteTrackerState>(context, listen: false);
+
+    if (routeTrackerStateProvider.showVesselRoute &&
+        selectedVesselTrack.isNotEmpty) {
+      return Marker(
+        markerId: const MarkerId('last_position_vessel'),
+        position: LatLng(selectedVesselTrack[markerIndex].latitude!,
+            selectedVesselTrack[markerIndex].longitude!),
+        rotation: selectedVesselTrack[markerIndex].courseOverGround!,
+        icon: markerIcon,
+      );
+    }
+    _markers.removeWhere(
+        (marker) => marker.markerId == const MarkerId('last_position_vessel'));
+    return null;
   }
 
   @override
   void dispose() {
     _mapController.dispose();
+    _aisConnectionStatusProvider.removeListener(_onAisConnectionChange);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final connectionStatusProviderLg =
-        Provider.of<LgConnectionStatusProvider>(context);
-    final isConnectedLg = connectionStatusProviderLg.isConnected;
-    final connectionStatusProviderAis =
-        Provider.of<AisConnectionStatusProvider>(context);
-    final isConnectedAis = connectionStatusProviderAis.isConnected;
-
     return Consumer<RouteTrackerState>(builder: (context, state, child) {
       fetchTrackDataFromProviderDates();
-
-      if (isConnectedLg && !_isUplaoding) {
-        print("hiiiiiiiiiiii");
-        _isUplaoding = true;
-        showVesselsOnLG();
-      }
 
       if (state.isPlaying) {
         startMarkerAnimation();
@@ -515,11 +635,16 @@ class _MapComponentState extends State<MapComponent> {
         resetMarkerAnimation();
       }
 
-      if (isConnectedAis && samplesMap.isEmpty) {
-        fetchInitialData();
-      }
+      // if (isConnectedAis && samplesMap.isEmpty) {
+      //   fetchInitialData();
+      // }
 
       final polylines = _buildPolylines();
+
+      final selectedVesselMarker = _buildSelectedVesselPositionMarker();
+      if (selectedVesselMarker != null) {
+        _markers.add(selectedVesselMarker);
+      }
 
       return GoogleMap(
         initialCameraPosition: CameraPosition(
@@ -535,8 +660,8 @@ class _MapComponentState extends State<MapComponent> {
           Circle(
             circleId: CircleId('selected_vessel'),
             center: LatLng(_selectedLat, _selectedLng),
-            radius: 430,
-            fillColor: Color.fromARGB(182, 0, 0, 0).withOpacity(0.1),
+            radius: 5000,
+            fillColor: const Color.fromARGB(182, 0, 0, 0).withOpacity(0.1),
             strokeWidth: 0,
           ),
         },
