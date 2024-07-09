@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -16,7 +17,7 @@ class AnimatedSplash extends StatelessWidget {
         splash: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.asset(
-          "assets/images/logo.png",
+          ImagePath.lgLogo,
           width: 300,
           height: 300,
           fit: BoxFit.contain,
