@@ -1,10 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:ais_visualizer/models/kml/blank_kml_model.dart';
 import 'package:ais_visualizer/models/kml/screen_overlay_kml_model.dart';
 import 'package:ais_visualizer/models/lg_connection_model.dart';
 import 'package:dartssh2/dartssh2.dart';
-import 'package:path_provider/path_provider.dart';
-
 
 class LgService {
   LgService._internal();
@@ -17,6 +16,7 @@ class LgService {
   SSHClient? _client;
   final LgConnectionModel _lgConnectionModel = LgConnectionModel();
   final String _url = 'http://lg1:81';
+  bool _isUploading = false;
 
   Future<bool?> connectToLG() async {
     try {
@@ -35,19 +35,33 @@ class LgService {
     }
   }
 
-  uploadKml(File inputFile, String fileName) async {
-    print("uploading kml");
-    final sftp = await _client?.sftp();
-    final file = await sftp?.open('/var/www/html/$fileName',
-          mode: SftpFileOpenMode.truncate |
-          SftpFileOpenMode.create |
-          SftpFileOpenMode.write);
-    print('Uploading KML...');
-    await execute('echo "$_url/$fileName" > /var/www/html/kmls.txt',
-        'KML file written successfully');
-    await file?.write(inputFile.openRead().cast());
-    print('Done Upload!');
+  Future<void> uploadKml(String content, String fileName) async {
+    if (_isUploading) {
+      return;
+    }
+    _isUploading = true; // Set the flag before starting the upload process
 
+    try {
+      print("Uploading KML...");
+      final sftp = await _client?.sftp();
+      if (sftp == null) {
+        throw Exception('Failed to initialize SFTP client');
+      }
+
+      // Create and open the file
+      final file = await sftp.open('/var/www/html/$fileName',
+          mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+      // Write the content
+      await file.writeBytes(utf8.encode(""));
+      await file.writeBytes(utf8.encode(content));
+      await execute('echo "$_url/$fileName" > /var/www/html/kmls.txt',
+          'KML file written successfully');
+      print('Upload complete!');
+    } catch (e) {
+      print('Error during KML upload: $e');
+    } finally {
+      _isUploading = false;
+    }
   }
 
   Future<SSHSession?> execute(cmd, successMessage) async {
@@ -162,6 +176,24 @@ class LgService {
   Future<void> flyTo(String linearTag) async {
     await query('flytoview=$linearTag');
   }
+
+  Future<void> startTour(String tourName) async {
+    await query('playtour=$tourName');
+  }
+
+  Future<void> stopTour() async {
+    await query('exittour=true');
+  }
+
+  // Future<void> sendTour(String tourKml, String tourName) async {
+  //   final fileName = '$tourName.kml';
+
+  //   final kmlFile = await createFile(fileName, tourKml);
+  //   await _sshService.upload(kmlFile.path);
+
+  //   await _sshService
+  //       .execute('echo "\n$_url/$fileName" >> /var/www/html/kmls.txt');
+  // }
 
   int calculateLeftMostScreen(int screenNumber) {
     if (screenNumber == 1) {
