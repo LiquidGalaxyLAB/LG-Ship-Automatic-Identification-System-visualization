@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:ais_visualizer/components/expansion_panel_component.dart';
+import 'package:ais_visualizer/components/orbit_button_component.dart';
 import 'package:ais_visualizer/components/vessel_panels_body.dart';
+import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
+import 'package:ais_visualizer/models/kml/orbit_path_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessel_info_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
@@ -229,7 +232,24 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   void _showOrbitSelectedVessel() {
     final selectedFileProvider =
         Provider.of<SelectedKmlFileProvider>(context, listen: false);
-    selectedFileProvider.updateConnectionStatus("vessel.kml");
+    selectedFileProvider.updateConnectionStatus("Orbit.kml");
+  }
+
+  Future<void> _stopOrbit() async {
+    await LgService().stopTour();
+  }
+
+  Future<void> _tourAisArea() async {
+    String polygoneFlyContent =
+        await OrbitPathKmlModel.generatePolygonOrbitContentArea(
+            'assets/data/open_ais_area.json');
+    MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
+    String polygoneContent = await multiPolygon.getPolylineContent();
+    String orbitContent =  OrbitPathKmlModel.buildPathOrbit(
+        polygoneFlyContent, polygoneContent);
+
+    await LgService().uploadKml(orbitContent, 'Orbit.kml');
+    LgService().startTour('Orbit');
   }
 
   @override
@@ -340,6 +360,12 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                               ),
                             ],
                           ),
+                        ),
+                        OrbitButton(
+                          startText: 'Tour AIS area on LG',
+                          stopText: 'Stop Tour',
+                          startOrbit: _tourAisArea,
+                          stopOrbit: _stopOrbit,
                         ),
                         const SizedBox(height: 20.0),
                         Center(
@@ -477,31 +503,17 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                               ],
                             ),
                           ),
-                          ElevatedButton(
-                            onPressed: _showOrbitSelectedVessel,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30.0, vertical: 0),
-                              textStyle: Theme.of(context).textTheme.bodySmall,
-                              backgroundColor:
-                                  AppColors.textContainerBackground,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const SizedBox(width: 8.0),
-                                Text(
-                                  'Show selected vessel on LG',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium!
-                                      .copyWith(color: AppColors.darkerGrey),
-                                ),
-                              ],
-                            ),
+                          OrbitButton(
+                            startText: 'Tour AIS area on LG',
+                            stopText: 'Stop Tour',
+                            startOrbit: _tourAisArea,
+                            stopOrbit: _stopOrbit,
+                          ),
+                          OrbitButton(
+                            startText: 'Show and orbit selected vessel on LG',
+                            stopText: 'Stop orbit',
+                            startOrbit: _showOrbitSelectedVessel,
+                            stopOrbit: _stopOrbit,
                           ),
                           const SizedBox(height: 20.0),
                           Text(

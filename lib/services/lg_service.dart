@@ -185,16 +185,6 @@ class LgService {
     await query('exittour=true');
   }
 
-  // Future<void> sendTour(String tourKml, String tourName) async {
-  //   final fileName = '$tourName.kml';
-
-  //   final kmlFile = await createFile(fileName, tourKml);
-  //   await _sshService.upload(kmlFile.path);
-
-  //   await _sshService
-  //       .execute('echo "\n$_url/$fileName" >> /var/www/html/kmls.txt');
-  // }
-
   int calculateLeftMostScreen(int screenNumber) {
     if (screenNumber == 1) {
       return 1;

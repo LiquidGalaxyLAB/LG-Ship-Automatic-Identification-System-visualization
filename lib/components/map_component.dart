@@ -108,7 +108,7 @@ class _MapComponentState extends State<MapComponent> {
           !_isUploading &&
           samplesMap.isNotEmpty) {
         await showVesselsOnLG();
-      } else if (_selectedKmlFileProvider.selectedKmlFile == 'vessel.kml' &&
+      } else if (_selectedKmlFileProvider.selectedKmlFile == 'Orbit.kml' &&
           !_isUploading) {
         await showSelectedVesselOnLG();
       }
@@ -473,7 +473,7 @@ class _MapComponentState extends State<MapComponent> {
       tilt: '0',
       heading: '0',
       altitude: 7000000,
-      altitudeMode: 'relativeToGround',
+      altitudeMode: 'relativeToSeaFloor',
     );
     await LgService().flyTo(lookAtModel.linearTag);
     VesselKmlModel kmlModel =
@@ -510,7 +510,7 @@ class _MapComponentState extends State<MapComponent> {
       tilt: '0',
       heading: '0',
       altitude: 7000000,
-      altitudeMode: 'relativeToGround',
+      altitudeMode: 'relativeToSeaFloor',
     );
     await LgService().flyTo(lookAtModel.linearTag);
     VesselKmlModel kmlModel =
@@ -534,26 +534,12 @@ class _MapComponentState extends State<MapComponent> {
     final selectedVesselProvider =
         Provider.of<SelectedVesselProvider>(context, listen: false);
 
-    LookAtKmlModel lookAtModel = LookAtKmlModel(
-      lat: samplesMap[selectedVesselProvider.selectedMMSI]!.latitude!,
-      lng: samplesMap[selectedVesselProvider.selectedMMSI]!.longitude!,
-      range: '5000',
-      tilt: '0',
-      heading: '0',
-      altitude: 700000,
-      altitudeMode: 'relativeToGround',
-    );
-    await LgService().flyTo(lookAtModel.linearTag);
-
     SelectedVesselKmlModel kmlModel = SelectedVesselKmlModel(
         vessel: samplesMap[selectedVesselProvider.selectedMMSI]!);
-    String kmlContent = await kmlModel.generateKmlWithArea();
-    await LgService().uploadKml(kmlContent, 'vessel.kml');
+    String kmlContent = await kmlModel.generateKmlWithAreaAndOrbit();
+    await LgService().uploadKml(kmlContent, 'Orbit.kml');
 
-    // String orbitContent =
-    //     OrbitKmlModel.buildOrbit(OrbitKmlModel.tag(lookAtModel));
-    // await LgService().uploadKml(orbitContent, 'Orbit.kml');
-    // LgService().startTour('Orbit');
+    LgService().startTour('Orbit');
 
     setState(() {
       _isUploading = false;
