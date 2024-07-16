@@ -50,12 +50,12 @@ class ScreenOverlayKmlModel {
     ScreenOverlayKmlModel model = ScreenOverlayKmlModel(
       name: 'Logo Overlay KML',
       icon: 'https://i.imgur.com/E3OoqXa.png',
-      overlayX: 0,
-      overlayY: 1,
-      screenX: 0.02,
-      screenY: 0.95,
-      sizeX: 500,
-      sizeY: 500,
+      overlayX: 0.5,
+      overlayY: 0.5,
+      screenX: 0.5,
+      screenY: 0.5,
+      sizeX: 0,
+      sizeY: 0,
     );
     return model.body;
   }

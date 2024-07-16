@@ -52,7 +52,7 @@ class AboutBalloonKmlModel {
             }
             .images img {
               margin: 0 0px;
-              width: 300px;
+              width: 100%;
               height: auto;
               border-radius: 5px;
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
