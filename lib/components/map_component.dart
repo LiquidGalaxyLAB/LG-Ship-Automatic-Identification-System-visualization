@@ -479,7 +479,8 @@ class _MapComponentState extends State<MapComponent> {
     VesselKmlModel kmlModel =
         VesselKmlModel(vessels: samplesMap.values.toList());
     String kmlContent = await kmlModel.generateKmlWithArea();
-    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
+
+    await LgService().uploadKml4(kmlContent, 'vesselsAis.kml');
     setState(() {
       _isUploading = false;
     });
@@ -494,15 +495,6 @@ class _MapComponentState extends State<MapComponent> {
       _isUploading = true;
     });
 
-    AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
-      id: '1',
-      name: 'About AIS Visualization Tool',
-      lat: 54.623032,
-      lng: 6.640915,
-    );
-    String aboutKml = aboutModel.generateKml();
-    await LgService().sendBallonKml(aboutKml);
-
     LookAtKmlModel lookAtModel = LookAtKmlModel(
       lat: 65.623032,
       lng: 22.640915,
@@ -516,7 +508,7 @@ class _MapComponentState extends State<MapComponent> {
     VesselKmlModel kmlModel =
         VesselKmlModel(vessels: samplesMap.values.toList());
     String kmlContent = await kmlModel.generateKmlWithArea();
-    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
+    await LgService().uploadKml4(kmlContent, 'vesselsAis.kml');
     setState(() {
       _isUploading = false;
     });
@@ -537,10 +529,11 @@ class _MapComponentState extends State<MapComponent> {
     SelectedVesselKmlModel kmlModel = SelectedVesselKmlModel(
         vessel: samplesMap[selectedVesselProvider.selectedMMSI]!);
     String kmlContent = await kmlModel.generateKmlWithAreaAndOrbit();
-    await LgService().uploadKml(kmlContent, 'Orbit.kml');
-
-    LgService().startTour('Orbit');
-
+    await LgService().cleanBeforeTour();
+    await LgService().uploadKml4(kmlContent, 'Orbit.kml');
+    // Adding a delay of 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    await LgService().startTour('Orbit');
     setState(() {
       _isUploading = false;
     });

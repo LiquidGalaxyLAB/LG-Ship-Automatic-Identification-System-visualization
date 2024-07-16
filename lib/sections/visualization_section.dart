@@ -245,11 +245,14 @@ class _VisualizationSectionState extends State<VisualizationSection> {
             'assets/data/open_ais_area.json');
     MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
     String polygoneContent = await multiPolygon.getPolylineContent();
-    String orbitContent =  OrbitPathKmlModel.buildPathOrbit(
-        polygoneFlyContent, polygoneContent);
+    String orbitContent =
+        OrbitPathKmlModel.buildPathOrbit(polygoneFlyContent, polygoneContent);
 
-    await LgService().uploadKml(orbitContent, 'Orbit.kml');
-    LgService().startTour('Orbit');
+    await LgService().cleanBeforeTour();
+    await LgService().uploadKml4(orbitContent, 'AisOrbit.kml');
+    // Adding a delay of 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    await LgService().startTour('AisOrbit');
   }
 
   @override
@@ -469,7 +472,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                         ),
                       ],
                     )
-                  : _fetchingNewVessel
+                  : _fetchingNewVessel && _currentVessel == null
                       ? const Center(child: CircularProgressIndicator())
                       : Column(children: [
                           ElevatedButton(
