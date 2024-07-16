@@ -11,13 +11,22 @@ class OrbitPathKmlModel {
 
     String content = '';
 
-    for (var polygon in polygonCoordinates.coordinates) {
+    for (int polygonIndex = 0;
+        polygonIndex < polygonCoordinates.coordinates.length;
+        polygonIndex++) {
+      var polygon = polygonCoordinates.coordinates[polygonIndex];
+      int stepSize = polygonIndex == 0
+          ? 500
+          : 100; // Smaller step size for inner polygons
+
       for (var ring in polygon) {
-        for (var i = 0; i < ring.length; i += 1000) {
-          var point = ring[i];
+        List<List<double>> smoothedPoints =
+            interpolatePoints(ring, stepSize: stepSize);
+
+        for (var point in smoothedPoints) {
           double lng = point[0];
           double lat = point[1];
-
+ 
           content += '''
             <gx:FlyTo>
               <gx:duration>1.2</gx:duration>
@@ -26,19 +35,45 @@ class OrbitPathKmlModel {
                 <longitude>$lng</longitude>
                 <latitude>$lat</latitude>
                 <heading>0</heading>
-                <tilt>60</tilt>
-                <range>5000</range>
-                <gx:fovy>60</gx:fovy>
-                <altitude>70000</altitude>
+                <tilt>0</tilt>
+                <range>50000</range>
+                <gx:fovy>0</gx:fovy>
+                <altitude>2000000</altitude>
                 <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
               </LookAt>
             </gx:FlyTo>
-          '''; 
+          ''';
         }
       }
     }
 
     return content;
+  }
+
+  static List<List<double>> interpolatePoints(List<List<double>> ring,
+      {int stepSize = 100}) {
+    List<List<double>> smoothedPoints = [];
+    int ringLength = ring.length;
+
+    if (ringLength <= 1) {
+      return ring;
+    }
+
+    for (int i = 0; i < ringLength; i += stepSize) {
+      int startIndex = i % ringLength;
+      int endIndex = (i + stepSize) % ringLength;
+
+      List<double> startPoint = ring[startIndex];
+      List<double> endPoint = ring[endIndex];
+
+      // Linear interpolation between startPoint and endPoint
+      double lng = (startPoint[0] + endPoint[0]) / 2;
+      double lat = (startPoint[1] + endPoint[1]) / 2;
+
+      smoothedPoints.add([lng, lat]);
+    }
+
+    return smoothedPoints;
   }
 
   static String buildPathOrbit(String orbitContent, String polygoneContent) {
@@ -47,15 +82,15 @@ class OrbitPathKmlModel {
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     $polygoneContent
-  <gx:Tour>
-          <name>Orbit</name>
-          <gx:Playlist> 
-          $orbitContent
-          </gx:Playlist>
-        </gx:Tour>
+    <gx:Tour>
+      <name>AisOrbit</name>
+      <gx:Playlist> 
+        $orbitContent
+      </gx:Playlist>
+    </gx:Tour>
   </Document>
 </kml>
-  ''';
+    ''';
   }
 }
 
