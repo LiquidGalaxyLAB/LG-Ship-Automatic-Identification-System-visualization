@@ -51,7 +51,7 @@ class VesselKmlModel {
         </IconStyle>
       </Style>
       <Placemark>
-        <name>${vessel.name}</name>
+        <name>${_escapeXml(vessel.name)}</name>
         <styleUrl>#customIconStyle</styleUrl>
         <Point>
           <coordinates>${vessel.longitude},${vessel.latitude},0</coordinates>
@@ -69,5 +69,17 @@ class VesselKmlModel {
   </Document>
 </kml>
     ''';
+  }
+
+  String _escapeXml(String? input) {
+    if (input == null || input.isEmpty) {
+      return ''; // Return empty string if input is null or empty
+    }
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
   }
 }

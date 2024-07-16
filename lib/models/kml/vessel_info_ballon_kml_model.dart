@@ -48,7 +48,7 @@ class VesselInfoBalloonKmlModel {
         <body style="background: rgba(245, 245, 245, 255);">
           <h1 style="color: rgba(225, 131, 14, 1.0);">Vessel Information</h1>
           <div class="header-content">
-            <p ><strong>${AppTexts.name}</strong> ${vessel.name ?? 'N/A'}</p>
+            <p ><strong>${AppTexts.name}</strong> ${_escapeXml(vessel.name)}</p>
             <p><strong>${AppTexts.mmsi}</strong> ${vessel.mmsi}</p>
             <p ><strong>${AppTexts.signalReceived}:</strong> ${vessel.msgtime}</p>
           </div>
@@ -129,6 +129,17 @@ class VesselInfoBalloonKmlModel {
   </Document>
 </kml>
     ''';
+  }
+  String _escapeXml(String? input) {
+    if (input == null || input.isEmpty) {
+      return ''; // Return empty string if input is null or empty
+    }
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
   }
 }
 
