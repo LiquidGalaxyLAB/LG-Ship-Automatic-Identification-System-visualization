@@ -32,9 +32,9 @@ class OrbitPathPlacemarkKmlModel {
             <latitude>$lat</latitude>
             <heading>0</heading>
             <tilt>0</tilt>
-            <range>50000</range>
+            <range>10000</range>
             <gx:fovy>0</gx:fovy>
-            <altitude>20000</altitude>
+            <altitude>1000</altitude>
             <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
           </LookAt>
         </gx:FlyTo>
