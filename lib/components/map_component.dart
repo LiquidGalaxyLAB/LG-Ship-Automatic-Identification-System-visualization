@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_kml_model.dart';
+import 'package:ais_visualizer/models/kml/orbit_path_placemark_kml_model.dart';
 import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
@@ -354,6 +355,9 @@ class _MapComponentState extends State<MapComponent> {
         startDate,
         endDate,
       );
+      // Preprocess the track data to remove consecutive points with the same lat and long
+      final processedTrack = removeConsecutiveDuplicatePoints(track);
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         routeTrackerStateProvider.toggleIsFetching(false);
         print('Doooooneeeeeeeee for state provider!!!!!!!!');
@@ -361,14 +365,44 @@ class _MapComponentState extends State<MapComponent> {
       print('Doooooneeeeeeeee');
       setState(() {
         markerIndex = 0;
-        selectedVesselTrack = track.reversed.toList();
+        selectedVesselTrack = processedTrack.reversed.toList();
       });
+      // // Generate the KML content with the processed track data
+      // List<List<double>> pathCoordinates = selectedVesselTrack
+      //     .map((point) => [point.longitude!, point.latitude!])
+      //     .toList();
+      // String kmlContent =
+      //     await OrbitPathPlacemarkKmlModel.buildPathOrbit(pathCoordinates);
+      // await LgService().cleanBeforeTour();
+      // LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
+      // // Adding a delay of 3 seconds
+      // await Future.delayed(const Duration(seconds: 3));
+      // await LgService().startTour('PathOrbit');
+
+      // Use the generated KML content as needed
+      print('Generated KML Content:');
     } catch (e) {
       print('Exception during track data fetch: $e');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         routeTrackerStateProvider.toggleIsFetching(false);
       });
     }
+  }
+
+  List<VesselSampled> removeConsecutiveDuplicatePoints(
+      List<VesselSampled> track) {
+    if (track.isEmpty) return track;
+
+    List<VesselSampled> filteredTrack = [track.first];
+
+    for (int i = 1; i < track.length; i++) {
+      if (track[i].latitude != track[i - 1].latitude ||
+          track[i].longitude != track[i - 1].longitude) {
+        filteredTrack.add(track[i]);
+      }
+    }
+
+    return filteredTrack;
   }
 
   void updateSelectedVessel(int mmsi) {
@@ -584,7 +618,7 @@ class _MapComponentState extends State<MapComponent> {
         markerId: const MarkerId('last_position_vessel'),
         position: LatLng(selectedVesselTrack[markerIndex].latitude!,
             selectedVesselTrack[markerIndex].longitude!),
-        rotation: selectedVesselTrack[markerIndex].courseOverGround!,
+        rotation: selectedVesselTrack[markerIndex].courseOverGround ?? 0,
         icon: markerIcon,
       );
     }
