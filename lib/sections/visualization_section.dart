@@ -648,8 +648,10 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 20.0),
                                 child: ExpansionPanelComponent(
-                                    header: AppTexts.routePrediction,
-                                    body: Container()),
+                                  header: AppTexts.routePrediction,
+                                  body: RoutePredectionExpansionPanelBody(
+                                      currentVessel: _currentVessel),
+                                ),
                               ),
                             ],
                           )

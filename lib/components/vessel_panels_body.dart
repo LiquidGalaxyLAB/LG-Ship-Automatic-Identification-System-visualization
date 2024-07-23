@@ -1,4 +1,5 @@
 import 'package:ais_visualizer/models/vessel_full_model.dart';
+import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -413,15 +414,9 @@ class _RouteTrackerExpansionPanelBodyState
   @override
   void didUpdateWidget(covariant RouteTrackerExpansionPanelBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print("Old MMSI: ${oldWidget.currentVessel?.mmsi}");
-    print("New MMSI: ${widget.currentVessel?.mmsi}");
-    final selectedVesselProvider = Provider.of<SelectedVesselProvider>(context);
-    print("Selected MMSI: ${selectedVesselProvider.selectedMMSI}");
-    print("Previous MMSI: ${selectedVesselProvider.previousMMSI}");
     if (widget.currentVessel?.mmsi != oldWidget.currentVessel?.mmsi) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<RouteTrackerState>().resetState();
-        print("Resetting stateaaaaaaaaaaaaaaaaaaa");
         _dateTimeController.clear();
         _speedController.text = '1.0';
       });
@@ -700,6 +695,139 @@ class _RouteTrackerExpansionPanelBodyState
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class RoutePredectionExpansionPanelBody extends StatefulWidget {
+  final VesselFull? currentVessel;
+
+  RoutePredectionExpansionPanelBody({
+    super.key,
+    required this.currentVessel,
+  });
+
+  @override
+  _RoutePredectionExpansionPanelBodyState createState() =>
+      _RoutePredectionExpansionPanelBodyState();
+}
+
+class _RoutePredectionExpansionPanelBodyState
+    extends State<RoutePredectionExpansionPanelBody> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant RoutePredectionExpansionPanelBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentVessel?.mmsi != oldWidget.currentVessel?.mmsi) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<RoutePredictionState>().resetState();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 20.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Row(
+              children: [
+                Text(
+                  AppTexts.showPredictionRoute,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const Spacer(),
+                Consumer<RoutePredictionState>(
+                  builder: (context, state, child) {
+                    return Checkbox(
+                      value: state.showVesselRoute,
+                      onChanged: (bool? value) {
+                        state.toggleShowRoute(value ?? false);
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20.0),
+          Container(
+            constraints: const BoxConstraints(
+              minWidth: double.infinity,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.textContainerBackground,
+              border: Border.all(
+                color: AppColors.primary,
+                width: 2.0,
+              ),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10.0),
+                  Text(
+                    AppTexts.timeToPredict,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 5.0),
+                  Consumer<RoutePredictionState>(
+                    builder: (context, state, child) {
+                      return DropdownButtonFormField<int>(
+                        value: state.timeToPredict,
+                        onChanged: (int? newValue) {
+                          if (newValue != null) {
+                            state.setTimeToPredict(newValue);
+                          }
+                        },
+                        items: <int>[10, 20, 30]
+                            .map<DropdownMenuItem<int>>((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text('$value minutes',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                          );
+                        }).toList(),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.darkGrey,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.darkGrey,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.darkGrey,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10.0),
         ],
       ),
     );
