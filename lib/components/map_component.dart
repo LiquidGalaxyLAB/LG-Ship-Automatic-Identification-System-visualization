@@ -87,6 +87,8 @@ class _MapComponentState extends State<MapComponent> {
   Future<void> _onAisConnectionChange() async {
     if (_aisConnectionStatusProvider.isConnected && !_isFetching) {
       await fetchInitialData();
+      _zoomToLevel(3.344121217727661);
+      await fetchInitialData();
       if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
         await showVesselsOnLGFirstConnect();
       }
@@ -324,6 +326,7 @@ class _MapComponentState extends State<MapComponent> {
     _zoomvalue = 591657550.500000 / pow(2, position.zoom);
     _manager.onCameraMove;
     print('Camera Zoom: ${position.zoom}');
+    print('lat: $_latvalue, long: $_longvalue');
   }
 
   void _onCameraIdle() {
@@ -336,6 +339,17 @@ class _MapComponentState extends State<MapComponent> {
   void _onMapCreated(GoogleMapController mapController) {
     _mapController = mapController;
     _manager.setMapId(mapController.mapId);
+  }
+
+  void _zoomToLevel(double zoomLevel) {
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: const LatLng(72.64001277596665, 28.69204211980104),
+        zoom: zoomLevel,
+        bearing: _bearingvalue,
+        tilt: _tiltvalue,
+      ),
+    ));
   }
 
   Future<void> fetchTrackDataForSelectedDates(
@@ -501,12 +515,12 @@ class _MapComponentState extends State<MapComponent> {
     await LgService().sendBallonKml(aboutKml);
 
     LookAtKmlModel lookAtModel = LookAtKmlModel(
-      lat: 65.623032,
-      lng: 22.640915,
-      range: '5000',
+      lat: 67.623032,
+      lng: 11.640915,
+      range: '1600000',
       tilt: '0',
       heading: '0',
-      altitude: 7000000,
+      altitude: 200000,
       altitudeMode: 'relativeToSeaFloor',
     );
     await LgService().flyTo(lookAtModel.linearTag);
@@ -530,12 +544,12 @@ class _MapComponentState extends State<MapComponent> {
     });
 
     LookAtKmlModel lookAtModel = LookAtKmlModel(
-      lat: 65.623032,
-      lng: 22.640915,
-      range: '5000',
+      lat: 67.623032,
+      lng: 11.640915,
+      range: '1600000',
       tilt: '0',
       heading: '0',
-      altitude: 7000000,
+      altitude: 200000,
       altitudeMode: 'relativeToSeaFloor',
     );
     await LgService().flyTo(lookAtModel.linearTag);
@@ -647,10 +661,6 @@ class _MapComponentState extends State<MapComponent> {
       if (state.currentPosition == -1) {
         resetMarkerAnimation();
       }
-
-      // if (isConnectedAis && samplesMap.isEmpty) {
-      //   fetchInitialData();
-      // }
 
       final polylines = _buildPolylines();
 
