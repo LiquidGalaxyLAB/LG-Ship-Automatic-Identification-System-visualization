@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/services/auth_service.dart';
@@ -16,7 +17,8 @@ class AisDataService {
   final http.Client _client = http.Client();
   http.Client _clientVesselStream = http.Client();
   StreamSubscription<VesselFull>? _activeStreamSubscription;
-  StreamController<VesselFull> _streamController = StreamController<VesselFull>.broadcast();
+  StreamController<VesselFull> _streamController =
+      StreamController<VesselFull>.broadcast();
 
   Future<void> cancelActiveStreamSubscription() async {
     if (_activeStreamSubscription != null) {
@@ -131,7 +133,6 @@ class AisDataService {
     final response = await _clientVesselStream.send(request);
     final stream = response.stream;
 
-
     _activeStreamSubscription = stream
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -177,9 +178,65 @@ class AisDataService {
             'Failed to fetch historic track data: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle any exceptions thrown during the process
       print('Error fetching historic track data: $e');
-      rethrow; // Re-throw the exception for the caller to handle
+      rethrow;
+    }
+  }
+
+  // General Speed Ranges:
+  // Small Boats: 1-10 knots
+  // Fishing Boats: 1-15 knots
+  // Cargo Ships: 10-20 knots
+  // Passenger Ferries: 15-30 knots
+  // 1 knot minimum area to avoid stationary vessels
+
+  Future<List<KnnVesselModel>> fetchAisPositionsInArea({
+    required String bbox,
+    required String start,
+    required String end,
+    required double minSpeed,
+  }) async {
+    final url =
+        'https://kystdatahuset.no/ws/api/ais/positions/within-bbox-time';
+
+    final payload = jsonEncode({
+      'bbox': bbox,
+      'start': start,
+      'end': end,
+      'minSpeed': minSpeed,
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'accept': 'text/plain',
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        if (responseData['success'] == true) {
+          final List<dynamic> rawData = responseData['data'];
+
+          List<KnnVesselModel> aisDataList =
+              rawData.map((item) => KnnVesselModel.fromList(item)).toList();
+
+          return aisDataList;
+        } else {
+          print('API call was not successful: ${responseData['msg']}');
+          return [];
+        }
+      } else {
+        print('Failed to fetch data. Status code: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error: $e');
+      return [];
     }
   }
 }
