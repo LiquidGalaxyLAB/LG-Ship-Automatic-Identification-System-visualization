@@ -1,8 +1,11 @@
+import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
+import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
@@ -731,6 +734,106 @@ class _RoutePredectionExpansionPanelBodyState
     }
   }
 
+  void _predictRoute() async {
+    // Check if the current speed is less than 1 knot then no calculation should be provided
+    if (widget.currentVessel!.speedOverGround! < 1) {
+      _showErrorDialogue('Cannot Find Prediction Route',
+          'Vessel speed is less than 1 knot and the vessel is not moving. No prediction route could be generated.');
+      return;
+    }
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevent dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Starting Prediction',
+            style: Theme.of(context)
+                .textTheme
+                .headlineLarge!
+                .copyWith(color: AppColors.success),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Text(
+                'Please wait while we predict the route...',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    // Get bbox
+    final bbox = getBoundingBox(widget.currentVessel!.latitude!,
+        widget.currentVessel!.longitude!, 2420);
+
+    // fetch data vessels from api
+    final List<KnnVesselModel> aisDataList =
+        await AisDataService().fetchAisPositionsInArea(
+      bbox: bbox,
+      start:
+          DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
+      end: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+      minSpeed: 0.5,
+    );
+
+    if (aisDataList.isEmpty) {
+      _closeDialog();
+      _showErrorDialogue('Cannot Find Prediction Route',
+          'No AIS data available for prediction.');
+      return;
+    }
+
+    _closeDialog();
+  }
+
+  _closeDialog() {
+    Navigator.of(context).pop();
+  }
+
+  void _showErrorDialogue(String titleText, String contentText) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            titleText,
+            style: Theme.of(context)
+                .textTheme
+                .headlineLarge!
+                .copyWith(color: AppColors.error),
+          ),
+          content: Text(
+            contentText,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: ButtonStyle(
+                side: WidgetStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0)),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                AppTexts.ok,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: AppColors.darkGrey),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -828,6 +931,21 @@ class _RoutePredectionExpansionPanelBodyState
             ),
           ),
           const SizedBox(height: 10.0),
+          Center(
+            child: ElevatedButton(
+              onPressed: _predictRoute,
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
+                textStyle: Theme.of(context).textTheme.bodyLarge,
+                backgroundColor: AppColors.accent,
+              ),
+              child: Text(
+                'Predict Route',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+          ),
         ],
       ),
     );

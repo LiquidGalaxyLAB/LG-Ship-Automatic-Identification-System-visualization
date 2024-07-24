@@ -11,6 +11,7 @@ import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
@@ -219,6 +220,10 @@ class _MapComponentState extends State<MapComponent> {
     final trackSatateProvider =
         Provider.of<RouteTrackerState>(context, listen: false);
     trackSatateProvider.resetState();
+    final predictStateProvider =
+        Provider.of<RoutePredictionState>(context, listen: false);
+    predictStateProvider.resetState();
+
   }
 
   Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
@@ -427,6 +432,9 @@ class _MapComponentState extends State<MapComponent> {
     final trackSatateProvider =
         Provider.of<RouteTrackerState>(context, listen: false);
     trackSatateProvider.resetState();
+    final predictStateProvider =
+        Provider.of<RoutePredictionState>(context, listen: false);
+    predictStateProvider.resetState();
     _selectedLat = samplesMap[mmsi]!.latitude!;
     _selectedLng = samplesMap[mmsi]!.longitude!;
     _selectedCog = samplesMap[mmsi]!.courseOverGround!;
