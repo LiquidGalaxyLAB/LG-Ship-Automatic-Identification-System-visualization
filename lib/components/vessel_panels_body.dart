@@ -773,13 +773,17 @@ class _RoutePredectionExpansionPanelBodyState
     final bbox = getBoundingBox(widget.currentVessel!.latitude!,
         widget.currentVessel!.longitude!, 2420);
 
+    // Format start and end dates
+    final String start =
+        formatDateTime(DateTime.now().subtract(const Duration(days: 20)));
+    final String end =
+        formatDateTime(DateTime.now().subtract(const Duration(days: 4)));
     // fetch data vessels from api
     final List<KnnVesselModel> aisDataList =
         await AisDataService().fetchAisPositionsInArea(
       bbox: bbox,
-      start:
-          DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
-      end: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+      start: start,
+      end: end,
       minSpeed: 0.5,
     );
 
