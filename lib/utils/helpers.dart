@@ -61,13 +61,13 @@ String getBoundingBox(double latitude, double longitude, double areaKm2) {
   double minLon = longitude - lonOffset;
   double maxLon = longitude + lonOffset;
 
-  return "$minLat, $minLon, $maxLat, $maxLon";
+  return "$minLon, $minLat, $maxLon, $maxLat";
 }
 
 String formatDateTime(DateTime dateTime) {
   return "${dateTime.year.toString().padLeft(4, '0')}"
-         "${dateTime.month.toString().padLeft(2, '0')}"
-         "${dateTime.day.toString().padLeft(2, '0')}"
-         "${dateTime.hour.toString().padLeft(2, '0')}"
-         "${dateTime.minute.toString().padLeft(2, '0')}";
+      "${dateTime.month.toString().padLeft(2, '0')}"
+      "${dateTime.day.toString().padLeft(2, '0')}"
+      "${dateTime.hour.toString().padLeft(2, '0')}"
+      "${dateTime.minute.toString().padLeft(2, '0')}";
 }
