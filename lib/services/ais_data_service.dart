@@ -239,4 +239,39 @@ class AisDataService {
       return [];
     }
   }
+
+  Future<Map<String, double>> fetchNextPosition(
+      int mmsi, String timestamp, double lng, double lat) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://kystdatahuset.no/ws/api/ais/positions/before-after'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+        body: jsonEncode({
+          'mmsi': mmsi,
+          'date': timestamp,
+          'longitude': lng,
+          'latitude': lat,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'lngPrev': data['lngPrev'],
+          'latPrev': data['latPrev'],
+          'lngNext': data['lngNext'],
+          'latNext': data['latNext'],
+        };
+      } else {
+        throw Exception('Failed to load position: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Log the error or handle it as needed
+      print('Error fetching next position: $e');
+      throw Exception('Error fetching next position: $e');
+    }
+  }
 }
