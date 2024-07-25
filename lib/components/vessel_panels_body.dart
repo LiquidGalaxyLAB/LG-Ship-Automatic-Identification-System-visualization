@@ -1,15 +1,15 @@
+import 'package:ais_visualizer/models/knn_simple_vessel_model.dart';
 import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
-import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
-import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:ais_visualizer/services/knn_service.dart';
 
 class NavigationExpansionPanelBody extends StatefulWidget {
   VesselFull? currentVessel;
@@ -793,6 +793,52 @@ class _RoutePredectionExpansionPanelBodyState
           'No AIS data available for prediction.');
       return;
     }
+
+    KnnService knnService = KnnService();
+    knnService.train(aisDataList);
+
+    KnnSimpleVesselModel targetVessel = KnnSimpleVesselModel(
+      mmsi: widget.currentVessel!.mmsi,
+      dateTimeUtc: widget.currentVessel!.msgtime,
+      longitude: widget.currentVessel!.longitude!,
+      latitude: widget.currentVessel!.latitude!,
+      speedOverGround: widget.currentVessel!.speedOverGround!,
+      courseOverGround: widget.currentVessel!.courseOverGround!,
+    );
+
+    print('Predicting route for vessel: $targetVessel');
+    int k = 9;
+    List<KnnSimpleVesselModel> similarVessels =
+        knnService.predict(targetVessel, k);
+    for (var vessel in similarVessels) {
+      print(vessel);
+      try {
+        final result =
+            await knnService.predictFutureLocation(targetVessel, vessel);
+        // Use the result as needed
+        print('Predicted location: $result');
+      } catch (e) {
+        _closeDialog();
+        _showErrorDialogue(
+            'An error occurred while predicting future location.',
+            'Cannot fetch AIS data, please try again later.');
+        print('Error occurred: $e');
+        return;
+      }
+    }
+
+    // try {
+    //   final result = await knnService.predictFutureLocation(
+    //       targetVessel, similarVessels[0]);
+    //   // Use the result as needed
+    //   print('Predicted location: $result');
+    // } catch (e) {
+    //   _closeDialog();
+    //   _showErrorDialogue('An error occurred while predicting future location.',
+    //       'Cannot fetch AIS data, please try again later.');
+    //   print('Error occurred: $e');
+    //   return;
+    // }
 
     _closeDialog();
   }
