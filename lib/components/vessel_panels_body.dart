@@ -719,6 +719,8 @@ class RoutePredectionExpansionPanelBody extends StatefulWidget {
 
 class _RoutePredectionExpansionPanelBodyState
     extends State<RoutePredectionExpansionPanelBody> {
+  bool _isCancelled = false;
+
   @override
   void initState() {
     super.initState();
@@ -741,6 +743,9 @@ class _RoutePredectionExpansionPanelBodyState
           'Vessel speed is less than 1 knot and the vessel is not moving. No prediction route could be generated.');
       return;
     }
+    
+    _isCancelled = false;
+
     showDialog(
       context: context,
       barrierDismissible:
@@ -765,6 +770,23 @@ class _RoutePredectionExpansionPanelBodyState
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isCancelled = true;
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppTexts.cancel,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: AppColors.darkGrey),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -787,6 +809,8 @@ class _RoutePredectionExpansionPanelBodyState
       minSpeed: 0.5,
     );
 
+    if (_isCancelled) return;
+
     if (aisDataList.isEmpty) {
       _closeDialog();
       _showErrorDialogue('Cannot Find Prediction Route',
@@ -796,6 +820,8 @@ class _RoutePredectionExpansionPanelBodyState
 
     KnnService knnService = KnnService();
     knnService.train(aisDataList);
+
+    if (_isCancelled) return;
 
     KnnSimpleVesselModel targetVessel = KnnSimpleVesselModel(
       mmsi: widget.currentVessel!.mmsi,
@@ -807,16 +833,18 @@ class _RoutePredectionExpansionPanelBodyState
     );
 
     print('Predicting route for vessel: $targetVessel');
-    int k = 9;
+    int k = 10;
     List<KnnSimpleVesselModel> similarVessels =
         knnService.predict(targetVessel, k);
     for (var vessel in similarVessels) {
+      if (_isCancelled) return;
       print(vessel);
       try {
         final result =
             await knnService.predictFutureLocation(targetVessel, vessel);
         // Use the result as needed
         print('Predicted location: $result');
+        if (_isCancelled) return;
       } catch (e) {
         _closeDialog();
         _showErrorDialogue(
@@ -826,19 +854,6 @@ class _RoutePredectionExpansionPanelBodyState
         return;
       }
     }
-
-    // try {
-    //   final result = await knnService.predictFutureLocation(
-    //       targetVessel, similarVessels[0]);
-    //   // Use the result as needed
-    //   print('Predicted location: $result');
-    // } catch (e) {
-    //   _closeDialog();
-    //   _showErrorDialogue('An error occurred while predicting future location.',
-    //       'Cannot fetch AIS data, please try again later.');
-    //   print('Error occurred: $e');
-    //   return;
-    // }
 
     _closeDialog();
   }
@@ -913,85 +928,18 @@ class _RoutePredectionExpansionPanelBodyState
             ),
           ),
           const SizedBox(height: 20.0),
-          Container(
-            constraints: const BoxConstraints(
-              minWidth: double.infinity,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.textContainerBackground,
-              border: Border.all(
-                color: AppColors.primary,
-                width: 2.0,
-              ),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10.0),
-                  Text(
-                    AppTexts.timeToPredict,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 5.0),
-                  Consumer<RoutePredictionState>(
-                    builder: (context, state, child) {
-                      return DropdownButtonFormField<int>(
-                        value: state.timeToPredict,
-                        onChanged: (int? newValue) {
-                          if (newValue != null) {
-                            state.setTimeToPredict(newValue);
-                          }
-                        },
-                        items: <int>[10, 20, 30]
-                            .map<DropdownMenuItem<int>>((int value) {
-                          return DropdownMenuItem<int>(
-                            value: value,
-                            child: Text('$value minutes',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 5.0),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
           const SizedBox(height: 10.0),
           Center(
             child: ElevatedButton(
               onPressed: _predictRoute,
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 10.0),
                 textStyle: Theme.of(context).textTheme.bodyLarge,
                 backgroundColor: AppColors.accent,
               ),
               child: Text(
-                'Predict Route',
+                'Predict Route for the next 30 minutes',
                 style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
