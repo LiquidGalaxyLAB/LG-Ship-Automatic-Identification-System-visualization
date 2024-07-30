@@ -14,7 +14,7 @@ class AppTexts {
   static const List<String> navBarItems = [
     visualization,
     collision,
-    selectRegion,
+    //selectRegion,
     filter,
     lgConnection,
     lgServices,

@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
     _navbarIcons = [
       FontAwesomeIcons.earthAmericas,
       FontAwesomeIcons.downLeftAndUpRightToCenter,
-      FontAwesomeIcons.drawPolygon,
+      //FontAwesomeIcons.drawPolygon,
       FontAwesomeIcons.filter,
       FontAwesomeIcons.link,
       FontAwesomeIcons.gears,
