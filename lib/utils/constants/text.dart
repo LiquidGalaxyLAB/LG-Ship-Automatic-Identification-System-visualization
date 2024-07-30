@@ -82,6 +82,8 @@ class AppTexts {
   static const String reboot = 'Reboot';
   static const String relaunch = 'Relaunch';
   static const String clearKML = 'Clear KML';
+  static const String setRefresh = 'Set Refresh';
+  static const String resetRefresh = 'Reset Refresh';
 
   static const String notConnectedError =
       'You are not connected to LG. Please connect and try again.';

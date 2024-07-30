@@ -367,6 +367,57 @@ class LgService {
     await query('exittour=true');
   }
 
+  // refresh every 2 seconds
+  Future<bool> setRefresh() async {
+    final pw = _lgConnectionModel.password;
+
+    const search = '<href>##LG_PHPIFACE##kml\\/slave_{{slave}}.kml<\\/href>';
+    const replace =
+        '<href>##LG_PHPIFACE##kml\\/slave_{{slave}}.kml<\\/href><refreshMode>onInterval<\\/refreshMode><refreshInterval>2<\\/refreshInterval>';
+    final command =
+        'echo $pw | sudo -S sed -i "s/$search/$replace/" ~/earth/kml/slave/myplaces.kml';
+
+    final clear =
+        'echo $pw | sudo -S sed -i "s/$replace/$search/" ~/earth/kml/slave/myplaces.kml';
+
+    bool allSuccessful = true;
+    for (var i = 2; i <= _lgConnectionModel.screenNumber; i++) {
+      final clearCmd = clear.replaceAll('{{slave}}', i.toString());
+      final cmd = command.replaceAll('{{slave}}', i.toString());
+      String query = 'sshpass -p $pw ssh -t lg$i \'{{cmd}}\'';
+
+      final result1 = await execute(query.replaceAll('{{cmd}}', clearCmd), 'Clearing refresh');
+      allSuccessful = allSuccessful && (result1 != null);
+      final result2 =  await execute(query.replaceAll('{{cmd}}', cmd), 'Setting refresh');
+      allSuccessful = allSuccessful && (result2 != null);
+    }
+    final result = await reboot();
+    return allSuccessful && result;
+  }
+
+  // stop refreshing
+  Future<bool> resetRefresh() async {
+    final pw = _lgConnectionModel.password;
+
+    const search =
+        '<href>##LG_PHPIFACE##kml\\/slave_{{slave}}.kml<\\/href><refreshMode>onInterval<\\/refreshMode><refreshInterval>2<\\/refreshInterval>';
+    const replace = '<href>##LG_PHPIFACE##kml\\/slave_{{slave}}.kml<\\/href>';
+
+    final clear =
+        'echo $pw | sudo -S sed -i "s/$search/$replace/" ~/earth/kml/slave/myplaces.kml';
+
+    bool allSuccessful = true;
+    for (var i = 2; i <= _lgConnectionModel.screenNumber; i++) {
+      final cmd = clear.replaceAll('{{slave}}', i.toString());
+      String query = 'sshpass -p $pw ssh -t lg$i \'$cmd\'';
+
+      final result = await execute(query, 'Resetting refresh');
+      allSuccessful = allSuccessful && (result != null);
+    }
+    final result = await reboot();
+    return result && allSuccessful;
+  }
+
   int calculateLeftMostScreen(int screenNumber) {
     if (screenNumber == 1) {
       return 1;
