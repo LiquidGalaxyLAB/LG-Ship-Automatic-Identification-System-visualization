@@ -6,11 +6,11 @@ class VesselKmlModel {
 
   VesselKmlModel({required this.vessels});
 
-  String generateKmlSolo() {
+  String generateMarkersOnlyKml() {
     String placemarks = vessels.map((vessel) => '''
       <Style id="customIconStyle">
         <IconStyle>
-	      <scale>1.8</scale>
+	      <scale>0.8</scale>
             <heading>${vessel.trueHeading}</heading>
           <Icon>
             <href>https://i.imgur.com/eaxfQjT.png</href>
@@ -18,7 +18,32 @@ class VesselKmlModel {
         </IconStyle>
       </Style>
       <Placemark>
-        <name>${vessel.name}</name>
+        <name>${_escapeXml(vessel.name)}</name>
+        <styleUrl>#customIconStyle</styleUrl>
+        <Point>
+          <coordinates>${vessel.longitude},${vessel.latitude},0</coordinates>
+        </Point>
+      </Placemark>
+    ''').join('\n');
+
+    return '''
+      $placemarks
+    ''';
+  }
+
+  String generateKmlSolo() {
+    String placemarks = vessels.map((vessel) => '''
+      <Style id="customIconStyle">
+        <IconStyle>
+	      <scale>0.8</scale>
+            <heading>${vessel.trueHeading}</heading>
+          <Icon>
+            <href>https://i.imgur.com/eaxfQjT.png</href>
+          </Icon>
+        </IconStyle>
+      </Style>
+      <Placemark>
+        <name>${_escapeXml(vessel.name)}</name>
         <styleUrl>#customIconStyle</styleUrl>
         <Point>
           <coordinates>${vessel.longitude},${vessel.latitude},0</coordinates>
@@ -43,10 +68,10 @@ class VesselKmlModel {
     String placemarks = vessels.map((vessel) => '''
       <Style id="customIconStyle">
         <IconStyle>
-	      <scale>1.8</scale>
+	      <scale>0.8</scale>
             <heading>${vessel.trueHeading}</heading>
           <Icon>
-            <href>https://imgur.com/Ao7sMGX.png</href>
+            <href>https://i.imgur.com/eaxfQjT.png</href>
           </Icon>
         </IconStyle>
       </Style>

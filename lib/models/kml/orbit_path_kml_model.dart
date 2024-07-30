@@ -15,9 +15,8 @@ class OrbitPathKmlModel {
         polygonIndex < polygonCoordinates.coordinates.length;
         polygonIndex++) {
       var polygon = polygonCoordinates.coordinates[polygonIndex];
-      int stepSize = polygonIndex == 0
-          ? 500
-          : 100; // Smaller step size for inner polygons
+      int stepSize =
+          polygonIndex == 0 ? 500 : 100; // Smaller step size for inner polygons
 
       for (var ring in polygon) {
         List<List<double>> smoothedPoints =
@@ -26,23 +25,27 @@ class OrbitPathKmlModel {
         for (var point in smoothedPoints) {
           double lng = point[0];
           double lat = point[1];
- 
+          int heading = 0;
           content += '''
             <gx:FlyTo>
-              <gx:duration>1.2</gx:duration>
+              <gx:duration>3</gx:duration>
               <gx:flyToMode>smooth</gx:flyToMode>
               <LookAt>
                 <longitude>$lng</longitude>
                 <latitude>$lat</latitude>
-                <heading>0</heading>
+                <heading>$heading</heading>
                 <tilt>0</tilt>
-                <range>50000</range>
+                <range>5000</range>
                 <gx:fovy>0</gx:fovy>
-                <altitude>2000000</altitude>
+                <altitude>1000000</altitude>
                 <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
               </LookAt>
             </gx:FlyTo>
           ''';
+          heading += 60;
+          if (heading >= 360) {
+            heading = 0;
+          }
         }
       }
     }
@@ -76,12 +79,15 @@ class OrbitPathKmlModel {
     return smoothedPoints;
   }
 
-  static String buildPathOrbit(String orbitContent, String polygoneContent) {
+  static String buildPathOrbit(
+      String orbitContent, String polygoneContent, String markers) {
     return '''
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     $polygoneContent
+    <name>Vessels</name>
+    $markers
     <gx:Tour>
       <name>AisOrbit</name>
       <gx:Playlist> 
