@@ -223,7 +223,6 @@ class _MapComponentState extends State<MapComponent> {
     final predictStateProvider =
         Provider.of<RoutePredictionState>(context, listen: false);
     predictStateProvider.resetState();
-
   }
 
   Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
@@ -611,12 +610,17 @@ class _MapComponentState extends State<MapComponent> {
     final routeTrackerStateProvider =
         Provider.of<RouteTrackerState>(context, listen: false);
 
+    final routePredictionStateProvider =
+        Provider.of<RoutePredictionState>(context, listen: false);
+
+    Set<Polyline> polylines = {};
+
     if (routeTrackerStateProvider.showVesselRoute &&
         selectedVesselTrack.isNotEmpty) {
       print("Building polylines");
-      return {
+      polylines.add(
         Polyline(
-          polylineId: PolylineId('route'),
+          polylineId: const PolylineId('track route'),
           points: selectedVesselTrack
               .map((sample) => LatLng(sample.latitude!, sample.longitude!))
               .toList(),
@@ -625,9 +629,29 @@ class _MapComponentState extends State<MapComponent> {
           startCap: Cap.roundCap,
           endCap: Cap.buttCap,
         ),
-      };
+      );
     }
-    return {};
+
+    if (routePredictionStateProvider.showVesselRoute &&
+        routePredictionStateProvider.predictedPoints.isNotEmpty) {
+      print("Building predicted polylines");
+      polylines.add(
+        Polyline(
+          polylineId: PolylineId('predicted_route'),
+          points: routePredictionStateProvider.predictedPoints
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList(),
+          width: 6,
+          color: Colors
+              .red, // Set the color to differentiate from the actual route
+          zIndex: 1,
+          startCap: Cap.roundCap,
+          endCap: Cap.buttCap,
+        ),
+      );
+    }
+
+    return polylines;
   }
 
   Marker? _buildSelectedVesselPositionMarker() {
@@ -658,52 +682,55 @@ class _MapComponentState extends State<MapComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RouteTrackerState>(builder: (context, state, child) {
-      fetchTrackDataFromProviderDates();
+    return Consumer<RoutePredictionState>(
+        builder: (context, predictionState, child) {
+      return Consumer<RouteTrackerState>(builder: (context, trackState, child) {
+        fetchTrackDataFromProviderDates();
 
-      if (state.isPlaying) {
-        startMarkerAnimation();
-      } else {
-        stopMarkerAnimation();
-      }
-      if (state.currentPosition == -1) {
-        resetMarkerAnimation();
-      }
+        if (trackState.isPlaying) {
+          startMarkerAnimation();
+        } else {
+          stopMarkerAnimation();
+        }
+        if (trackState.currentPosition == -1) {
+          resetMarkerAnimation();
+        }
 
-      final polylines = _buildPolylines();
+        final polylines = _buildPolylines();
 
-      final selectedVesselMarker = _buildSelectedVesselPositionMarker();
-      if (selectedVesselMarker != null) {
-        _markers.add(selectedVesselMarker);
-      }
+        final selectedVesselMarker = _buildSelectedVesselPositionMarker();
+        if (selectedVesselMarker != null) {
+          _markers.add(selectedVesselMarker);
+        }
 
-      return GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: _center,
-          zoom: 6,
-          bearing: _bearingvalue,
-          tilt: _tiltvalue,
-        ),
-        polylines: polylines,
-        markers: _markers,
-        //polygons: _polygons,
-        circles: {
-          Circle(
-            circleId: CircleId('selected_vessel'),
-            center: LatLng(_selectedLat, _selectedLng),
-            radius: 5000,
-            fillColor: const Color.fromARGB(182, 0, 0, 0).withOpacity(0.1),
-            strokeWidth: 0,
+        return GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: _center,
+            zoom: 6,
+            bearing: _bearingvalue,
+            tilt: _tiltvalue,
           ),
-        },
-        tiltGesturesEnabled: true,
-        zoomControlsEnabled: true,
-        zoomGesturesEnabled: true,
-        scrollGesturesEnabled: true,
-        onCameraMove: _onCameraMove,
-        onCameraIdle: _onCameraIdle,
-        onMapCreated: _onMapCreated,
-      );
+          polylines: polylines,
+          markers: _markers,
+          //polygons: _polygons,
+          circles: {
+            Circle(
+              circleId: CircleId('selected_vessel'),
+              center: LatLng(_selectedLat, _selectedLng),
+              radius: 5000,
+              fillColor: const Color.fromARGB(182, 0, 0, 0).withOpacity(0.1),
+              strokeWidth: 0,
+            ),
+          },
+          tiltGesturesEnabled: true,
+          zoomControlsEnabled: true,
+          zoomGesturesEnabled: true,
+          scrollGesturesEnabled: true,
+          onCameraMove: _onCameraMove,
+          onCameraIdle: _onCameraIdle,
+          onMapCreated: _onMapCreated,
+        );
+      });
     });
   }
 }

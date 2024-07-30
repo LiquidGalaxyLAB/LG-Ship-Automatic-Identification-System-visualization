@@ -8,6 +8,7 @@ import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:ais_visualizer/services/knn_service.dart';
 
@@ -833,9 +834,12 @@ class _RoutePredectionExpansionPanelBodyState
     );
 
     print('Predicting route for vessel: $targetVessel');
-    int k = 10;
+    int k = 20;
     List<KnnSimpleVesselModel> similarVessels =
         knnService.predict(targetVessel, k);
+
+    List<LatLng> predictedPoints = [];
+  
     for (var vessel in similarVessels) {
       if (_isCancelled) return;
       print(vessel);
@@ -844,6 +848,7 @@ class _RoutePredectionExpansionPanelBodyState
             await knnService.predictFutureLocation(targetVessel, vessel);
         // Use the result as needed
         print('Predicted location: $result');
+        predictedPoints.add(LatLng(result["futureLat"]!, result["futureLng"]!));
         if (_isCancelled) return;
       } catch (e) {
         _closeDialog();
@@ -854,8 +859,12 @@ class _RoutePredectionExpansionPanelBodyState
         return;
       }
     }
-
+    _setPredictedPoints(predictedPoints);
     _closeDialog();
+  }
+
+  void _setPredictedPoints(List<LatLng> points) {
+    context.read<RoutePredictionState>().setPredictedPoints(points);
   }
 
   _closeDialog() {
