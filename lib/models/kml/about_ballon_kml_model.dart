@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/models/kml/screen_overlay_kml_model.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 
 class AboutBalloonKmlModel {
@@ -110,6 +111,20 @@ class AboutBalloonKmlModel {
     ''';
   }
 
+  String generateStaticKml() {
+    ScreenOverlayKmlModel model = ScreenOverlayKmlModel(
+      name: 'About Overlay KML',
+      icon: 'https://i.imgur.com/mRstMxV.png',
+      overlayX: 0.5,
+      overlayY: 0.5,
+      screenX: 0.5,
+      screenY: 0.5,
+      sizeX: 0,
+      sizeY: 0,
+    );
+    return model.body;
+  }
+
   factory AboutBalloonKmlModel.fromAppTexts({
     required String id,
     required String name,
@@ -127,16 +142,4 @@ class AboutBalloonKmlModel {
       features: AppTexts.features,
     );
   }
-}
-
-void main() {
-  // Example usage
-  AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
-    id: '1',
-    name: 'About AIS Visualization Tool',
-    lat: 37.7749, // Example latitude
-    lng: -122.4194, // Example longitude
-  );
-  String kml = aboutModel.generateKml();
-  print(kml);
 }
