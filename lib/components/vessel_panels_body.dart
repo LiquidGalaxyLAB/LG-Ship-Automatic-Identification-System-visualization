@@ -1,6 +1,7 @@
 import 'package:ais_visualizer/models/knn_simple_vessel_model.dart';
 import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
+import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
@@ -502,10 +503,56 @@ class _RouteTrackerExpansionPanelBodyState
     }
   }
 
-  void _tourVesselTrack() {
+  bool checkConnectionStatus() {
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context, listen: false);
+    return connectionStatusProvider.isConnected;
+  }
+
+  Future<bool> _tourVesselTrack() async {
+    if (!checkConnectionStatus()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              AppTexts.notConnectedError,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
+    }
+
     final selectedFileProvider =
         Provider.of<SelectedKmlFileProvider>(context, listen: false);
-    selectedFileProvider.updateConnectionStatus("PathOrbit.kml");
+    selectedFileProvider.updateFileStatus("PathOrbit.kml");
+    return true;
   }
 
   Future<void> _stopOrbit() async {

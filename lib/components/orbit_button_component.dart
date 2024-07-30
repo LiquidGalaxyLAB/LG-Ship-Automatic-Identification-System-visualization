@@ -2,8 +2,8 @@ import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class OrbitButton extends StatefulWidget {
-  final VoidCallback startOrbit;
-  final VoidCallback stopOrbit;
+  final Future<bool> Function() startOrbit;
+  final Future<void> Function() stopOrbit;
   final String startText;
   final String stopText;
   final ButtonStyle? style;
@@ -24,15 +24,20 @@ class OrbitButton extends StatefulWidget {
 class _OrbitButtonState extends State<OrbitButton> {
   bool _isOrbiting = false;
 
-  void _toggleOrbit() {
-    setState(() {
-      if (_isOrbiting) {
-        widget.stopOrbit();
-      } else {
-        widget.startOrbit();
+  void _toggleOrbit() async {
+    if (_isOrbiting) {
+      await widget.stopOrbit();
+      setState(() {
+        _isOrbiting = false;
+      });
+    } else {
+      final success = await widget.startOrbit();
+      if (success) {
+        setState(() {
+          _isOrbiting = true;
+        });
       }
-      _isOrbiting = !_isOrbiting;
-    });
+    }
   }
 
   @override

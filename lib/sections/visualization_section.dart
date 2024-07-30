@@ -7,6 +7,7 @@ import 'package:ais_visualizer/models/kml/orbit_path_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessel_info_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
@@ -223,23 +224,144 @@ class _VisualizationSectionState extends State<VisualizationSection> {
     );
   }
 
-  void _showAllVesselsOnLG() {
-    final selectedFileProvider =
-        Provider.of<SelectedKmlFileProvider>(context, listen: false);
-    selectedFileProvider.updateConnectionStatus("vesselsAis.kml");
+  bool checkConnectionStatus() {
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context, listen: false);
+    return connectionStatusProvider.isConnected;
   }
 
-  void _showOrbitSelectedVessel() {
+  void _showAllVesselsOnLG() {
+    if (!checkConnectionStatus()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              AppTexts.notConnectedError,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
     final selectedFileProvider =
         Provider.of<SelectedKmlFileProvider>(context, listen: false);
-    selectedFileProvider.updateConnectionStatus("Orbit.kml");
+    selectedFileProvider.updateFileStatus("vesselsAis.kml");
+  }
+
+  Future<bool> _showOrbitSelectedVessel() async {
+    if (!checkConnectionStatus()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              AppTexts.notConnectedError,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
+    }
+    final selectedFileProvider =
+        Provider.of<SelectedKmlFileProvider>(context, listen: false);
+    selectedFileProvider.updateFileStatus("Orbit.kml");
+    return true;
   }
 
   Future<void> _stopOrbit() async {
     await LgService().stopTour();
   }
 
-  Future<void> _tourAisArea() async {
+  Future<bool> _tourAisArea() async {
+    if (!checkConnectionStatus()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              AppTexts.notConnectedError,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
+    }
     String polygoneFlyContent =
         await OrbitPathKmlModel.generatePolygonOrbitContentArea(
             'assets/data/open_ais_area.json');
@@ -253,6 +375,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('AisOrbit');
+    return true;
   }
 
   @override

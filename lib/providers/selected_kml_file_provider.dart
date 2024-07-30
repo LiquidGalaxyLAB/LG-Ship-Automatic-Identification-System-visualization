@@ -6,7 +6,7 @@ class SelectedKmlFileProvider extends ChangeNotifier {
 
   String get selectedKmlFile => _selectedKmlFile;
 
-  void updateConnectionStatus(String kmlFile) {
+  void updateFileStatus(String kmlFile) {
     _selectedKmlFile = kmlFile;
     notifyListeners();
   }
