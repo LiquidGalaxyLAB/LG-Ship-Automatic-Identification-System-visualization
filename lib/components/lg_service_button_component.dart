@@ -20,7 +20,7 @@ class LgServiceButtonComponent extends StatelessWidget {
         executeService(text);
       },
       style: ElevatedButton.styleFrom(
-        fixedSize: const Size(200.0, 80.0),
+        fixedSize: const Size(210.0, 65.0),
         padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
         backgroundColor: AppColors.accent,
       ),
