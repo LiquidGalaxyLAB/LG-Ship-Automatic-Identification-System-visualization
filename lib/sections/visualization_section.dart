@@ -5,6 +5,7 @@ import 'package:ais_visualizer/components/vessel_panels_body.dart';
 import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_path_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessel_info_ballon_kml_model.dart';
+import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
@@ -37,6 +38,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
   late AisConnectionStatusProvider _aisConnectionStatusProvider;
   final TextEditingController _mmsiController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isUploadingOrbitFile = false;
 
   @override
   void initState() {
@@ -362,19 +364,30 @@ class _VisualizationSectionState extends State<VisualizationSection> {
       );
       return false;
     }
+    setState(() {
+      _isUploadingOrbitFile = true;
+    });
     String polygoneFlyContent =
         await OrbitPathKmlModel.generatePolygonOrbitContentArea(
             'assets/data/open_ais_area.json');
     MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
     String polygoneContent = await multiPolygon.getPolylineContent();
-    String orbitContent =
-        OrbitPathKmlModel.buildPathOrbit(polygoneFlyContent, polygoneContent);
+
+    final vessels = await AisDataService().fetchInitialData();
+    VesselKmlModel vesselKmlModel = VesselKmlModel(vessels: vessels);
+    String vesselMarkers = vesselKmlModel.generateMarkersOnlyKml();
+
+    String orbitContent = OrbitPathKmlModel.buildPathOrbit(
+        polygoneFlyContent, polygoneContent, vesselMarkers);
 
     await LgService().cleanBeforeTour();
     await LgService().uploadKml4(orbitContent, 'AisOrbit.kml');
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('AisOrbit');
+    setState(() {
+      _isUploadingOrbitFile = false;
+    });
     return true;
   }
 
@@ -487,11 +500,23 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                             ],
                           ),
                         ),
-                        OrbitButton(
-                          startText: 'Tour AIS area on LG',
-                          stopText: 'Stop Tour',
-                          startOrbit: _tourAisArea,
-                          stopOrbit: _stopOrbit,
+                        Align(
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize
+                                .min, // Ensures the Row only takes up as much space as needed
+                            children: [
+                              OrbitButton(
+                                startText: 'Tour AIS area on LG',
+                                stopText: 'Stop Tour',
+                                startOrbit: _tourAisArea,
+                                stopOrbit: _stopOrbit,
+                              ),
+                              const SizedBox(width: 20.0),
+                              if (_isUploadingOrbitFile)
+                                const CircularProgressIndicator(),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 20.0),
                         Center(
@@ -629,11 +654,23 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                               ],
                             ),
                           ),
-                          OrbitButton(
-                            startText: 'Tour AIS area on LG',
-                            stopText: 'Stop Tour',
-                            startOrbit: _tourAisArea,
-                            stopOrbit: _stopOrbit,
+                          Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisSize: MainAxisSize
+                                  .min, // Ensures the Row only takes up as much space as needed
+                              children: [
+                                OrbitButton(
+                                  startText: 'Tour AIS area on LG',
+                                  stopText: 'Stop Tour',
+                                  startOrbit: _tourAisArea,
+                                  stopOrbit: _stopOrbit,
+                                ),
+                                const SizedBox(width: 20.0),
+                                if (_isUploadingOrbitFile)
+                                  const CircularProgressIndicator(),
+                              ],
+                            ),
                           ),
                           OrbitButton(
                             startText: 'Show and orbit selected vessel on LG',
