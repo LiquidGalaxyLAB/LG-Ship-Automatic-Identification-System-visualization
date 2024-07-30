@@ -470,34 +470,39 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                   // Case for no vessel selected
                   ? Column(
                       children: [
-                        ElevatedButton(
-                          onPressed: _showAllVesselsOnLG,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30.0, vertical: 0),
-                            textStyle: Theme.of(context).textTheme.bodyLarge,
-                            backgroundColor: AppColors.textContainerBackground,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                          width: 270.0,
+                          child: ElevatedButton(
+                            onPressed: _showAllVesselsOnLG,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30.0, vertical: 0),
+                              textStyle: Theme.of(context).textTheme.bodyLarge,
+                              backgroundColor:
+                                  AppColors.textContainerBackground,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                ImagePath.lgLogo,
-                                width: 30.0,
-                                height: 30.0,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                'Show all vessels on LG',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium!
-                                    .copyWith(color: AppColors.darkerGrey),
-                              ),
-                            ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  ImagePath.lgLogo,
+                                  width: 30.0,
+                                  height: 30.0,
+                                ),
+                                const SizedBox(width: 8.0),
+                                Text(
+                                  'Show all vessels on LG',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium!
+                                      .copyWith(color: AppColors.darkerGrey),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         Align(
@@ -512,9 +517,15 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                                 startOrbit: _tourAisArea,
                                 stopOrbit: _stopOrbit,
                               ),
-                              const SizedBox(width: 20.0),
-                              if (_isUploadingOrbitFile)
-                                const CircularProgressIndicator(),
+                              if (_isUploadingOrbitFile) ...[
+                                const SizedBox(width: 5.0),
+                                const SizedBox(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.0),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -623,35 +634,41 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                   : _fetchingNewVessel && _currentVessel == null
                       ? const Center(child: CircularProgressIndicator())
                       : Column(children: [
-                          ElevatedButton(
-                            onPressed: _showAllVesselsOnLG,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30.0, vertical: 0),
-                              textStyle: Theme.of(context).textTheme.bodySmall,
-                              backgroundColor:
-                                  AppColors.textContainerBackground,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            width: 270.0,
+                            child: ElevatedButton(
+                              onPressed: _showAllVesselsOnLG,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 30.0, vertical: 0),
+                                textStyle:
+                                    Theme.of(context).textTheme.bodySmall,
+                                backgroundColor:
+                                    AppColors.textContainerBackground,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Image.asset(
-                                  ImagePath.lgLogo,
-                                  width: 30.0,
-                                  height: 30.0,
-                                ),
-                                const SizedBox(width: 8.0),
-                                Text(
-                                  'Show all vessels on LG',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium!
-                                      .copyWith(color: AppColors.darkerGrey),
-                                ),
-                              ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.asset(
+                                    ImagePath.lgLogo,
+                                    width: 30.0,
+                                    height: 30.0,
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Text(
+                                    'Show all vessels on LG',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium!
+                                        .copyWith(color: AppColors.darkerGrey),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           Align(
@@ -666,9 +683,15 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                                   startOrbit: _tourAisArea,
                                   stopOrbit: _stopOrbit,
                                 ),
-                                const SizedBox(width: 20.0),
-                                if (_isUploadingOrbitFile)
-                                  const CircularProgressIndicator(),
+                                if (_isUploadingOrbitFile) ...[
+                                  const SizedBox(width: 5.0),
+                                  const SizedBox(
+                                    width: 20.0,
+                                    height: 20.0,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.0),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
