@@ -115,6 +115,9 @@ class _MapComponentState extends State<MapComponent> {
       } else if (_selectedKmlFileProvider.selectedKmlFile == 'Orbit.kml' &&
           !_isUploading) {
         await showSelectedVesselOnLG();
+      } else if (_selectedKmlFileProvider.selectedKmlFile == 'PathOrbit.kml' &&
+          !_isUploading) {
+        await showVesselTrackOnLG();
       }
     }
   }
@@ -379,25 +382,14 @@ class _MapComponentState extends State<MapComponent> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         routeTrackerStateProvider.toggleIsFetching(false);
         print('Doooooneeeeeeeee for state provider!!!!!!!!');
+        // show the button of LG
+        routeTrackerStateProvider.toggleShowLGBotton(true);
       });
       print('Doooooneeeeeeeee');
       setState(() {
         markerIndex = 0;
         selectedVesselTrack = processedTrack.reversed.toList();
       });
-      // // Generate the KML content with the processed track data
-      // List<List<double>> pathCoordinates = selectedVesselTrack
-      //     .map((point) => [point.longitude!, point.latitude!])
-      //     .toList();
-      // String kmlContent =
-      //     await OrbitPathPlacemarkKmlModel.buildPathOrbit(pathCoordinates);
-      // await LgService().cleanBeforeTour();
-      // LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
-      // // Adding a delay of 3 seconds
-      // await Future.delayed(const Duration(seconds: 3));
-      // await LgService().startTour('PathOrbit');
-
-      // Use the generated KML content as needed
       print('Generated KML Content:');
     } catch (e) {
       print('Exception during track data fetch: $e');
@@ -567,6 +559,21 @@ class _MapComponentState extends State<MapComponent> {
     setState(() {
       _isUploading = false;
     });
+  }
+
+  Future<void> showVesselTrackOnLG() async {
+    // Generate the KML content with the processed track data
+    List<List<double>> pathCoordinates = selectedVesselTrack
+        .map((point) =>
+            [point.longitude!, point.latitude!, point.courseOverGround ?? 0])
+        .toList();
+    String kmlContent =
+        await OrbitPathPlacemarkKmlModel.buildPathOrbit(pathCoordinates);
+    await LgService().cleanBeforeTour();
+    LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
+    // Adding a delay of 5 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    await LgService().startTour('PathOrbit');
   }
 
   Future<void> showSelectedVesselOnLG() async {

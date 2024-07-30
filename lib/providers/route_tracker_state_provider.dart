@@ -8,6 +8,8 @@ class RouteTrackerState extends ChangeNotifier {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isFetching = false;
+  bool _sendOrbitToLg = false;
+  bool _showLGBotton = false;
 
 
   bool get showVesselRoute  => _showVesselRoute ;
@@ -17,6 +19,8 @@ class RouteTrackerState extends ChangeNotifier {
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
   bool get isFetching => _isFetching;
+  bool get sendOrbitToLg => _sendOrbitToLg;
+  bool get showLGBotton => _showLGBotton;
 
   void toggleShowRoute(bool value) {
     _showVesselRoute  = value;
@@ -49,6 +53,16 @@ class RouteTrackerState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleSendOrbitToLg(bool value) {
+    _sendOrbitToLg = value;
+    notifyListeners();
+  }
+
+  void toggleShowLGBotton(bool value) {
+    _showLGBotton = value;
+    notifyListeners();
+  }
+
   void resetState() {
     _showVesselRoute  = false;
     _isPlaying = false;
@@ -57,6 +71,8 @@ class RouteTrackerState extends ChangeNotifier {
     _startDate = null;
     _endDate = null;
     _isFetching = false;
+    _sendOrbitToLg = false;
+    _showLGBotton = false;
     notifyListeners();
   }
 }

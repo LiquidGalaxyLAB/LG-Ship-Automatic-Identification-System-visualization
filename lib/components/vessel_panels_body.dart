@@ -3,7 +3,9 @@ import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
+import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
+import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:ais_visualizer/services/knn_service.dart';
+import 'package:ais_visualizer/components/orbit_button_component.dart';
 
 class NavigationExpansionPanelBody extends StatefulWidget {
   VesselFull? currentVessel;
@@ -499,6 +502,16 @@ class _RouteTrackerExpansionPanelBodyState
     }
   }
 
+  void _tourVesselTrack() {
+    final selectedFileProvider =
+        Provider.of<SelectedKmlFileProvider>(context, listen: false);
+    selectedFileProvider.updateConnectionStatus("PathOrbit.kml");
+  }
+
+  Future<void> _stopOrbit() async {
+    await LgService().stopTour();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -691,6 +704,26 @@ class _RouteTrackerExpansionPanelBodyState
                               ),
                             ],
                           ),
+                          const SizedBox(height: 10.0),
+                          if (state.showLGBotton)
+                            OrbitButton(
+                              startText: 'Play Track on LG',
+                              stopText: 'Stop Tour',
+                              startOrbit: _tourVesselTrack,
+                              stopOrbit: _stopOrbit,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 10.0),
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(color: Colors.white),
+                                backgroundColor: AppColors.accent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                            ),
                         ],
                       );
                     },
@@ -744,7 +777,7 @@ class _RoutePredectionExpansionPanelBodyState
           'Vessel speed is less than 1 knot and the vessel is not moving. No prediction route could be generated.');
       return;
     }
-    
+
     _isCancelled = false;
 
     showDialog(
@@ -839,7 +872,7 @@ class _RoutePredectionExpansionPanelBodyState
         knnService.predict(targetVessel, k);
 
     List<LatLng> predictedPoints = [];
-  
+
     for (var vessel in similarVessels) {
       if (_isCancelled) return;
       print(vessel);
@@ -946,6 +979,9 @@ class _RoutePredectionExpansionPanelBodyState
                     horizontal: 10.0, vertical: 10.0),
                 textStyle: Theme.of(context).textTheme.bodyLarge,
                 backgroundColor: AppColors.accent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
               child: Text(
                 'Predict Route for the next 30 minutes',
