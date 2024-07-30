@@ -570,8 +570,8 @@ class _MapComponentState extends State<MapComponent> {
     String kmlContent =
         await OrbitPathPlacemarkKmlModel.buildPathOrbit(pathCoordinates);
     await LgService().cleanBeforeTour();
-    LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
-    // Adding a delay of 5 seconds
+    await LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
+    // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('PathOrbit');
   }
