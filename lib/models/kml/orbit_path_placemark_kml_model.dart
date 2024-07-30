@@ -8,16 +8,18 @@ class OrbitPathPlacemarkKmlModel {
     for (int i = 0; i < pathCoordinates.length; i += stepSize) {
       double lng = pathCoordinates[i][0];
       double lat = pathCoordinates[i][1];
+      double heading = pathCoordinates[i][2];
 
       content += '''
         <gx:AnimatedUpdate>
-          <gx:duration>0</gx:duration>
+          <gx:duration>0.1</gx:duration>
           <Update>
             <targetHref></targetHref>
             <Change>
               <Placemark targetId="iconmoved">
+                <styleUrl>#customIconStyle</styleUrl>
                 <Point>
-                  <coordinates>$lng,$lat,0</coordinates>
+                  <coordinates>$lng,$lat,$heading</coordinates>
                 </Point>
               </Placemark>
             </Change>
@@ -25,16 +27,16 @@ class OrbitPathPlacemarkKmlModel {
         </gx:AnimatedUpdate>
 
         <gx:FlyTo>
-          <gx:duration>0.2</gx:duration>
+          <gx:duration>0.5</gx:duration>
           <gx:flyToMode>smooth</gx:flyToMode>
           <LookAt>
             <longitude>$lng</longitude>
             <latitude>$lat</latitude>
-            <heading>0</heading>
+            <heading>$heading</heading>
             <tilt>0</tilt>
             <range>10000</range>
             <gx:fovy>0</gx:fovy>
-            <altitude>1000</altitude>
+            <altitude>230000</altitude>
             <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
           </LookAt>
         </gx:FlyTo>
@@ -106,15 +108,26 @@ class OrbitPathPlacemarkKmlModel {
       </LineString>
     </Placemark>
 
+    <Style id="customIconStyle">
+      <IconStyle>
+        <scale>1.8</scale>
+        <heading>0</heading>
+        <Icon>
+          <href>https://imgur.com/Ao7sMGX.png</href>
+        </Icon>
+      </IconStyle>
+    </Style>
+
     <Placemark id="iconmoved">
       <name>Vessel</name>
+      <styleUrl>#customIconStyle</styleUrl>
       <Point>
-        <coordinates>${pathCoordinates[0][0]},${pathCoordinates[0][1]},0</coordinates>
+        <coordinates>${pathCoordinates[0][0]},${pathCoordinates[0][1]},${pathCoordinates[0][2]}</coordinates>
       </Point>
     </Placemark>
 
-    <name>PathOrbit</name>
     <gx:Tour>
+      <name>PathOrbit</name>
       <gx:Playlist> 
         $orbitContent
       </gx:Playlist>
