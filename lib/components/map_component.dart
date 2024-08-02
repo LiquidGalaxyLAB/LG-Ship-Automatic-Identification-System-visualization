@@ -60,6 +60,7 @@ class _MapComponentState extends State<MapComponent> {
   late AisConnectionStatusProvider _aisConnectionStatusProvider;
   late LgConnectionStatusProvider _lgConnectionStatusProvider;
   late SelectedKmlFileProvider _selectedKmlFileProvider;
+  bool _skipFlyTo = false;
 
   @override
   void initState() {
@@ -220,6 +221,7 @@ class _MapComponentState extends State<MapComponent> {
       _markers.addAll(_clusterdMarkers);
       _markers.removeWhere((marker) => marker.markerId == MarkerId(c.getId()));
     });
+    _zoomToLevelWithLatLong(6, c.location.latitude, c.location.longitude);
     final selectedVesselProvider =
         Provider.of<SelectedVesselProvider>(context, listen: false);
     selectedVesselProvider.updateSelectedVessel(-1);
@@ -321,6 +323,10 @@ class _MapComponentState extends State<MapComponent> {
       heading: bearingflag.toString(),
     );
     try {
+      if (_skipFlyTo) {
+        _skipFlyTo = false;
+        return;
+      }
       await LgService().flyTo(flyto.linearTag);
     } catch (e) {
       print('Could not connect to host LG');
@@ -355,6 +361,17 @@ class _MapComponentState extends State<MapComponent> {
     _mapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
         target: const LatLng(72.64001277596665, 28.69204211980104),
+        zoom: zoomLevel,
+        bearing: _bearingvalue,
+        tilt: _tiltvalue,
+      ),
+    ));
+  }
+
+  void _zoomToLevelWithLatLong(double zoomLevel, double lat, double long) {
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(lat, long),
         zoom: zoomLevel,
         bearing: _bearingvalue,
         tilt: _tiltvalue,
@@ -432,6 +449,33 @@ class _MapComponentState extends State<MapComponent> {
     _selectedLat = samplesMap[mmsi]!.latitude!;
     _selectedLng = samplesMap[mmsi]!.longitude!;
     _selectedCog = samplesMap[mmsi]!.courseOverGround!;
+    _skipFlyTo = true;
+    _zoomToLevelWithLatLong(11, _selectedLat, _selectedLng);
+    flyToSelectedVessel();
+  }
+
+  Future<void> flyToSelectedVessel() async {
+    LookAtKmlModel lookAtModel = LookAtKmlModel(
+      lat: _selectedLat,
+      lng: _selectedLng,
+      range: '5000',
+      tilt: '0',
+      heading: '0',
+      altitude: 100,
+      altitudeMode: 'relativeToSeaFloor',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
+    await Future.delayed(const Duration(seconds: 1)); 
+    lookAtModel = LookAtKmlModel(
+      lat: _selectedLat,
+      lng: _selectedLng,
+      range: '5000',
+      tilt: '60',
+      heading: '0',
+      altitude: 100,
+      altitudeMode: 'relativeToSeaFloor',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
   }
 
   void startMarkerAnimation() {
