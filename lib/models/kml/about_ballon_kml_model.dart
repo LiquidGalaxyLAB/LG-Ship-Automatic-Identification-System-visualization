@@ -114,7 +114,7 @@ class AboutBalloonKmlModel {
   String generateStaticKml() {
     ScreenOverlayKmlModel model = ScreenOverlayKmlModel(
       name: 'About Overlay KML',
-      icon: 'https://i.imgur.com/mRstMxV.png',
+      icon: 'https://i.imgur.com/tG0qHMO.png',
       overlayX: 0.5,
       overlayY: 0.5,
       screenX: 0.5,

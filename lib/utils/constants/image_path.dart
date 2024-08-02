@@ -1,8 +1,8 @@
 class ImagePath {
-
   ImagePath._();
 
   static const String appLogo = 'assets/img/app_logo.png';
+  static const String fullLogos = 'assets/img/logos_splash_screen.png';
   static const String lgLogo = 'assets/img/lg_logo.png';
   static const String appLogoLg = 'assets/img/app_logo_lg.png';
   static const String appLogoNoname = 'assets/img/app_logo_noname.png';
