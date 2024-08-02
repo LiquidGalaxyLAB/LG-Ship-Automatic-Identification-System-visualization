@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
             ImagePath.fullLogos,
-            width: 1000,
+            width: MediaQuery.of(context).size.width - 30,
             fit: BoxFit.contain,
           ),
         ),
