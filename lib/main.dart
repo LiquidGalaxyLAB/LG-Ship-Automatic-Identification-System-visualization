@@ -5,7 +5,7 @@ import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
-import 'package:ais_visualizer/screens/animated_splash_screen.dart';
+import 'package:ais_visualizer/screens/splash_screen.dart';
 import 'package:ais_visualizer/services/auth_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/theme/theme.dart';
@@ -42,7 +42,7 @@ class AISVisualizerApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme,
       title: AppTexts.appName,
-      home: const AnimatedSplash(),
+      home: const SplashScreen(),
     );
   }
 }
