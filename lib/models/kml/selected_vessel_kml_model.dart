@@ -98,9 +98,9 @@ class SelectedVesselKmlModel {
       lat: vessel.latitude!,
       lng: vessel.longitude!,
       range: '10000',
-      tilt: '0',
+      tilt: '60',
       heading: '0',
-      altitude: 1000,
+      altitude: 100,
       altitudeMode: 'relativeToSeaFloor',
     );
 

@@ -34,7 +34,7 @@ class OrbitPathKmlModel {
                 <longitude>$lng</longitude>
                 <latitude>$lat</latitude>
                 <heading>$heading</heading>
-                <tilt>0</tilt>
+                <tilt>45</tilt>
                 <range>5000</range>
                 <gx:fovy>0</gx:fovy>
                 <altitude>1000000</altitude>

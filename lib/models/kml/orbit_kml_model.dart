@@ -21,9 +21,9 @@ class OrbitKmlModel {
                   <longitude>${lookAt.lng}</longitude>
                   <latitude>${lookAt.lat}</latitude>
                   <heading>$heading</heading>
-                  <tilt>60</tilt>
+                  <tilt>70</tilt>
                   <range>${lookAt.range}</range>
-                  <gx:fovy>60</gx:fovy>
+                  <gx:fovy>0</gx:fovy>
                   <altitude>${lookAt.altitude}</altitude>
                   <gx:altitudeMode>${lookAt.altitudeMode}</gx:altitudeMode>
               </LookAt>

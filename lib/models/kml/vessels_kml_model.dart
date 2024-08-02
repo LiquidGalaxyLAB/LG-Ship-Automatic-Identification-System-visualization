@@ -18,7 +18,6 @@ class VesselKmlModel {
         </IconStyle>
       </Style>
       <Placemark>
-        <name>${_escapeXml(vessel.name)}</name>
         <styleUrl>#customIconStyle</styleUrl>
         <Point>
           <coordinates>${vessel.longitude},${vessel.latitude},0</coordinates>
