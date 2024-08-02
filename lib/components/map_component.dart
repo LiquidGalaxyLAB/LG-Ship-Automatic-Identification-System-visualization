@@ -69,7 +69,7 @@ class _MapComponentState extends State<MapComponent> {
     _initClusterManager();
     //_loadPolygons();
     _latvalue = 67.26;
-    _longvalue = 14.38;
+    _longvalue = 18.38;
     _tiltvalue = 0;
     _bearingvalue = 0;
     _center = LatLng(_latvalue, _longvalue);

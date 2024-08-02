@@ -192,12 +192,14 @@ class _MainScreenState extends State<MainScreen> {
     return Consumer<SelectedNavItemProvider>(
         builder: (context, selectedNavItemProvider, child) {
       return Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.primaryBackground,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40.0),
+            topLeft: selectedNavItemProvider.selectedItem == AppTexts.about
+                ? const Radius.circular(0.0)
+                : const Radius.circular(40.0),
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: AppColors.softGrey,
               spreadRadius: 3,
@@ -206,7 +208,8 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        width: 400,
+        width:
+            selectedNavItemProvider.selectedItem == AppTexts.about ? 600 : 400,
         child: Column(
           children: [
             Expanded(

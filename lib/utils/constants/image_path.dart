@@ -15,4 +15,5 @@ class ImagePath {
   static const String connectedIcon = 'assets/img/connected_icon.png';
   static const String disconnectedIcon = 'assets/img/disconnected_icon.png';
   static const String lgServicesIcon = 'assets/img/lg_services_icon.png';
+  static const String aboutLogos = 'assets/img/about_logo.png';
 }
