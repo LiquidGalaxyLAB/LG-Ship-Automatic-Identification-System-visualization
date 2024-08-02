@@ -253,17 +253,17 @@ class _LgServiceSectionState extends State<LgServiceSection> {
                     executeService: (service) =>
                         showConfirmationDialog(service)),
                 const SizedBox(height: 10.0),
-                LgServiceButtonComponent(
-                    text: AppTexts.setRefresh,
-                    icon: Icons.replay_circle_filled_sharp,
-                    executeService: (service) =>
-                        showConfirmationDialog(service)),
-                const SizedBox(height: 10.0),
-                LgServiceButtonComponent(
-                    text: AppTexts.resetRefresh,
-                    icon: Icons.reset_tv_rounded,
-                    executeService: (service) =>
-                        showConfirmationDialog(service)),
+                // LgServiceButtonComponent(
+                //     text: AppTexts.setRefresh,
+                //     icon: Icons.replay_circle_filled_sharp,
+                //     executeService: (service) =>
+                //         showConfirmationDialog(service)),
+                // const SizedBox(height: 10.0),
+                // LgServiceButtonComponent(
+                //     text: AppTexts.resetRefresh,
+                //     icon: Icons.reset_tv_rounded,
+                //     executeService: (service) =>
+                //         showConfirmationDialog(service)),
               ],
             ),
           ],
