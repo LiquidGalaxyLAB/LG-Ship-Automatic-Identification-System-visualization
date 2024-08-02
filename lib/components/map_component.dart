@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
+import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_path_placemark_kml_model.dart';
 import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
@@ -102,6 +103,8 @@ class _MapComponentState extends State<MapComponent> {
           !_isUploading &&
           samplesMap.isNotEmpty) {
         await showVesselsOnLGFirstConnect();
+      } else {
+        showLogos();
       }
     }
   }
@@ -490,6 +493,47 @@ class _MapComponentState extends State<MapComponent> {
             formattedStartDate, formattedEndDate);
       }
     }
+  }
+
+  Future<void> showLogos() async {
+    if (_isUploading) {
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    await LgService().cleanKMLsAndVisualization(true);
+    await LgService().sendLogo();
+
+    AboutBalloonKmlModel aboutModel = AboutBalloonKmlModel.fromAppTexts(
+      id: '1',
+      name: 'About AIS Visualization Tool',
+      lat: 54.623032,
+      lng: 6.640915,
+    );
+    String aboutKml = aboutModel.generateStaticKml();
+    await LgService().sendBallonKml(aboutKml);
+
+    LookAtKmlModel lookAtModel = LookAtKmlModel(
+      lat: 67.623032,
+      lng: 11.640915,
+      range: '1600000',
+      tilt: '0',
+      heading: '0',
+      altitude: 200000,
+      altitudeMode: 'relativeToSeaFloor',
+    );
+    await LgService().flyTo(lookAtModel.linearTag);
+
+    MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
+    String kml = multiPolygon.generateKml();
+    await LgService().uploadKml4(kml, 'area.kml');
+
+    setState(() {
+      _isUploading = false;
+    });
   }
 
   Future<void> showVesselsOnLGFirstConnect() async {
