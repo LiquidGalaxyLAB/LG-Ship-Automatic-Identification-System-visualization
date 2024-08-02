@@ -49,7 +49,7 @@ class ScreenOverlayKmlModel {
   static String generateLogo() {
     ScreenOverlayKmlModel model = ScreenOverlayKmlModel(
       name: 'Logo Overlay KML',
-      icon: 'https://i.imgur.com/05wgoCI.png',
+      icon: 'https://i.imgur.com/nXz0W87.png',
       overlayX: 0.5,
       overlayY:
           1.0, // Bottom edge of the overlay aligns with the top edge of the screen
