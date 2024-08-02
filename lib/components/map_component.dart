@@ -510,7 +510,7 @@ class _MapComponentState extends State<MapComponent> {
       lat: 54.623032,
       lng: 6.640915,
     );
-    String aboutKml = aboutModel.generateKml();
+    String aboutKml = aboutModel.generateStaticKml();
     await LgService().sendBallonKml(aboutKml);
 
     LookAtKmlModel lookAtModel = LookAtKmlModel(
