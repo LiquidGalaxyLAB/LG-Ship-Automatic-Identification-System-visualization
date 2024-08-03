@@ -5,6 +5,7 @@ import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
+import 'package:ais_visualizer/providers/selected_types_provider.dart';
 import 'package:ais_visualizer/screens/splash_screen.dart';
 import 'package:ais_visualizer/services/auth_service.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => SelectedNavItemProvider()),
         ChangeNotifierProvider(create: (_) => SelectedKmlFileProvider()),
         ChangeNotifierProvider(create: (_) => RoutePredictionState()),
+        ChangeNotifierProvider(create: (_) => SelectedTypesProvider()),
       ],
       child: const AISVisualizerApp(),
     ),
