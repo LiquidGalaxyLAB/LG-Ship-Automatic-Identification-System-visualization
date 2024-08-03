@@ -8,6 +8,7 @@ import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
 import 'package:ais_visualizer/sections/token_section.dart';
 import 'package:ais_visualizer/sections/visualization_section.dart';
+import 'package:ais_visualizer/sections/filter_section.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
@@ -66,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
       case AppTexts.selectRegion:
         return const Text('Content for Select region');
       case AppTexts.filter:
-        return const Text('Content for Filter');
+        return FilterSection();
       case AppTexts.lgConnection:
         return const ConnectionSection();
       case AppTexts.lgServices:
