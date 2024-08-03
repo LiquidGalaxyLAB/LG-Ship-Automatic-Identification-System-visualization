@@ -450,6 +450,7 @@ class _MapComponentState extends State<MapComponent> {
     _selectedLng = samplesMap[mmsi]!.longitude!;
     _selectedCog = samplesMap[mmsi]!.courseOverGround!;
     _skipFlyTo = true;
+    showVesselsOnLG();
     _zoomToLevelWithLatLong(11, _selectedLat, _selectedLng);
     flyToSelectedVessel();
   }
