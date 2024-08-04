@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/selected_types_provider.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:flutter/material.dart';
@@ -14,25 +15,73 @@ class FilterSection extends StatefulWidget {
 class _FilterSectionState extends State<FilterSection> {
   final List<String> items = AppTexts.filterItems;
   List<String> selectedValues = [];
+  List<int> selectedIndexes = [];
   List<String> tempSelectedValues = [];
+  List<int> tempSelectedIndexes = [];
   String searchText = '';
   bool isPanelOpen = false;
+  late AisConnectionStatusProvider _aisConnectionStatusProvider;
 
   final TextEditingController textEditingController = TextEditingController();
 
   void _filterData() {
+    if (!_aisConnectionStatusProvider.isConnected) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              "You need to be connected to the AIS server to filter data.",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
     setState(() {
       selectedValues = List.from(tempSelectedValues);
+      selectedIndexes = List.from(tempSelectedIndexes);
     });
-    context.read<SelectedTypesProvider>().setSelectedTypes(selectedValues);
+    context
+        .read<SelectedTypesProvider>()
+        .setSelectedTypes(selectedValues, selectedIndexes);
   }
 
   void _clearFilters() {
     setState(() {
       tempSelectedValues.clear();
       selectedValues.clear();
+      selectedIndexes.clear();
+      tempSelectedIndexes.clear();
     });
-    context.read<SelectedTypesProvider>().setSelectedTypes(selectedValues);
+    context
+        .read<SelectedTypesProvider>()
+        .setSelectedTypes(selectedValues, selectedIndexes);
   }
 
   @override
@@ -40,7 +89,11 @@ class _FilterSectionState extends State<FilterSection> {
     super.initState();
     final selectedTypesProvider = context.read<SelectedTypesProvider>();
     selectedValues = selectedTypesProvider.selectedTypes;
+    selectedIndexes = selectedTypesProvider.selectedTypesIndex;
     tempSelectedValues = List.from(selectedValues);
+    tempSelectedIndexes = List.from(selectedIndexes);
+    _aisConnectionStatusProvider =
+        Provider.of<AisConnectionStatusProvider>(context, listen: false);
   }
 
   @override
@@ -82,6 +135,7 @@ class _FilterSectionState extends State<FilterSection> {
                       isPanelOpen = !isPanelOpen;
                       if (!isPanelOpen) {
                         tempSelectedValues = List.from(selectedValues);
+                        tempSelectedIndexes = List.from(selectedIndexes);
                       }
                     });
                   },
@@ -126,7 +180,9 @@ class _FilterSectionState extends State<FilterSection> {
                             label: Text(value),
                             onDeleted: () {
                               setState(() {
+                                int index = tempSelectedValues.indexOf(value);
                                 tempSelectedValues.remove(value);
+                                tempSelectedIndexes.removeAt(index);
                               });
                             },
                           ),
@@ -230,40 +286,43 @@ class _FilterSectionState extends State<FilterSection> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(24.0),
                           border: Border.all(
-                            color: Colors.grey.shade300, // Border color
-                            width: 1.0, // Border width
+                            color: Colors.grey.shade300,
+                            width: 1.0,
                           ),
                         ),
                         child: Column(
-                          children: filteredItems
-                              .map((item) => CheckboxListTile(
-                                    title: Text(
-                                      item,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ),
-                                    value: tempSelectedValues.contains(item),
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        if (value == true) {
-                                          tempSelectedValues.add(item);
-                                        } else {
-                                          tempSelectedValues.remove(item);
-                                        }
-                                      });
-                                    },
-                                    checkColor: Colors.white,
-                                    activeColor: Colors.green,
-                                    tileColor: Colors.lightGreen.shade50,
-                                    contentPadding: const EdgeInsets.all(8.0),
-                                  ))
-                              .toList(),
+                          children: filteredItems.map((item) {
+                            int itemIndex = items.indexOf(item);
+                            return CheckboxListTile(
+                              title: Text(
+                                item,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              value: tempSelectedIndexes.contains(itemIndex),
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    tempSelectedValues.add(item);
+                                    tempSelectedIndexes.add(itemIndex);
+                                  } else {
+                                    int index =
+                                        tempSelectedValues.indexOf(item);
+                                    tempSelectedValues.removeAt(index);
+                                    tempSelectedIndexes.removeAt(index);
+                                  }
+                                });
+                              },
+                              checkColor: Colors.white,
+                              activeColor: Colors.green,
+                              tileColor: Colors.lightGreen.shade50,
+                              contentPadding: const EdgeInsets.all(8.0),
+                            );
+                          }).toList(),
                         ),
                       ),
                     ],
                   ),
-                const SizedBox(height: 20.0),
               ],
             ),
           ),

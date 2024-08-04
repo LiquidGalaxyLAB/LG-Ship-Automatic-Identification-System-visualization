@@ -183,6 +183,27 @@ class AisDataService {
     }
   }
 
+  Future<List<VesselSampled>> fetchFilteredData(List<int> shipTypes) async {
+    final token = await AuthService.getToken();
+    final url =
+        Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    final body = jsonEncode(
+        {"shipTypes": shipTypes, "modelType": "Simple", "modelFormat": "Json"});
+
+    final response = await _client.post(url, headers: headers, body: body);
+    if (response.statusCode == 200) {
+      List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((item) => VesselSampled.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load filtered data');
+    }
+  }
+
   // General Speed Ranges:
   // Small Boats: 1-10 knots
   // Fishing Boats: 1-15 knots

@@ -15,6 +15,7 @@ import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_kml_file_provider.dart';
+import 'package:ais_visualizer/providers/selected_types_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
@@ -60,6 +61,7 @@ class _MapComponentState extends State<MapComponent> {
   late AisConnectionStatusProvider _aisConnectionStatusProvider;
   late LgConnectionStatusProvider _lgConnectionStatusProvider;
   late SelectedKmlFileProvider _selectedKmlFileProvider;
+  late SelectedTypesProvider _selectedTypesProvider;
   bool _skipFlyTo = false;
 
   @override
@@ -80,10 +82,13 @@ class _MapComponentState extends State<MapComponent> {
           Provider.of<LgConnectionStatusProvider>(context, listen: false);
       _selectedKmlFileProvider =
           Provider.of<SelectedKmlFileProvider>(context, listen: false);
+      _selectedTypesProvider =
+          Provider.of<SelectedTypesProvider>(context, listen: false);
 
       _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
       _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
       _selectedKmlFileProvider.addListener(_onKmlFileChange);
+      _selectedTypesProvider.addListener(_onFilterChange);
     });
   }
 
@@ -124,6 +129,30 @@ class _MapComponentState extends State<MapComponent> {
         await showVesselTrackOnLG();
       }
     }
+  }
+
+  Future<void> _onFilterChange() async {
+    List<int> filter =
+        _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
+    await fetchFilteredData(filter);
+    _zoomToLevel(3.344121217727661);
+    await fetchFilteredData(filter);
+  }
+
+  List<int> _processIndexTypes(List<int> indexTypes) {
+    List<int> processedIndexes = [];
+
+    for (int index in indexTypes) {
+      if (index == 0) {
+        processedIndexes.add(index);
+      } else if (index == 1) {
+        processedIndexes.addAll(List<int>.generate(19, (i) => i + 1));
+      } else if (index >= 2) {
+        processedIndexes.add(index + 18);
+      }
+    }
+
+    return processedIndexes;
   }
 
   Future<void> _loadPolygons() async {
@@ -285,7 +314,7 @@ class _MapComponentState extends State<MapComponent> {
         }
       });
       await _onClusterUpdate();
-      connectToSSE();
+      // connectToSSE();
       _isFetching = false;
     } catch (e) {
       _isFetching = false;
@@ -305,6 +334,26 @@ class _MapComponentState extends State<MapComponent> {
       },
       cancelOnError: true,
     );
+  }
+
+  Future<void> fetchFilteredData(List<int> filter) async {
+    try {
+      if (_isFetching) {
+        return;
+      }
+      final vessels = await AisDataService().fetchFilteredData(filter);
+      setState(() {
+        samplesMap.clear();
+        for (var sample in vessels) {
+          samplesMap[sample.mmsi!] = sample;
+        }
+      });
+      await _onClusterUpdate();
+      _isFetching = false;
+    } catch (e) {
+      _isFetching = false;
+      print('Exception during initial data fetch: $e');
+    }
   }
 
   // for map sync
@@ -466,7 +515,7 @@ class _MapComponentState extends State<MapComponent> {
       altitudeMode: 'relativeToSeaFloor',
     );
     await LgService().flyTo(lookAtModel.linearTag);
-    await Future.delayed(const Duration(seconds: 1)); 
+    await Future.delayed(const Duration(seconds: 1));
     lookAtModel = LookAtKmlModel(
       lat: _selectedLat,
       lng: _selectedLng,
