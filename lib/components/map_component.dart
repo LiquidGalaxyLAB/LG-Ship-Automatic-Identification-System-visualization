@@ -105,6 +105,28 @@ class _MapComponentState extends State<MapComponent> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _drawOnMapProvider = Provider.of<DrawOnMapProvider>(context, listen: false);
+    _aisConnectionStatusProvider =
+        Provider.of<AisConnectionStatusProvider>(context, listen: false);
+    _lgConnectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context, listen: false);
+    _selectedKmlFileProvider =
+        Provider.of<SelectedKmlFileProvider>(context, listen: false);
+    _selectedTypesProvider =
+        Provider.of<SelectedTypesProvider>(context, listen: false);
+    _filterRegionProvider =
+        Provider.of<FilterRegionProvider>(context, listen: false);
+
+    _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
+    _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
+    _selectedKmlFileProvider.addListener(_onKmlFileChange);
+    _selectedTypesProvider.addListener(_onFilterChange);
+    _filterRegionProvider.addListener(_onRegionChange);
+  }
+
   Future<void> _onAisConnectionChange() async {
     if (_aisConnectionStatusProvider.isConnected && !_isFetching) {
       await fetchInitialData();
@@ -730,9 +752,9 @@ class _MapComponentState extends State<MapComponent> {
     String kmlContent = '';
 
     if (_drawOnMapProvider.polyLinesLatLngList.isNotEmpty) {
-      kmlContent = await kmlModel.generateKmlWithAreaAndRegion(_drawOnMapProvider.polyLinesLatLngList);
-    }
-    else {
+      kmlContent = await kmlModel
+          .generateKmlWithAreaAndRegion(_drawOnMapProvider.polyLinesLatLngList);
+    } else {
       kmlContent = await kmlModel.generateKmlWithArea();
     }
     LgService().cleanBeforKmlResend();
@@ -828,13 +850,20 @@ class _MapComponentState extends State<MapComponent> {
     if (routeTrackerStateProvider.showVesselRoute &&
         selectedVesselTrack.isNotEmpty) {
       print("Building polylines");
+      List<LatLng> originalPoints = selectedVesselTrack
+          .map((sample) => LatLng(sample.latitude!, sample.longitude!))
+          .toList();
+
+      // Filter out points that are too close to each other
+      List<LatLng> filteredPoints = filterClosePoints(
+          originalPoints, 10.0); // Adjust the distance as needed
+
       polylines.add(
         Polyline(
           polylineId: const PolylineId('track route'),
-          points: selectedVesselTrack
-              .map((sample) => LatLng(sample.latitude!, sample.longitude!))
-              .toList(),
+          points: filteredPoints,
           width: 4,
+          color: Colors.green,
           zIndex: 1,
           startCap: Cap.roundCap,
           endCap: Cap.buttCap,
@@ -861,6 +890,45 @@ class _MapComponentState extends State<MapComponent> {
     }
 
     return polylines;
+  }
+
+  double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
+    const R = 6371000; // Radius of Earth in meters
+    double dLat = (lat2 - lat1) * pi / 180.0;
+    double dLon = (lon2 - lon1) * pi / 180.0;
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * pi / 180.0) *
+            cos(lat2 * pi / 180.0) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+  }
+
+  List<LatLng> filterClosePoints(List<LatLng> points, double minDistance) {
+    if (points.isEmpty) return [];
+
+    List<LatLng> filteredPoints = [points[0]];
+
+    for (int i = 1; i < points.length; i++) {
+      LatLng lastPoint = filteredPoints.last;
+      LatLng currentPoint = points[i];
+
+      double distance = haversineDistance(
+        lastPoint.latitude,
+        lastPoint.longitude,
+        currentPoint.latitude,
+        currentPoint.longitude,
+      );
+
+      if (distance >= minDistance) {
+        filteredPoints.add(currentPoint);
+      }
+    }
+
+    return filteredPoints;
   }
 
   Marker? _buildSelectedVesselPositionMarker() {

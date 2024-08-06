@@ -122,7 +122,7 @@ class VesselKmlModel {
             <width>2</width>
           </LineStyle>
           <PolyStyle>
-            <color>7fff0000</color>
+            <color>4dff0000</color>
           </PolyStyle>
         </Style>
         <Polygon>

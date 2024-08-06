@@ -6,6 +6,7 @@ import 'package:ais_visualizer/providers/filter_region_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
+import 'package:ais_visualizer/sections/collision_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
 import 'package:ais_visualizer/sections/select_region_section.dart';
@@ -70,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
       case AppTexts.visualization:
         return const VisualizationSection();
       case AppTexts.collision:
-        return const Text('Content for Collision');
+        return const CollisionSection();
       case AppTexts.selectRegion:
         return const SelectRegionSection();
       case AppTexts.filter:
