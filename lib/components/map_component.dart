@@ -145,6 +145,7 @@ class _MapComponentState extends State<MapComponent> {
   }
 
   Future<void> _onFilterChange() async {
+    samplesMap.clear();
     _markers.clear();
     _clusterdMarkers.clear();
     List<int> filter =
@@ -152,11 +153,15 @@ class _MapComponentState extends State<MapComponent> {
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+    if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
+      await showVesselsOnLG();
+    }
   }
 
   Future<void> _onRegionChange() async {
     _markers.clear();
     _clusterdMarkers.clear();
+    samplesMap.clear();
     List<int> filter =
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
@@ -165,6 +170,9 @@ class _MapComponentState extends State<MapComponent> {
     setState(() {
       _polygons.clear();
     });
+    if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
+      await showVesselsOnLG();
+    }
   }
 
   List<int> _processIndexTypes(List<int> indexTypes) {
@@ -371,7 +379,6 @@ class _MapComponentState extends State<MapComponent> {
       }
       final vessels = await AisDataService().fetchFilteredData(filter, region);
       setState(() {
-        samplesMap.clear();
         for (var sample in vessels) {
           samplesMap[sample.mmsi!] = sample;
         }
@@ -720,7 +727,15 @@ class _MapComponentState extends State<MapComponent> {
     await LgService().flyTo(lookAtModel.linearTag);
     VesselKmlModel kmlModel =
         VesselKmlModel(vessels: samplesMap.values.toList());
-    String kmlContent = await kmlModel.generateKmlWithArea();
+    String kmlContent = '';
+
+    if (_drawOnMapProvider.polyLinesLatLngList.isNotEmpty) {
+      kmlContent = await kmlModel.generateKmlWithAreaAndRegion(_drawOnMapProvider.polyLinesLatLngList);
+    }
+    else {
+      kmlContent = await kmlModel.generateKmlWithArea();
+    }
+    LgService().cleanBeforKmlResend();
     await LgService().uploadKml4(kmlContent, 'vesselsAis.kml');
     setState(() {
       _isUploading = false;

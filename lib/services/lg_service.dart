@@ -356,6 +356,11 @@ class LgService {
     await query('playtour=$tourName');
   }
 
+  Future<void> cleanBeforKmlResend() async {
+    await execute('echo "" > /var/www/html/kmls.txt',
+          'KML file cleaned successfully');
+  }
+
   Future<void> cleanBeforeTour() async {
     String query =
         'echo "exittour=true" > /tmp/query.txt && > /var/www/html/kmls.txt';
