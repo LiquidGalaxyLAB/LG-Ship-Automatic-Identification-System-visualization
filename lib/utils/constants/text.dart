@@ -14,7 +14,7 @@ class AppTexts {
   static const List<String> navBarItems = [
     visualization,
     collision,
-    //selectRegion,
+    selectRegion,
     filter,
     lgConnection,
     lgServices,
@@ -62,6 +62,8 @@ class AppTexts {
   static const String connectionLG = 'Liquid Galaxy Rig Connection Manager';
   static const String connectedSuccessfully = 'Connected to LG Successfully';
   static const String connectionFailed = 'Failed to Connect to LG';
+
+  static const String drawRegion = 'Select Region by Drawing on the Map';
 
   static const String clientId = 'Client ID';
   static const String clientIdHint = 'admin@example.com:adm';

@@ -47,6 +47,8 @@ class _MapComponentState extends State<MapComponent> {
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
 
   late GoogleMapController _mapController;
+  Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+
   double _zoomvalue = 591657550.500000 / pow(2, 13.15393352508545);
   late double _latvalue;
   late double _longvalue;

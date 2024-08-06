@@ -1,11 +1,14 @@
 import 'package:ais_visualizer/components/collapsed_left_sidebar_component.dart';
+import 'package:ais_visualizer/components/draw_on_map_component.dart';
 import 'package:ais_visualizer/components/map_component.dart';
 import 'package:ais_visualizer/components/opened_left_sidebar_component.dart';
+import 'package:ais_visualizer/providers/filter_region_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
 import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:ais_visualizer/sections/about_section.dart';
 import 'package:ais_visualizer/sections/connection_section.dart';
 import 'package:ais_visualizer/sections/lg_services_section.dart';
+import 'package:ais_visualizer/sections/select_region_section.dart';
 import 'package:ais_visualizer/sections/token_section.dart';
 import 'package:ais_visualizer/sections/visualization_section.dart';
 import 'package:ais_visualizer/sections/filter_section.dart';
@@ -30,6 +33,8 @@ class _MainScreenState extends State<MainScreen> {
   bool _isLeftSidebarOpen = true;
   bool _dialogShown = false;
   late BuildContext _dialogContext;
+  late DrawOnMapComponent _drawOnMapComponent;
+  late MapComponent _mapComponent;
 
   @override
   void initState() {
@@ -38,12 +43,14 @@ class _MainScreenState extends State<MainScreen> {
     _navbarIcons = [
       FontAwesomeIcons.earthAmericas,
       FontAwesomeIcons.downLeftAndUpRightToCenter,
-      //FontAwesomeIcons.drawPolygon,
+      FontAwesomeIcons.drawPolygon,
       FontAwesomeIcons.filter,
       FontAwesomeIcons.link,
       FontAwesomeIcons.gears,
       FontAwesomeIcons.key,
     ];
+    _drawOnMapComponent = DrawOnMapComponent();
+    _mapComponent = MapComponent();
   }
 
   void _toggleRightSidebar() {
@@ -65,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
       case AppTexts.collision:
         return const Text('Content for Collision');
       case AppTexts.selectRegion:
-        return const Text('Content for Select region');
+        return const SelectRegionSection();
       case AppTexts.filter:
         return FilterSection();
       case AppTexts.lgConnection:
@@ -152,7 +159,21 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Stack(
         children: [
-          MapComponent(),
+          Consumer<FilterRegionProvider>(
+              builder: (context, filterRegionProvider, child) {
+            return Stack(
+              children: [
+                Offstage(
+                  offstage: filterRegionProvider.enableFilterMap,
+                  child: _mapComponent,
+                ),
+                Offstage(
+                  offstage: !filterRegionProvider.enableFilterMap,
+                  child: _drawOnMapComponent,
+                ),
+              ],
+            );
+          }),
           FloatingArrow(
             isOpen: _isRightSidebarOpen,
             onTap: _toggleRightSidebar,
@@ -209,8 +230,11 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        width:
-            selectedNavItemProvider.selectedItem == AppTexts.about ? 600 : 400,
+        width: selectedNavItemProvider.selectedItem == AppTexts.about
+            ? 600
+            : selectedNavItemProvider.selectedItem == AppTexts.selectRegion
+                ? 200
+                : 400,
         child: Column(
           children: [
             Expanded(
