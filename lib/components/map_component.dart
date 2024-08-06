@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
@@ -11,6 +12,8 @@ import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/draw_on_map_provider.dart';
+import 'package:ais_visualizer/providers/filter_region_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
 import 'package:ais_visualizer/providers/route_prediction_state_provider.dart';
 import 'package:ais_visualizer/providers/route_tracker_state_provider.dart';
@@ -45,6 +48,7 @@ class _MapComponentState extends State<MapComponent> {
   double _selectedLng = 0.0;
   double _selectedCog = 0.0;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  Set<Polyline> _polyLines = HashSet<Polyline>();
 
   late GoogleMapController _mapController;
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
@@ -64,6 +68,8 @@ class _MapComponentState extends State<MapComponent> {
   late LgConnectionStatusProvider _lgConnectionStatusProvider;
   late SelectedKmlFileProvider _selectedKmlFileProvider;
   late SelectedTypesProvider _selectedTypesProvider;
+  late FilterRegionProvider _filterRegionProvider;
+  late DrawOnMapProvider _drawOnMapProvider;
   bool _skipFlyTo = false;
 
   @override
@@ -86,11 +92,16 @@ class _MapComponentState extends State<MapComponent> {
           Provider.of<SelectedKmlFileProvider>(context, listen: false);
       _selectedTypesProvider =
           Provider.of<SelectedTypesProvider>(context, listen: false);
+      _filterRegionProvider =
+          Provider.of<FilterRegionProvider>(context, listen: false);
+      _drawOnMapProvider =
+          Provider.of<DrawOnMapProvider>(context, listen: false);
 
       _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
       _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
       _selectedKmlFileProvider.addListener(_onKmlFileChange);
       _selectedTypesProvider.addListener(_onFilterChange);
+      _filterRegionProvider.addListener(_onRegionChange);
     });
   }
 
@@ -134,11 +145,26 @@ class _MapComponentState extends State<MapComponent> {
   }
 
   Future<void> _onFilterChange() async {
+    _markers.clear();
+    _clusterdMarkers.clear();
     List<int> filter =
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
-    await fetchFilteredData(filter);
+    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
-    await fetchFilteredData(filter);
+    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+  }
+
+  Future<void> _onRegionChange() async {
+    _markers.clear();
+    _clusterdMarkers.clear();
+    List<int> filter =
+        _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
+    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+    _zoomToLevel(3.344121217727661);
+    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+    setState(() {
+      _polygons.clear();
+    });
   }
 
   List<int> _processIndexTypes(List<int> indexTypes) {
@@ -338,12 +364,12 @@ class _MapComponentState extends State<MapComponent> {
     );
   }
 
-  Future<void> fetchFilteredData(List<int> filter) async {
+  Future<void> fetchFilteredData(List<int> filter, List<LatLng> region) async {
     try {
       if (_isFetching) {
         return;
       }
-      final vessels = await AisDataService().fetchFilteredData(filter);
+      final vessels = await AisDataService().fetchFilteredData(filter, region);
       setState(() {
         samplesMap.clear();
         for (var sample in vessels) {
@@ -762,6 +788,28 @@ class _MapComponentState extends State<MapComponent> {
 
     Set<Polyline> polylines = {};
 
+    // Add the region polyline if it exists
+    if (_drawOnMapProvider.polyLinesLatLngList.isNotEmpty) {
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('region_polyline'),
+          points: _drawOnMapProvider.polyLinesLatLngList,
+          width: 5,
+          color: Colors.blue,
+        ),
+      );
+      // set the polygone too
+      _polygons.add(
+        Polygon(
+          polygonId: PolygonId('region_polygon'),
+          points: _drawOnMapProvider.polyLinesLatLngList,
+          strokeWidth: 5,
+          strokeColor: Colors.blue,
+          fillColor: Colors.blue.withOpacity(0.4),
+        ),
+      );
+    }
+
     if (routeTrackerStateProvider.showVesselRoute &&
         selectedVesselTrack.isNotEmpty) {
       print("Building polylines");
@@ -789,8 +837,7 @@ class _MapComponentState extends State<MapComponent> {
               .map((point) => LatLng(point.latitude, point.longitude))
               .toList(),
           width: 6,
-          color: Colors
-              .red, // Set the color to differentiate from the actual route
+          color: Colors.red,
           zIndex: 1,
           startCap: Cap.roundCap,
           endCap: Cap.buttCap,
@@ -843,7 +890,7 @@ class _MapComponentState extends State<MapComponent> {
           resetMarkerAnimation();
         }
 
-        final polylines = _buildPolylines();
+        _polyLines = _buildPolylines();
 
         final selectedVesselMarker = _buildSelectedVesselPositionMarker();
         if (selectedVesselMarker != null) {
@@ -857,9 +904,9 @@ class _MapComponentState extends State<MapComponent> {
             bearing: _bearingvalue,
             tilt: _tiltvalue,
           ),
-          polylines: polylines,
+          polylines: _polyLines,
+          polygons: _polygons,
           markers: _markers,
-          //polygons: _polygons,
           circles: {
             Circle(
               circleId: CircleId('selected_vessel'),

@@ -46,7 +46,7 @@ class _SelectRegionSectionState extends State<SelectRegionSection> {
                         _filterRegionProvider.setEnableFilterMap(false);
                         // cancel drawing, ensure that the filter region is not set and clear the drawing
                         drawOnMapProvider.clearDrawing();
-                        _filterRegionProvider.setFilterRegion(false);
+                        _filterRegionProvider.setFilterRegion(true);
                       },
                       child: const Icon(Icons.clear),
                     )
@@ -98,6 +98,7 @@ class _SelectRegionSectionState extends State<SelectRegionSection> {
                       ? ElevatedButton(
                           onPressed: () {
                             drawOnMapProvider.clearDrawing();
+                            _filterRegionProvider.setFilterRegion(true);
                           },
                           child: Text("Clear Selection"),
                         )

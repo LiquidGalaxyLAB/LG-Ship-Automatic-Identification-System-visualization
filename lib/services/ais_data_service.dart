@@ -5,6 +5,7 @@ import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/services/auth_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AisDataService {
   AisDataService._internal();
@@ -183,7 +184,8 @@ class AisDataService {
     }
   }
 
-  Future<List<VesselSampled>> fetchFilteredData(List<int> shipTypes) async {
+  Future<List<VesselSampled>> fetchFilteredData(
+      List<int> shipTypes, List<LatLng> regionCoordinates) async {
     final token = await AuthService.getToken();
     final url =
         Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
@@ -192,15 +194,39 @@ class AisDataService {
       'Content-Type': 'application/json',
     };
 
-    final body = jsonEncode(
-        {"shipTypes": shipTypes, "modelType": "Simple", "modelFormat": "Json"});
+    // Convert LatLng list to polygon format
+    final Map<String, dynamic> requestBody = {
+      "shipTypes": shipTypes,
+      "modelType": "Simple",
+      "modelFormat": "Json"
+    };
 
+    // Add the geometry field only if regionCoordinates is not empty
+    if (regionCoordinates.isNotEmpty) {
+      final List<List<double>> polygonCoordinates = regionCoordinates
+          .map((latLng) => [latLng.longitude, latLng.latitude])
+          .toList();
+
+      // Ensure the last point is the same as the first point
+      if (polygonCoordinates.first != polygonCoordinates.last) {
+        polygonCoordinates.add(polygonCoordinates.first);
+      }
+
+      requestBody["geometry"] = {
+        "type": "Polygon",
+        "coordinates": [polygonCoordinates]
+      };
+    }
+
+    final body = jsonEncode(requestBody);
     final response = await _client.post(url, headers: headers, body: body);
+
     if (response.statusCode == 200) {
       List<dynamic> jsonList = jsonDecode(response.body);
       return jsonList.map((item) => VesselSampled.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load filtered data');
+      // Improved error handling
+      throw Exception('Failed to load filtered data: ${response.body}');
     }
   }
 

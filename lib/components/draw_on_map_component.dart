@@ -5,7 +5,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:ais_visualizer/providers/draw_on_map_provider.dart';
 
 class DrawOnMapComponent extends StatefulWidget {
@@ -146,7 +145,7 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
             polylineId: PolylineId('user_polyline'),
             points: _userPolyLinesLatLngList,
             width: 5,
-            color: Colors.red,
+            color: Colors.blue,
           ),
         );
       } catch (e) {
@@ -169,15 +168,16 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
           polygonId: PolygonId('user_polygon'),
           points: _userPolyLinesLatLngList,
           strokeWidth: 5,
-          strokeColor: Colors.red,
-          fillColor: Colors.red.withOpacity(0.4),
+          strokeColor: Colors.blue,
+          fillColor: Colors.blue.withOpacity(0.4),
         ),
       );
 
       final drawOnMapProvider =
           Provider.of<DrawOnMapProvider>(context, listen: false);
+      _userPolyLinesLatLngList.add(_userPolyLinesLatLngList.first);
       drawOnMapProvider.addPolyLineLatLng(_userPolyLinesLatLngList
-          .map((latLng) => latlong2.LatLng(latLng.latitude, latLng.longitude))
+          .map((latLng) => LatLng(latLng.latitude, latLng.longitude))
           .toList());
 
       setState(() {
