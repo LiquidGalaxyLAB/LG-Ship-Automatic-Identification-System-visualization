@@ -64,6 +64,7 @@ class AppTexts {
   static const String connectionFailed = 'Failed to Connect to LG';
 
   static const String drawRegion = 'Select Region by Drawing on the Map';
+  static const String collisionRisk = 'Collision Risk Strategy';
 
   static const String clientId = 'Client ID';
   static const String clientIdHint = 'admin@example.com:adm';

@@ -12,6 +12,7 @@ import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:ais_visualizer/providers/AIS_connection_status_provider.dart';
+import 'package:ais_visualizer/providers/collision_provider.dart';
 import 'package:ais_visualizer/providers/draw_on_map_provider.dart';
 import 'package:ais_visualizer/providers/filter_region_provider.dart';
 import 'package:ais_visualizer/providers/lg_connection_status_provider.dart';
@@ -70,6 +71,7 @@ class _MapComponentState extends State<MapComponent> {
   late SelectedTypesProvider _selectedTypesProvider;
   late FilterRegionProvider _filterRegionProvider;
   late DrawOnMapProvider _drawOnMapProvider;
+  late CollisionProvider _collisionProvider;
   bool _skipFlyTo = false;
 
   @override
@@ -96,12 +98,15 @@ class _MapComponentState extends State<MapComponent> {
           Provider.of<FilterRegionProvider>(context, listen: false);
       _drawOnMapProvider =
           Provider.of<DrawOnMapProvider>(context, listen: false);
+      _collisionProvider =
+          Provider.of<CollisionProvider>(context, listen: false);
 
       _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
       _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
       _selectedKmlFileProvider.addListener(_onKmlFileChange);
       _selectedTypesProvider.addListener(_onFilterChange);
       _filterRegionProvider.addListener(_onRegionChange);
+      _collisionProvider.addListener(_onCollisionSelection);
     });
   }
 
@@ -119,12 +124,14 @@ class _MapComponentState extends State<MapComponent> {
         Provider.of<SelectedTypesProvider>(context, listen: false);
     _filterRegionProvider =
         Provider.of<FilterRegionProvider>(context, listen: false);
+    _collisionProvider = Provider.of<CollisionProvider>(context, listen: false);
 
     _aisConnectionStatusProvider.addListener(_onAisConnectionChange);
     _lgConnectionStatusProvider.addListener(_onLgConnectionChange);
     _selectedKmlFileProvider.addListener(_onKmlFileChange);
     _selectedTypesProvider.addListener(_onFilterChange);
     _filterRegionProvider.addListener(_onRegionChange);
+    _collisionProvider.addListener(_onCollisionSelection);
   }
 
   Future<void> _onAisConnectionChange() async {
@@ -195,6 +202,16 @@ class _MapComponentState extends State<MapComponent> {
     if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
       await showVesselsOnLG();
     }
+  }
+
+  Future<void> _onCollisionSelection() async {
+    if (!_collisionProvider.isInCollision) {
+      return;
+    }
+    final selectedVesselProvider =
+        Provider.of<SelectedVesselProvider>(context, listen: false);
+    _collisionProvider
+        .setOwnVessel(samplesMap[selectedVesselProvider.selectedMMSI]);
   }
 
   List<int> _processIndexTypes(List<int> indexTypes) {
@@ -542,6 +559,10 @@ class _MapComponentState extends State<MapComponent> {
   }
 
   void updateSelectedVessel(int mmsi) {
+    if (_collisionProvider.isInCollision) {
+      _collisionProvider.setTargetVessel(samplesMap[mmsi]);
+      return;
+    }
     resetMapComponents();
     final selectedVesselProvider =
         Provider.of<SelectedVesselProvider>(context, listen: false);
