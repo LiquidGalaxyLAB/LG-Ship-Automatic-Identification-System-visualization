@@ -1,7 +1,6 @@
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
 
-
 class VesselInfoBalloonKmlModel {
   VesselFull vessel;
 
@@ -31,6 +30,7 @@ class VesselInfoBalloonKmlModel {
               border: 1px solid rgba(223, 226, 233, 255);
               border-radius: 5px;
               padding: 10px;
+              font-size: 16px;
               color: rgba(2, 48, 71, 255);
               box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
             }
@@ -130,6 +130,7 @@ class VesselInfoBalloonKmlModel {
 </kml>
     ''';
   }
+
   String _escapeXml(String? input) {
     if (input == null || input.isEmpty) {
       return ''; // Return empty string if input is null or empty
@@ -173,7 +174,8 @@ void main() {
     msgtimeStatic: DateTime.now().subtract(Duration(hours: 2)),
   );
 
-  VesselInfoBalloonKmlModel vesselInfoBalloon = VesselInfoBalloonKmlModel(vessel: vessel);
+  VesselInfoBalloonKmlModel vesselInfoBalloon =
+      VesselInfoBalloonKmlModel(vessel: vessel);
   String kml = vesselInfoBalloon.generateKml();
   print(kml);
 }
