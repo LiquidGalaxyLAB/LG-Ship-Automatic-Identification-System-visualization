@@ -123,7 +123,7 @@ class CollisionKmlModel {
     for (int i = 0; i < coordinates.length; i++) {
       tourBuffer.writeln('''
         <gx:AnimatedUpdate>
-          <gx:duration>0.2</gx:duration>
+          <gx:duration>0.3</gx:duration>
           <Update>
             <targetHref></targetHref>
             <Change>
@@ -138,14 +138,14 @@ class CollisionKmlModel {
         </gx:AnimatedUpdate>
 
         <gx:FlyTo>
-          <gx:duration>0.2</gx:duration>
+          <gx:duration>0.3</gx:duration>
           <gx:flyToMode>smooth</gx:flyToMode>
           <LookAt>
             <longitude>${coordinates[i].longitude}</longitude>
             <latitude>${coordinates[i].latitude}</latitude>
             <heading>${vessel.trueHeading}</heading>
             <tilt>60</tilt>
-            <range>10000</range>
+            <range>1000</range>
             <gx:fovy>0</gx:fovy>
             <altitude>500</altitude>
             <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
@@ -164,7 +164,7 @@ class CollisionKmlModel {
   List<LatLng> _generateCoordinates(
       VesselSampled vessel, LatLng collisionPoint) {
     // Simple linear interpolation
-    int numPoints = 10;
+    int numPoints = 25;
     List<LatLng> coordinates = [];
     double latStep = (collisionPoint.latitude - vessel.latitude!) / numPoints;
     double lonStep = (collisionPoint.longitude - vessel.longitude!) / numPoints;

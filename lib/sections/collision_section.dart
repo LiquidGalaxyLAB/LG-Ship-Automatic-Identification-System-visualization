@@ -1,3 +1,4 @@
+import 'package:ais_visualizer/components/orbit_button_component.dart';
 import 'package:ais_visualizer/models/kml/collision_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/collision_kml_model.dart';
 import 'package:ais_visualizer/providers/collision_provider.dart';
@@ -27,6 +28,7 @@ class _CollisionSectionState extends State<CollisionSection> {
   bool _willCollide = false;
   LatLng? _collisionPoint;
   bool _isUploading = false;
+  int _timeInMilliSeconds = 0;
 
   @override
   void initState() {
@@ -46,9 +48,13 @@ class _CollisionSectionState extends State<CollisionSection> {
     _collisionProvider.reset();
   }
 
-  Future<void> _simulateCollisionOnLG() async {
+  Future<void> _stopOrbit() async {
+    await LgService().stopTour();
+  }
+
+  Future<bool> _simulateCollisionOnLG() async {
     if (_isUploading) {
-      return;
+      return false;
     }
     setState(() {
       _isUploading = true;
@@ -77,10 +83,25 @@ class _CollisionSectionState extends State<CollisionSection> {
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('VesselCollisionTour');
+    _timeInMilliSeconds = _computeOrbitTimeInMilliseconds(25);
 
     setState(() {
       _isUploading = false;
     });
+    return true;
+  }
+
+  int _computeOrbitTimeInMilliseconds(int size, {int stepSize = 1}) {
+    double updateDurationInSeconds = 0.3;
+    double waitDurationInSeconds = 0.3;
+
+    int numberOfSegments = (size / stepSize).ceil();
+    double totalDurationInSeconds =
+        numberOfSegments * (updateDurationInSeconds + waitDurationInSeconds);
+
+    final trackOrbitTimeInMilliseconds =
+        (totalDurationInSeconds * 1000).toInt();
+    return trackOrbitTimeInMilliseconds;
   }
 
   void _calculateCPAandTCPA() {
@@ -331,37 +352,47 @@ class _CollisionSectionState extends State<CollisionSection> {
                                         ),
                                   const SizedBox(height: 10.0),
                                   _tcpa != 0.0
-                                      ? ElevatedButton(
-                                          onPressed: () {
-                                            _simulateCollisionOnLG();
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 30.0,
-                                                vertical: 10.0),
-                                            textStyle: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge,
-                                            backgroundColor: AppColors.accent,
-                                          ),
-                                          child: Row(
+                                      ? Align(
+                                          alignment: Alignment.center,
+                                          child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Flexible(
-                                                child: Text(
-                                                  "Simulate CPA on LG",
-                                                  style: Theme.of(context)
+                                              OrbitButton(
+                                                startText: 'Simulate CPA on LG',
+                                                stopText: 'Stop Tour',
+                                                startOrbit:
+                                                    _simulateCollisionOnLG,
+                                                stopOrbit: _stopOrbit,
+                                                timeInMilliSeconds:
+                                                    _timeInMilliSeconds + 2000,
+                                                style: ElevatedButton.styleFrom(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10.0,
+                                                      vertical: 10.0),
+                                                  textStyle: Theme.of(context)
                                                       .textTheme
-                                                      .labelLarge,
-                                                  textAlign: TextAlign.center,
+                                                      .bodyLarge
+                                                      ?.copyWith(
+                                                          color: Colors.white),
+                                                  backgroundColor:
+                                                      AppColors.accent,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                  ),
                                                 ),
                                               ),
-                                              const SizedBox(width: 8.0),
-                                              const FaIcon(
-                                                FontAwesomeIcons.video,
-                                                size: 18.0,
-                                                color: AppColors.white,
-                                              ),
+                                              const SizedBox(height: 10.0),
+                                              if (_isUploading)
+                                                const SizedBox(
+                                                  width: 20.0,
+                                                  height: 20.0,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 2.0),
+                                                ),
                                             ],
                                           ),
                                         )
