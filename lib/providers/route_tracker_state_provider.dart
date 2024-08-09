@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RouteTrackerState extends ChangeNotifier {
-  bool _showVesselRoute  = false;
+  bool _showVesselRoute = false;
   bool _isPlaying = false;
   double _playbackSpeed = 1.0;
   double _currentPosition = -1.0;
@@ -10,9 +10,9 @@ class RouteTrackerState extends ChangeNotifier {
   bool _isFetching = false;
   bool _sendOrbitToLg = false;
   bool _showLGBotton = false;
+  int _timeInMilliSeconds = 0;
 
-
-  bool get showVesselRoute  => _showVesselRoute ;
+  bool get showVesselRoute => _showVesselRoute;
   bool get isPlaying => _isPlaying;
   double get playbackSpeed => _playbackSpeed;
   double get currentPosition => _currentPosition;
@@ -21,9 +21,10 @@ class RouteTrackerState extends ChangeNotifier {
   bool get isFetching => _isFetching;
   bool get sendOrbitToLg => _sendOrbitToLg;
   bool get showLGBotton => _showLGBotton;
+  int get timeInMilliSeconds => _timeInMilliSeconds;
 
   void toggleShowRoute(bool value) {
-    _showVesselRoute  = value;
+    _showVesselRoute = value;
     notifyListeners();
   }
 
@@ -46,7 +47,7 @@ class RouteTrackerState extends ChangeNotifier {
     _startDate = newStartDate;
     _endDate = newEndDate;
     notifyListeners();
-  } 
+  }
 
   void toggleIsFetching(bool value) {
     _isFetching = value;
@@ -63,8 +64,13 @@ class RouteTrackerState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setTimeInMilliSeconds(int timeInMilliSeconds) {
+    _timeInMilliSeconds = timeInMilliSeconds;
+    notifyListeners();
+  }
+
   void resetState() {
-    _showVesselRoute  = false;
+    _showVesselRoute = false;
     _isPlaying = false;
     _playbackSpeed = 1.0;
     _currentPosition = -1.0;

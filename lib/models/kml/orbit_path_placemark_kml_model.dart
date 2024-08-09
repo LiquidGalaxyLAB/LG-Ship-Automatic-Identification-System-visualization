@@ -46,7 +46,7 @@ class OrbitPathPlacemarkKmlModel {
       double lat = filteredPathCoordinates[i][1];
       double heading = filteredPathCoordinates[i][2];
 
-      content += '''.
+      content += '''
         <gx:AnimatedUpdate>
           <gx:duration>0.2</gx:duration>
           <Update>
@@ -55,7 +55,7 @@ class OrbitPathPlacemarkKmlModel {
               <Placemark targetId="iconmoved">
                 <styleUrl>#customIconStyle</styleUrl>
                 <Point>
-                  <coordinates>$lng,$lat,$heading</coordinates>
+                  <coordinates>$lng,$lat,0</coordinates>
                 </Point>
               </Placemark>
             </Change>
@@ -68,7 +68,7 @@ class OrbitPathPlacemarkKmlModel {
           <LookAt>
             <longitude>$lng</longitude>
             <latitude>$lat</latitude>
-            <heading>$heading</heading>
+            <heading>0</heading>
             <tilt>60</tilt>
             <range>10000</range>
             <gx:fovy>0</gx:fovy>
@@ -86,32 +86,6 @@ class OrbitPathPlacemarkKmlModel {
     return content;
   }
 
-  static List<List<double>> interpolatePoints(List<List<double>> ring,
-      {int stepSize = 100}) {
-    List<List<double>> smoothedPoints = [];
-    int ringLength = ring.length;
-
-    if (ringLength <= 1) {
-      return ring;
-    }
-
-    for (int i = 0; i < ringLength; i += stepSize) {
-      int startIndex = i % ringLength;
-      int endIndex = (i + stepSize) % ringLength;
-
-      List<double> startPoint = ring[startIndex];
-      List<double> endPoint = ring[endIndex];
-
-      // Linear interpolation between startPoint and endPoint
-      double lng = (startPoint[0] + endPoint[0]) / 2;
-      double lat = (startPoint[1] + endPoint[1]) / 2;
-
-      smoothedPoints.add([lng, lat]);
-    }
-
-    return smoothedPoints;
-  }
-
   static Future<String> buildPathOrbit(
       List<List<double>> pathCoordinates) async {
     MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
@@ -120,7 +94,7 @@ class OrbitPathPlacemarkKmlModel {
       return '${point[0]},${point[1]},0';
     }).join(' ');
 
-    String orbitContent = generateOrbitContent(pathCoordinates, stepSize: 10);
+    String orbitContent = generateOrbitContent(pathCoordinates, stepSize: 1);
 
     return '''
 <?xml version="1.0" encoding="UTF-8"?>

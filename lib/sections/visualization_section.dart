@@ -516,6 +516,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                                 stopText: 'Stop Tour',
                                 startOrbit: _tourAisArea,
                                 stopOrbit: _stopOrbit,
+                                timeInMilliSeconds: 53000 + 3000,
                               ),
                               if (_isUploadingOrbitFile) ...[
                                 const SizedBox(width: 5.0),
@@ -682,6 +683,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                                   stopText: 'Stop Tour',
                                   startOrbit: _tourAisArea,
                                   stopOrbit: _stopOrbit,
+                                  timeInMilliSeconds: 53000 + 3000,
                                 ),
                                 if (_isUploadingOrbitFile) ...[
                                   const SizedBox(width: 5.0),
@@ -700,6 +702,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
                             stopText: 'Stop orbit',
                             startOrbit: _showOrbitSelectedVessel,
                             stopOrbit: _stopOrbit,
+                            timeInMilliSeconds: 44000 + 3000,
                           ),
                           const SizedBox(height: 20.0),
                           Text(

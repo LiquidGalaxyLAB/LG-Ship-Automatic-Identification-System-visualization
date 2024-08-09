@@ -73,6 +73,7 @@ class _MapComponentState extends State<MapComponent> {
   late DrawOnMapProvider _drawOnMapProvider;
   late CollisionProvider _collisionProvider;
   bool _skipFlyTo = false;
+  int _trackOrbitTimeInMilliseconds = 0;
 
   @override
   void initState() {
@@ -502,6 +503,18 @@ class _MapComponentState extends State<MapComponent> {
     ));
   }
 
+  int _computeOrbitTimeInMilliseconds(int size, {int stepSize = 1}) {
+    double updateDurationInSeconds = 0.2; // Duration for gx:AnimatedUpdate
+    double waitDurationInSeconds = 0.3; // Duration for gx:Wait
+
+    int numberOfSegments = (size / stepSize).ceil();
+    double totalDurationInSeconds =
+        numberOfSegments * (updateDurationInSeconds + waitDurationInSeconds);
+
+    _trackOrbitTimeInMilliseconds = (totalDurationInSeconds * 1000).toInt();
+    return _trackOrbitTimeInMilliseconds;
+  }
+
   Future<void> fetchTrackDataForSelectedDates(
     int mmsi,
     String startDate,
@@ -525,6 +538,13 @@ class _MapComponentState extends State<MapComponent> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         routeTrackerStateProvider.toggleIsFetching(false);
         print('Doooooneeeeeeeee for state provider!!!!!!!!');
+
+        final filteredRoute = selectedVesselTrack
+          .map((sample) => LatLng(sample.latitude!, sample.longitude!))
+          .toList();
+        // Set the time in milliseconds for the orbit
+        routeTrackerStateProvider.setTimeInMilliSeconds(
+            _computeOrbitTimeInMilliseconds(filterClosePoints(filteredRoute, 30).length));
         // show the button of LG
         routeTrackerStateProvider.toggleShowLGBotton(true);
       });

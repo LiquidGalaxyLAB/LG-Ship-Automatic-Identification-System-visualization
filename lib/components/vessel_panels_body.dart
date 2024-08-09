@@ -758,6 +758,8 @@ class _RouteTrackerExpansionPanelBodyState
                               stopText: 'Stop Tour',
                               startOrbit: _tourVesselTrack,
                               stopOrbit: _stopOrbit,
+                              timeInMilliSeconds:
+                                  state.timeInMilliSeconds + 3000,
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10.0, vertical: 10.0),
