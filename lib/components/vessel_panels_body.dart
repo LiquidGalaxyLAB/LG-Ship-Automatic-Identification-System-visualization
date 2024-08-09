@@ -998,7 +998,7 @@ class _RoutePredectionExpansionPanelBodyState
     );
 
     print('Predicting route for vessel: $targetVessel');
-    int k = 20;
+    int k = 5;
     List<KnnSimpleVesselModel> similarVessels =
         knnService.predict(targetVessel, k);
 
@@ -1026,7 +1026,8 @@ class _RoutePredectionExpansionPanelBodyState
     final List<LatLng> currentVesselList = [
       LatLng(widget.currentVessel!.latitude!, widget.currentVessel!.longitude!)
     ];
-    _predictedPointList = currentVesselList + predictedPoints;
+    _predictedPointList =
+        currentVesselList + predictedPoints + currentVesselList;
     _setPredictedPoints(_predictedPointList);
     int time = _computeOrbitTimeInMilliseconds(predictedPoints.length);
     _closeDialog();
@@ -1037,8 +1038,8 @@ class _RoutePredectionExpansionPanelBodyState
   }
 
   int _computeOrbitTimeInMilliseconds(int size, {int stepSize = 1}) {
-    double updateDurationInSeconds = 0.2; // Duration for gx:AnimatedUpdate
-    double waitDurationInSeconds = 0.3; // Duration for gx:Wait
+    double updateDurationInSeconds = 0.3; // Duration for gx:AnimatedUpdate
+    double waitDurationInSeconds = 0.8; // Duration for gx:Wait
 
     int numberOfSegments = (size / stepSize).ceil();
     double totalDurationInSeconds =
@@ -1177,7 +1178,7 @@ class _RoutePredectionExpansionPanelBodyState
                     stopText: 'Stop Tour',
                     startOrbit: _tourVesselPrediction,
                     stopOrbit: _stopOrbit,
-                    timeInMilliSeconds: _timeInMilliSeconds,
+                    timeInMilliSeconds: _timeInMilliSeconds + 2000,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10.0, vertical: 10.0),

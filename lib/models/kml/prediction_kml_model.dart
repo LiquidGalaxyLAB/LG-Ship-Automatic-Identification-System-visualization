@@ -15,7 +15,7 @@ class PredictionKmlModel {
     for (int i = 0; i < coordinates.length; i += 1) {
       content += '''
         <gx:AnimatedUpdate>
-          <gx:duration>0.2</gx:duration>
+          <gx:duration>0.3</gx:duration>
           <Update>
             <targetHref></targetHref>
             <Change>
@@ -30,7 +30,7 @@ class PredictionKmlModel {
         </gx:AnimatedUpdate>
 
         <gx:FlyTo>
-          <gx:duration>0.2</gx:duration>
+          <gx:duration>0.3</gx:duration>
           <gx:flyToMode>smooth</gx:flyToMode>
           <LookAt>
             <longitude>${coordinates[i].longitude}</longitude>
@@ -45,7 +45,7 @@ class PredictionKmlModel {
         </gx:FlyTo>
 
         <gx:Wait>
-          <gx:duration>0.3</gx:duration>  
+          <gx:duration>0.8</gx:duration>  
         </gx:Wait>
       ''';
     }
