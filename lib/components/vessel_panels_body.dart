@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:ais_visualizer/models/kml/prediction_kml_model.dart';
 import 'package:ais_visualizer/models/knn_simple_vessel_model.dart';
 import 'package:ais_visualizer/models/knn_vessel_model.dart';
 import 'package:ais_visualizer/models/vessel_full_model.dart';
@@ -803,6 +806,10 @@ class RoutePredectionExpansionPanelBody extends StatefulWidget {
 class _RoutePredectionExpansionPanelBodyState
     extends State<RoutePredectionExpansionPanelBody> {
   bool _isCancelled = false;
+  bool _showLGButton = false;
+  bool _isUploading = false;
+  int _timeInMilliSeconds = 0;
+  List<LatLng> _predictedPointList = [];
 
   @override
   void initState() {
@@ -817,6 +824,81 @@ class _RoutePredectionExpansionPanelBodyState
         context.read<RoutePredictionState>().resetState();
       });
     }
+  }
+
+  bool checkConnectionStatus() {
+    final connectionStatusProvider =
+        Provider.of<LgConnectionStatusProvider>(context, listen: false);
+    return connectionStatusProvider.isConnected;
+  }
+
+  Future<bool> _tourVesselPrediction() async {
+    if (!checkConnectionStatus()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppTexts.error,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineLarge!
+                  .copyWith(color: AppColors.error),
+            ),
+            content: Text(
+              AppTexts.notConnectedError,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(
+                    const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  AppTexts.ok,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(color: AppColors.darkGrey),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    PredictionKmlModel predictionKmlModel = PredictionKmlModel(
+      coordinates: _predictedPointList,
+      heading: calculateHeading(
+        _predictedPointList[0].latitude,
+        _predictedPointList[0].longitude,
+        _predictedPointList[1].latitude,
+        _predictedPointList[1].longitude,
+      ),
+    );
+
+    String kmlContent = await predictionKmlModel.generatePredictionKML();
+    LgService().cleanBeforKmlResend();
+    await LgService().uploadKml4(kmlContent, 'PredictOrbit.kml');
+    await Future.delayed(const Duration(seconds: 3));
+    await LgService().startTour('PathOrbit');
+    setState(() {
+      _isUploading = false;
+    });
+    return true;
+  }
+
+  Future<void> _stopOrbit() async {
+    await LgService().stopTour();
   }
 
   void _predictRoute() async {
@@ -880,9 +962,9 @@ class _RoutePredectionExpansionPanelBodyState
 
     // Format start and end dates
     final String start =
-        formatDateTime(DateTime.now().subtract(const Duration(days: 20)));
+        formatDateTime(DateTime.now().subtract(const Duration(days: 30)));
     final String end =
-        formatDateTime(DateTime.now().subtract(const Duration(days: 4)));
+        formatDateTime(DateTime.now().subtract(const Duration(days: 20)));
     // fetch data vessels from api
     final List<KnnVesselModel> aisDataList =
         await AisDataService().fetchAisPositionsInArea(
@@ -941,8 +1023,53 @@ class _RoutePredectionExpansionPanelBodyState
         return;
       }
     }
-    _setPredictedPoints(predictedPoints);
+    final List<LatLng> currentVesselList = [
+      LatLng(widget.currentVessel!.latitude!, widget.currentVessel!.longitude!)
+    ];
+    _predictedPointList = currentVesselList + predictedPoints;
+    _setPredictedPoints(_predictedPointList);
+    int time = _computeOrbitTimeInMilliseconds(predictedPoints.length);
     _closeDialog();
+    setState(() {
+      _showLGButton = true;
+      _timeInMilliSeconds = time;
+    });
+  }
+
+  int _computeOrbitTimeInMilliseconds(int size, {int stepSize = 1}) {
+    double updateDurationInSeconds = 0.2; // Duration for gx:AnimatedUpdate
+    double waitDurationInSeconds = 0.3; // Duration for gx:Wait
+
+    int numberOfSegments = (size / stepSize).ceil();
+    double totalDurationInSeconds =
+        numberOfSegments * (updateDurationInSeconds + waitDurationInSeconds);
+
+    final trackOrbitTimeInMilliseconds =
+        (totalDurationInSeconds * 1000).toInt();
+    return trackOrbitTimeInMilliseconds;
+  }
+
+  double calculateHeading(double lat1, double lon1, double lat2, double lon2) {
+    // Convert degrees to radians
+    double lat1Rad = lat1 * pi / 180.0;
+    double lon1Rad = lon1 * pi / 180.0;
+    double lat2Rad = lat2 * pi / 180.0;
+    double lon2Rad = lon2 * pi / 180.0;
+
+    // Calculate the change in coordinates
+    double deltaLon = lon2Rad - lon1Rad;
+
+    // Calculate heading
+    double x = sin(deltaLon) * cos(lat2Rad);
+    double y = cos(lat1Rad) * sin(lat2Rad) -
+        sin(lat1Rad) * cos(lat2Rad) * cos(deltaLon);
+    double headingRad = atan2(x, y);
+
+    // Convert radians to degrees
+    double headingDeg = headingRad * 180.0 / pi;
+
+    // Normalize heading to be within the range [0, 360)
+    return (headingDeg + 360.0) % 360.0;
   }
 
   void _setPredictedPoints(List<LatLng> points) {
@@ -1038,6 +1165,42 @@ class _RoutePredectionExpansionPanelBodyState
               ),
             ),
           ),
+          const SizedBox(height: 10.0),
+          if (_showLGButton)
+            Align(
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OrbitButton(
+                    startText: 'Play Track on LG',
+                    stopText: 'Stop Tour',
+                    startOrbit: _tourVesselPrediction,
+                    stopOrbit: _stopOrbit,
+                    timeInMilliSeconds: _timeInMilliSeconds,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 10.0),
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: Colors.white),
+                      backgroundColor: AppColors.accent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10.0),
+                  if (_isUploading)
+                    const SizedBox(
+                      width: 20.0,
+                      height: 20.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );

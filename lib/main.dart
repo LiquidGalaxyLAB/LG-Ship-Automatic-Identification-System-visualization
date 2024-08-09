@@ -35,7 +35,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => FilterRegionProvider()),
         ChangeNotifierProvider(create: (_) => CollisionProvider()),
       ],
-      child: const AISVisualizerApp(),
+      child: const AISVisualizerApp(), 
     ),
   );
 }
