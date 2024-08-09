@@ -94,7 +94,6 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
   }
 
   _onPanUpdate(DragUpdateDetails details) async {
-    // To start draw new polygon every time.
     if (_clearDrawing) {
       _clearDrawing = false;
       _clearPolygons();
@@ -111,20 +110,15 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
         y = details.localPosition.dy;
       }
 
-      // Round the x and y.
       int xCoordinate = x!.round();
       int yCoordinate = y!.round();
 
-      // Check if the distance between last point is not too far.
-      // to prevent two fingers drawing.
       if (_lastXCoordinate != null && _lastYCoordinate != null) {
         var distance = math.sqrt(math.pow(xCoordinate - _lastXCoordinate!, 2) +
             math.pow(yCoordinate - _lastYCoordinate!, 2));
-        // Check if the distance of point and point is large.
         if (distance > 80.0) return;
       }
 
-      // Cached the coordinate.
       _lastXCoordinate = xCoordinate;
       _lastYCoordinate = yCoordinate;
 
@@ -135,7 +129,11 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
       LatLng latLng = await controller.getLatLng(screenCoordinate);
 
       try {
-        // Add new point to list.
+        if (_userPolyLinesLatLngList.length > 1 && _doesLineIntersect(latLng)) {
+          // Intersection detected, ignore this point
+          return;
+        }
+
         _userPolyLinesLatLngList.add(latLng);
 
         _polyLines.removeWhere(
@@ -155,8 +153,59 @@ class _DrawOnMapComponentState extends State<DrawOnMapComponent> {
     }
   }
 
+  bool _doesLineIntersect(LatLng newPoint) {
+    for (int i = 0; i < _userPolyLinesLatLngList.length - 2; i++) {
+      LatLng a = _userPolyLinesLatLngList[i];
+      LatLng b = _userPolyLinesLatLngList[i + 1];
+      LatLng c = _userPolyLinesLatLngList.last;
+      LatLng d = newPoint;
+
+      if (_doLinesIntersect(a, b, c, d)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _doLinesIntersect(LatLng p1, LatLng q1, LatLng p2, LatLng q2) {
+    // Use orientation test to determine if two line segments intersect
+    int o1 = _orientation(p1, q1, p2);
+    int o2 = _orientation(p1, q1, q2);
+    int o3 = _orientation(p2, q2, p1);
+    int o4 = _orientation(p2, q2, q1);
+
+    if (o1 != o2 && o3 != o4) {
+      return true;
+    }
+
+    // Collinear cases
+    if (o1 == 0 && _onSegment(p1, p2, q1)) return true;
+    if (o2 == 0 && _onSegment(p1, q2, q1)) return true;
+    if (o3 == 0 && _onSegment(p2, p1, q2)) return true;
+    if (o4 == 0 && _onSegment(p2, q1, q2)) return true;
+
+    return false;
+  }
+
+  int _orientation(LatLng p, LatLng q, LatLng r) {
+    double val = (q.longitude - p.longitude) * (r.latitude - q.latitude) -
+        (q.latitude - p.latitude) * (r.longitude - q.longitude);
+
+    if (val == 0) return 0; // collinear
+    return (val > 0) ? 1 : 2; // clock or counterclockwise
+  }
+
+  bool _onSegment(LatLng p, LatLng q, LatLng r) {
+    if (q.longitude <= math.max(p.longitude, r.longitude) &&
+        q.longitude >= math.min(p.longitude, r.longitude) &&
+        q.latitude <= math.max(p.latitude, r.latitude) &&
+        q.latitude >= math.min(p.latitude, r.latitude)) {
+      return true;
+    }
+    return false;
+  }
+
   _onPanEnd(DragEndDetails details) async {
-    // Reset last cached coordinate
     _lastXCoordinate = null;
     _lastYCoordinate = null;
 

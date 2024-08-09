@@ -185,7 +185,9 @@ class AisDataService {
   }
 
   Future<List<VesselSampled>> fetchFilteredData(
-      List<int> shipTypes, List<LatLng> regionCoordinates) async {
+      List<int> shipTypes,
+      List<LatLng> regionCoordinates,
+      List<VesselSampled> currentVessels, List<bool> exception) async {
     final token = await AuthService.getToken();
     final url =
         Uri.parse('https://live.ais.barentswatch.no/v1/latest/combined');
@@ -207,11 +209,6 @@ class AisDataService {
           .map((latLng) => [latLng.longitude, latLng.latitude])
           .toList();
 
-      // Ensure the last point is the same as the first point
-      if (polygonCoordinates.first != polygonCoordinates.last) {
-        polygonCoordinates.add(polygonCoordinates.first);
-      }
-
       requestBody["geometry"] = {
         "type": "Polygon",
         "coordinates": [polygonCoordinates]
@@ -223,10 +220,11 @@ class AisDataService {
 
     if (response.statusCode == 200) {
       List<dynamic> jsonList = jsonDecode(response.body);
+      exception[0] = false;
       return jsonList.map((item) => VesselSampled.fromJson(item)).toList();
     } else {
-      // Improved error handling
-      throw Exception('Failed to load filtered data: ${response.body}');
+      exception[0] = true;
+      return currentVessels;
     }
   }
 

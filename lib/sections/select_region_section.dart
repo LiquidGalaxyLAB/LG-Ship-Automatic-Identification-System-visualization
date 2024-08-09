@@ -123,7 +123,7 @@ class _SelectRegionSectionState extends State<SelectRegionSection> {
                               ),
                               const SizedBox(height: 8.0),
                               Text(
-                                "- Move the map first to your specific location \n - Press the floating button \n \n Now, you can draw...",
+                                "- Move the map first to your specific location \n - Press the floating button \n \n Now, you can draw... (only polygone are allowed, no intersecting lines)",
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium

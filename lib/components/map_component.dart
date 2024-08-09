@@ -23,6 +23,8 @@ import 'package:ais_visualizer/providers/selected_types_provider.dart';
 import 'package:ais_visualizer/providers/selected_vessel_provider.dart';
 import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
+import 'package:ais_visualizer/utils/constants/colors.dart';
+import 'package:ais_visualizer/utils/constants/text.dart';
 import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -139,7 +141,7 @@ class _MapComponentState extends State<MapComponent> {
     if (_aisConnectionStatusProvider.isConnected && !_isFetching) {
       await fetchInitialData();
       _zoomToLevel(3.344121217727661);
-      await fetchInitialData();
+      _onClusterUpdate();
       if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
         await showVesselsOnLGFirstConnect();
       }
@@ -182,7 +184,7 @@ class _MapComponentState extends State<MapComponent> {
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
-    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+    _onClusterUpdate();
     if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
       await showVesselsOnLG();
     }
@@ -196,7 +198,7 @@ class _MapComponentState extends State<MapComponent> {
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
-    await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
+    _onClusterUpdate();
     setState(() {
       _polygons.clear();
     });
@@ -382,6 +384,7 @@ class _MapComponentState extends State<MapComponent> {
       if (_isFetching) {
         return;
       }
+      _isFetching = true;
       final vessels = await AisDataService().fetchInitialData();
       print("DOOOOOOOOOOOOONEEEEEEEEEEEEEEEEE FEEEEEEETCHHHHHHIIIIIINGGGGGGG");
       setState(() {
@@ -417,18 +420,67 @@ class _MapComponentState extends State<MapComponent> {
       if (_isFetching) {
         return;
       }
-      final vessels = await AisDataService().fetchFilteredData(filter, region);
-      setState(() {
-        for (var sample in vessels) {
-          samplesMap[sample.mmsi!] = sample;
-        }
-      });
+      _isFetching = true;
+      List<bool> exceptions = [false];
+      final vessels = await AisDataService().fetchFilteredData(
+          filter, region, samplesMap.values.toList(), exceptions);
+      if (!exceptions[0]) {
+        setState(() {
+          for (var sample in vessels) {
+            samplesMap[sample.mmsi!] = sample;
+          }
+        });
+      } else {
+        // this is the case where the draw region is not valid, it has intersected multiple regions
+        _showErrorRegionDialog();
+        _drawOnMapProvider.clearDrawing();
+        _isFetching = false;
+        _onFilterChange();
+      }
       await _onClusterUpdate();
       _isFetching = false;
     } catch (e) {
       _isFetching = false;
       print('Exception during initial data fetch: $e');
     }
+  }
+
+  void _showErrorRegionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "The region you have drawn is not valid.",
+            style: Theme.of(context)
+                .textTheme
+                .headlineLarge!
+                .copyWith(color: AppColors.error),
+          ),
+          content: Text(
+            "Please draw a valid region that does not intersect.",
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          actions: [
+            TextButton(
+              style: ButtonStyle(
+                side: MaterialStateProperty.all(
+                  const BorderSide(color: AppColors.darkGrey, width: 3.0),
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                AppTexts.ok,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: AppColors.darkGrey),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // for map sync
@@ -540,11 +592,12 @@ class _MapComponentState extends State<MapComponent> {
         print('Doooooneeeeeeeee for state provider!!!!!!!!');
 
         final filteredRoute = selectedVesselTrack
-          .map((sample) => LatLng(sample.latitude!, sample.longitude!))
-          .toList();
+            .map((sample) => LatLng(sample.latitude!, sample.longitude!))
+            .toList();
         // Set the time in milliseconds for the orbit
         routeTrackerStateProvider.setTimeInMilliSeconds(
-            _computeOrbitTimeInMilliseconds(filterClosePoints(filteredRoute, 30).length));
+            _computeOrbitTimeInMilliseconds(
+                filterClosePoints(filteredRoute, 30).length));
         // show the button of LG
         routeTrackerStateProvider.toggleShowLGBotton(true);
       });
