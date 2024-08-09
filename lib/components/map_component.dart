@@ -141,7 +141,9 @@ class _MapComponentState extends State<MapComponent> {
     if (_aisConnectionStatusProvider.isConnected && !_isFetching) {
       await fetchInitialData();
       _zoomToLevel(3.344121217727661);
-      _onClusterUpdate();
+      // add delay 2 seconds to wait for the data to be fetched
+      await Future.delayed(const Duration(seconds: 2));
+      await _onClusterUpdate();
       if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
         await showVesselsOnLGFirstConnect();
       }
@@ -184,7 +186,7 @@ class _MapComponentState extends State<MapComponent> {
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
-    _onClusterUpdate();
+    await _onClusterUpdate();
     if (_lgConnectionStatusProvider.isConnected && !_isUploading) {
       await showVesselsOnLG();
     }
@@ -198,7 +200,7 @@ class _MapComponentState extends State<MapComponent> {
         _processIndexTypes(_selectedTypesProvider.selectedTypesIndex);
     await fetchFilteredData(filter, _drawOnMapProvider.polyLinesLatLngList);
     _zoomToLevel(3.344121217727661);
-    _onClusterUpdate();
+    await _onClusterUpdate();
     setState(() {
       _polygons.clear();
     });

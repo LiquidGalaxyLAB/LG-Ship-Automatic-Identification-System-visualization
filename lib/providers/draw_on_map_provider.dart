@@ -13,6 +13,11 @@ class DrawOnMapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setDrawing(bool value) {
+    _isDrawing = value;
+    notifyListeners();
+  }
+
   void addPolyLineLatLng(List<LatLng> latLng) {
     _polyLinesLatLngList.clear();
     _polyLinesLatLngList.addAll(latLng);

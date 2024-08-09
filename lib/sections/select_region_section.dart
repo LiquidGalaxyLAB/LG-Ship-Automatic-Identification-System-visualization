@@ -14,12 +14,27 @@ class SelectRegionSection extends StatefulWidget {
 
 class _SelectRegionSectionState extends State<SelectRegionSection> {
   FilterRegionProvider _filterRegionProvider = FilterRegionProvider();
+  DrawOnMapProvider _drawOnMapProvider = DrawOnMapProvider();
 
   @override
   void initState() {
     super.initState();
     _filterRegionProvider =
         Provider.of<FilterRegionProvider>(context, listen: false);
+    _drawOnMapProvider = Provider.of<DrawOnMapProvider>(context, listen: false);
+  }
+
+  @override
+  void dispose() {
+    Future.microtask(() {
+      if (_filterRegionProvider.enableFilterMap) {
+        _filterRegionProvider.setEnableFilterMap(false);
+        if (_drawOnMapProvider.isDrawing) {
+          _drawOnMapProvider.toggleDrawing();
+        }
+      }
+    });
+    super.dispose();
   }
 
   @override
