@@ -152,6 +152,7 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(5.0),
         child: AppBar(

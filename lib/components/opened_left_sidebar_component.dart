@@ -20,10 +20,12 @@ class OpenedLeftSidebarComponent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<OpenedLeftSidebarComponent> createState() => _OpenedLeftSidebarComponentState();
+  State<OpenedLeftSidebarComponent> createState() =>
+      _OpenedLeftSidebarComponentState();
 }
 
-class _OpenedLeftSidebarComponentState extends State<OpenedLeftSidebarComponent> {
+class _OpenedLeftSidebarComponentState
+    extends State<OpenedLeftSidebarComponent> {
   late ScrollController _scrollController;
 
   @override
@@ -114,21 +116,21 @@ class _OpenedLeftSidebarComponentState extends State<OpenedLeftSidebarComponent>
           Expanded(
             child: Consumer<SelectedNavItemProvider>(
               builder: (context, selectedNavItemProvider, child) {
-                // Get the selected index
-                final int selectedIndex = widget.navbarItems.indexOf(
-                    selectedNavItemProvider.selectedItem);
+                // // Get the selected index
+                // final int selectedIndex = widget.navbarItems.indexOf(
+                //     selectedNavItemProvider.selectedItem);
 
-                // Scroll to the position if the selectedIndex is valid
-                if (selectedIndex >= 0 && selectedIndex < widget.navbarItems.length - 1) {
-                  const double itemHeight = 60.0;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollController.animateTo(
-                      selectedIndex * itemHeight,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  });
-                }
+                // // Scroll to the position if the selectedIndex is valid
+                // if (selectedIndex >= 0 && selectedIndex < widget.navbarItems.length - 1) {
+                //   const double itemHeight = 60.0;
+                //   WidgetsBinding.instance.addPostFrameCallback((_) {
+                //     _scrollController.animateTo(
+                //       selectedIndex * itemHeight,
+                //       duration: const Duration(milliseconds: 300),
+                //       curve: Curves.easeInOut,
+                //     );
+                //   });
+                // }
 
                 return ListView.builder(
                   controller: _scrollController,
@@ -160,8 +162,8 @@ class _OpenedLeftSidebarComponentState extends State<OpenedLeftSidebarComponent>
                 children: [
                   GestureDetector(
                     onTap: () {
-                      selectedNavItemProvider
-                          .updateNavItem(widget.navbarItems[widget.navbarItems.length - 1]);
+                      selectedNavItemProvider.updateNavItem(
+                          widget.navbarItems[widget.navbarItems.length - 1]);
                     },
                     child: Container(
                       decoration: BoxDecoration(
