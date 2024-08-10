@@ -20,6 +20,7 @@ class _FilterSectionState extends State<FilterSection> {
   List<int> tempSelectedIndexes = [];
   String searchText = '';
   bool isPanelOpen = false;
+  bool isSelectAll = false;
   late AisConnectionStatusProvider _aisConnectionStatusProvider;
 
   final TextEditingController textEditingController = TextEditingController();
@@ -78,10 +79,24 @@ class _FilterSectionState extends State<FilterSection> {
       selectedValues.clear();
       selectedIndexes.clear();
       tempSelectedIndexes.clear();
+      isSelectAll = false;
     });
     context
         .read<SelectedTypesProvider>()
         .setSelectedTypes(selectedValues, selectedIndexes);
+  }
+
+  void _toggleSelectAll(bool value) {
+    setState(() {
+      isSelectAll = value;
+      if (isSelectAll) {
+        tempSelectedValues = List.from(items);
+        tempSelectedIndexes = List.generate(items.length, (index) => index);
+      } else {
+        tempSelectedValues.clear();
+        tempSelectedIndexes.clear();
+      }
+    });
   }
 
   @override
@@ -165,32 +180,6 @@ class _FilterSectionState extends State<FilterSection> {
                 ),
                 const SizedBox(height: 10.0),
                 if (selectedValues.isNotEmpty)
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    children: tempSelectedValues
-                        .map(
-                          (value) => Chip(
-                            deleteIconColor: AppColors.grey,
-                            labelStyle: Theme.of(context)
-                                .textTheme
-                                .headlineSmall!
-                                .copyWith(
-                                    fontSize: 12, color: AppColors.darkGrey),
-                            label: Text(value),
-                            onDeleted: () {
-                              setState(() {
-                                int index = tempSelectedValues.indexOf(value);
-                                tempSelectedValues.remove(value);
-                                tempSelectedIndexes.removeAt(index);
-                              });
-                            },
-                          ),
-                        )
-                        .toList(),
-                  ),
-                const SizedBox(height: 10.0),
-                if (selectedValues.isNotEmpty)
                   TextButton(
                     onPressed: _clearFilters,
                     style: TextButton.styleFrom(
@@ -237,6 +226,46 @@ class _FilterSectionState extends State<FilterSection> {
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                 ),
+                const SizedBox(height: 10.0),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: isSelectAll
+                      ? [
+                          Chip(
+                            deleteIconColor: AppColors.grey,
+                            labelStyle: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .copyWith(
+                                    fontSize: 12, color: AppColors.darkGrey),
+                            label: const Text('All Filters'),
+                            onDeleted: _clearFilters,
+                          ),
+                        ]
+                      : tempSelectedValues
+                          .map(
+                            (value) => Chip(
+                              deleteIconColor: AppColors.grey,
+                              labelStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(
+                                      fontSize: 12, color: AppColors.darkGrey),
+                              label: Text(value),
+                              onDeleted: () {
+                                setState(() {
+                                  int index = tempSelectedValues.indexOf(value);
+                                  tempSelectedValues.remove(value);
+                                  tempSelectedIndexes.removeAt(index);
+                                  isSelectAll = false;
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                ),
+                const SizedBox(height: 10.0),
                 if (isPanelOpen)
                   Column(
                     children: [
@@ -280,6 +309,23 @@ class _FilterSectionState extends State<FilterSection> {
                         ),
                       ),
                       const SizedBox(height: 10.0),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: isSelectAll,
+                            onChanged: (bool? value) {
+                              _toggleSelectAll(value ?? false);
+                            },
+                          ),
+                          Text(
+                            'Select All',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontSize: 14),
+                          ),
+                        ],
+                      ),
                       Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
