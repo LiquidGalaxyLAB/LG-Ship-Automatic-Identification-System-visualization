@@ -1,6 +1,7 @@
 import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 
 class CollisionKmlModel {
   VesselSampled ownVessel;
@@ -37,7 +38,7 @@ class CollisionKmlModel {
         </IconStyle>
       </Style>
       <Placemark>
-        <name>${_escapeXml(ownVessel.name)}</name>
+        <name>${escapeXml(ownVessel.name)}</name>
         <styleUrl>#ownVesselStyle</styleUrl>
         <Point>
           <coordinates>${ownVessel.longitude},${ownVessel.latitude},0</coordinates>
@@ -54,7 +55,7 @@ class CollisionKmlModel {
         </IconStyle>
       </Style>
       <Placemark id="targetVesselMoved">
-        <name>${_escapeXml(targetVessel.name)}</name>
+        <name>${escapeXml(targetVessel.name)}</name>
         <styleUrl>#targetVesselStyle</styleUrl>
         <Point>
           <coordinates>${targetVessel.longitude},${targetVessel.latitude},0</coordinates>
@@ -176,17 +177,5 @@ class CollisionKmlModel {
     }
 
     return coordinates;
-  }
-
-  String _escapeXml(String? input) {
-    if (input == null || input.isEmpty) {
-      return ''; // Return empty string if input is null or empty
-    }
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
   }
 }

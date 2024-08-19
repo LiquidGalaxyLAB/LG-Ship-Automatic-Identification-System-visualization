@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:ais_visualizer/models/kml/about_ballon_kml_model.dart';
 import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
-import 'package:ais_visualizer/models/kml/orbit_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_path_placemark_kml_model.dart';
 import 'package:ais_visualizer/models/kml/selected_vessel_kml_model.dart';
 import 'package:ais_visualizer/models/kml/vessels_kml_model.dart';
@@ -25,7 +24,6 @@ import 'package:ais_visualizer/services/ais_data_service.dart';
 import 'package:ais_visualizer/services/lg_service.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
-import 'package:ais_visualizer/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -388,7 +386,6 @@ class _MapComponentState extends State<MapComponent> {
       }
       _isFetching = true;
       final vessels = await AisDataService().fetchInitialData();
-      print("DOOOOOOOOOOOOONEEEEEEEEEEEEEEEEE FEEEEEEETCHHHHHHIIIIIINGGGGGGG");
       setState(() {
         for (var sample in vessels) {
           samplesMap[sample.mmsi!] = sample;
@@ -519,8 +516,6 @@ class _MapComponentState extends State<MapComponent> {
     _tiltvalue = position.tilt;
     _zoomvalue = 591657550.500000 / pow(2, position.zoom);
     _manager.onCameraMove;
-    print('Camera Zoom: ${position.zoom}');
-    print('lat: $_latvalue, long: $_longvalue');
   }
 
   void _onCameraIdle() {
@@ -591,7 +586,6 @@ class _MapComponentState extends State<MapComponent> {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         routeTrackerStateProvider.toggleIsFetching(false);
-        print('Doooooneeeeeeeee for state provider!!!!!!!!');
 
         final filteredRoute = selectedVesselTrack
             .map((sample) => LatLng(sample.latitude!, sample.longitude!))
@@ -603,7 +597,6 @@ class _MapComponentState extends State<MapComponent> {
         // show the button of LG
         routeTrackerStateProvider.toggleShowLGBotton(true);
       });
-      print('Doooooneeeeeeeee');
       setState(() {
         markerIndex = 0;
         selectedVesselTrack = processedTrack.reversed.toList();
@@ -776,7 +769,7 @@ class _MapComponentState extends State<MapComponent> {
 
     MultiPolygonKmlModel multiPolygon = MultiPolygonKmlModel(coordinates: []);
     String kml = multiPolygon.generateKml();
-    await LgService().uploadKml4(kml, 'area.kml');
+    await LgService().uploadKml(kml, 'area.kml');
 
     setState(() {
       _isUploading = false;
@@ -818,7 +811,7 @@ class _MapComponentState extends State<MapComponent> {
         VesselKmlModel(vessels: samplesMap.values.toList());
     String kmlContent = await kmlModel.generateKmlWithArea();
 
-    await LgService().uploadKml4(kmlContent, 'vesselsAis.kml');
+    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
     setState(() {
       _isUploading = false;
     });
@@ -854,7 +847,7 @@ class _MapComponentState extends State<MapComponent> {
       kmlContent = await kmlModel.generateKmlWithArea();
     }
     LgService().cleanBeforKmlResend();
-    await LgService().uploadKml4(kmlContent, 'vesselsAis.kml');
+    await LgService().uploadKml(kmlContent, 'vesselsAis.kml');
     setState(() {
       _isUploading = false;
     });
@@ -869,7 +862,7 @@ class _MapComponentState extends State<MapComponent> {
     String kmlContent =
         await OrbitPathPlacemarkKmlModel.buildPathOrbit(pathCoordinates);
     await LgService().cleanBeforeTour();
-    await LgService().uploadKml4(kmlContent, 'PathOrbit.kml');
+    await LgService().uploadKml(kmlContent, 'PathOrbit.kml');
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('PathOrbit');
@@ -891,7 +884,7 @@ class _MapComponentState extends State<MapComponent> {
         vessel: samplesMap[selectedVesselProvider.selectedMMSI]!);
     String kmlContent = await kmlModel.generateKmlWithAreaAndOrbit();
     await LgService().cleanBeforeTour();
-    await LgService().uploadKml4(kmlContent, 'Orbit.kml');
+    await LgService().uploadKml(kmlContent, 'Orbit.kml');
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('Orbit');

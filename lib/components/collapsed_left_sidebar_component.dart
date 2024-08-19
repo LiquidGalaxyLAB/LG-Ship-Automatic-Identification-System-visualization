@@ -3,7 +3,6 @@ import 'package:ais_visualizer/providers/selected_nav_item_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ais_visualizer/components/navbar_item_component.dart';
 import 'package:ais_visualizer/utils/constants/colors.dart';
-import 'package:ais_visualizer/utils/constants/image_path.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 

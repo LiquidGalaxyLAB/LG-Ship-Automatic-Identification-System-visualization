@@ -2,6 +2,7 @@ import 'package:ais_visualizer/models/kml/look_at_kml_model.dart';
 import 'package:ais_visualizer/models/kml/multi_polygone_kml_model.dart';
 import 'package:ais_visualizer/models/kml/orbit_kml_model.dart';
 import 'package:ais_visualizer/models/vessel_sampled_model.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 
 class SelectedVesselKmlModel {
   VesselSampled vessel;
@@ -87,7 +88,7 @@ class SelectedVesselKmlModel {
         </IconStyle>
       </Style>
       <Placemark>
-        <name>${_escapeXml(vessel.name)}</name>
+        <name>${escapeXml(vessel.name)}</name>
         <styleUrl>#customIconStyle</styleUrl>
         <Point>
           <coordinates>${vessel.longitude},${vessel.latitude},0</coordinates>
@@ -122,17 +123,5 @@ class SelectedVesselKmlModel {
   </Document>
 </kml>
     ''';
-  }
-
-  String _escapeXml(String? input) {
-    if (input == null || input.isEmpty) {
-      return ''; // Return empty string if input is null or empty
-    }
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
   }
 }

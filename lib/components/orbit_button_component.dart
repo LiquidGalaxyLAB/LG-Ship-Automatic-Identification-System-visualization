@@ -9,7 +9,7 @@ class OrbitButton extends StatefulWidget {
   final String startText;
   final String stopText;
   final ButtonStyle? style;
-  final int timeInMilliSeconds; // Time in milliseconds
+  final int timeInMilliSeconds;
 
   const OrbitButton({
     Key? key,
@@ -18,7 +18,7 @@ class OrbitButton extends StatefulWidget {
     required this.startText,
     required this.stopText,
     this.style,
-    required this.timeInMilliSeconds, // Initialize it in the constructor
+    required this.timeInMilliSeconds,
   }) : super(key: key);
 
   @override

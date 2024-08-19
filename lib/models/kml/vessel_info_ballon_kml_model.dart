@@ -1,5 +1,6 @@
 import 'package:ais_visualizer/models/vessel_full_model.dart';
 import 'package:ais_visualizer/utils/constants/text.dart';
+import 'package:ais_visualizer/utils/helpers.dart';
 
 class VesselInfoBalloonKmlModel {
   VesselFull vessel;
@@ -48,7 +49,7 @@ class VesselInfoBalloonKmlModel {
         <body style="background: rgba(245, 245, 245, 255);">
           <h1 style="color: rgba(225, 131, 14, 1.0);">Vessel Information</h1>
           <div class="header-content">
-            <p ><strong>${AppTexts.name}</strong> ${_escapeXml(vessel.name)}</p>
+            <p ><strong>${AppTexts.name}</strong> ${escapeXml(vessel.name)}</p>
             <p><strong>${AppTexts.mmsi}</strong> ${vessel.mmsi}</p>
             <p ><strong>${AppTexts.signalReceived}:</strong> ${vessel.msgtime}</p>
           </div>
@@ -130,52 +131,4 @@ class VesselInfoBalloonKmlModel {
 </kml>
     ''';
   }
-
-  String _escapeXml(String? input) {
-    if (input == null || input.isEmpty) {
-      return ''; // Return empty string if input is null or empty
-    }
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
-  }
-}
-
-void main() {
-  // Example vessel data
-  VesselFull vessel = VesselFull(
-    mmsi: 123456789,
-    msgtime: DateTime.now(),
-    courseOverGround: 75.5,
-    latitude: 37.7749,
-    longitude: -122.4194,
-    navigationalStatus: 5,
-    rateOfTurn: 0.0,
-    speedOverGround: 14.2,
-    trueHeading: 90,
-    imoNumber: 9876543,
-    callSign: 'ABC123',
-    name: 'Vessel Name',
-    destination: 'Port of San Francisco',
-    eta: '2024-06-30T12:00:00Z',
-    draught: 9.5,
-    shipLength: 300.0,
-    shipWidth: 50.0,
-    shipType: 70,
-    dimensionA: 150.0,
-    dimensionB: 150.0,
-    dimensionC: 25.0,
-    dimensionD: 25.0,
-    positionFixingDeviceType: 1,
-    reportClass: 'Class A',
-    msgtimeStatic: DateTime.now().subtract(Duration(hours: 2)),
-  );
-
-  VesselInfoBalloonKmlModel vesselInfoBalloon =
-      VesselInfoBalloonKmlModel(vessel: vessel);
-  String kml = vesselInfoBalloon.generateKml();
-  print(kml);
 }

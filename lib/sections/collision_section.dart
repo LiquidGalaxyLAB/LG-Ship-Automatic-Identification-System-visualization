@@ -79,7 +79,7 @@ class _CollisionSectionState extends State<CollisionSection> {
     String kmlContent = await collisionKmlModel.generateKmlCollision();
     await LgService().cleanBeforeTour();
     LgService().cleanBeforKmlResend();
-    await LgService().uploadKml4(kmlContent, 'collisionSimulation.kml');
+    await LgService().uploadKml(kmlContent, 'collisionSimulation.kml');
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('VesselCollisionTour');

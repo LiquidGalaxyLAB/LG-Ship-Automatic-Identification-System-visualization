@@ -381,7 +381,7 @@ class _VisualizationSectionState extends State<VisualizationSection> {
         polygoneFlyContent, polygoneContent, vesselMarkers);
 
     await LgService().cleanBeforeTour();
-    await LgService().uploadKml4(orbitContent, 'AisOrbit.kml');
+    await LgService().uploadKml(orbitContent, 'AisOrbit.kml');
     // Adding a delay of 3 seconds
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('AisOrbit');

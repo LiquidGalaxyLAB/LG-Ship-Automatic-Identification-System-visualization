@@ -71,3 +71,15 @@ String formatDateTime(DateTime dateTime) {
       "${dateTime.hour.toString().padLeft(2, '0')}"
       "${dateTime.minute.toString().padLeft(2, '0')}";
 }
+
+String escapeXml(String? input) {
+    if (input == null || input.isEmpty) {
+      return ''; // Return empty string if input is null or empty
+    }
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
+  }

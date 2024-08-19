@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:ais_visualizer/models/kml/prediction_kml_model.dart';
 import 'package:ais_visualizer/models/knn_simple_vessel_model.dart';
 import 'package:ais_visualizer/models/knn_vessel_model.dart';
@@ -888,7 +887,7 @@ class _RoutePredectionExpansionPanelBodyState
 
     String kmlContent = await predictionKmlModel.generatePredictionKML();
     LgService().cleanBeforKmlResend();
-    await LgService().uploadKml4(kmlContent, 'PredictOrbit.kml');
+    await LgService().uploadKml(kmlContent, 'PredictOrbit.kml');
     await Future.delayed(const Duration(seconds: 3));
     await LgService().startTour('PathOrbit');
     setState(() {
@@ -1006,12 +1005,9 @@ class _RoutePredectionExpansionPanelBodyState
 
     for (var vessel in similarVessels) {
       if (_isCancelled) return;
-      print(vessel);
       try {
         final result =
             await knnService.predictFutureLocation(targetVessel, vessel);
-        // Use the result as needed
-        print('Predicted location: $result');
         predictedPoints.add(LatLng(result["futureLat"]!, result["futureLng"]!));
         if (_isCancelled) return;
       } catch (e) {

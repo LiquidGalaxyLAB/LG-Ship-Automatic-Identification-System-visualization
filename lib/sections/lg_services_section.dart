@@ -36,10 +36,6 @@ class _LgServiceSectionState extends State<LgServiceSection> {
         success = await LgService().cleanKMLsAndVisualization(true);
       } else if (service == AppTexts.reboot) {
         success = await LgService().reboot();
-      } else if (service == AppTexts.setRefresh) {
-        success = await LgService().setRefresh();
-      } else if (service == AppTexts.resetRefresh) {
-        success = await LgService().resetRefresh();
       }
 
       if (success) {

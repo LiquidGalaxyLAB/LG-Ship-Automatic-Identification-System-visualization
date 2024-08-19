@@ -109,16 +109,4 @@ class CollisionBallonKmlModel {
 </kml>
     ''';
   }
-
-  String _escapeXml(String? input) {
-    if (input == null || input.isEmpty) {
-      return ''; // Return empty string if input is null or empty
-    }
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
-  }
 }
