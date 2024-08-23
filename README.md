@@ -1,8 +1,10 @@
-# **LG AIS Visualization** ![image](https://github.com/user-attachments/assets/81dc38b3-bd89-4966-a372-928e455eb6e6)
-
-
-[![Platform](https://img.shields.io/badge/platform-Android%20|%20Tablet-lightgrey)](https://github.com/username/repository)
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7ad1095d-7597-4a5e-bd17-493b8b6809b3" alt="app_logo_lg" width="500" />
+  <br/>
+  <a href="https://github.com/username/repository">
+    <img src="https://img.shields.io/badge/platform-Android%20|%20Tablet-lightgrey" alt="Platform" />
+  </a>
+</p>
 
 ## **Table of Contents**
 
