@@ -1,4 +1,5 @@
-# **LG AIS Visualization** ![App Logo](https://raw.githubusercontent.com/LiquidGalaxyLAB/LG-Ship-Automatic-Identification-System-visualization/main/assets/img/full_logos.png/app_logo_noname.png)
+# **LG AIS Visualization** ![image](https://github.com/user-attachments/assets/81dc38b3-bd89-4966-a372-928e455eb6e6)
+
 
 [![Platform](https://img.shields.io/badge/platform-Android%20|%20Tablet-lightgrey)](https://github.com/username/repository)
 
