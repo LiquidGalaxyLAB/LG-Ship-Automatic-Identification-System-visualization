@@ -101,7 +101,22 @@ Here's a guide on how to use the AIS Visualization app, focusing on common tasks
 - **How to Use:** Once connected, current vessels will automatically appear spanning the Norwegian region area in a polygon. For each visualization and filter, you can use a button to display the data on Liquid Galaxy. The app is designed to work both standalone and with Liquid Galaxy, supporting various visualizations including playing orbits, tour tracks, collision routes, predictive routes, past route tracks, and synchronization with the app map. The app also integrates balloons for detailed information.
 
 ## **Screenshots**
-
+![s1](https://github.com/user-attachments/assets/28e811e4-060b-4a87-bff6-a20ebdf14a43)
+About the App
+![s2](https://github.com/user-attachments/assets/ca31493f-d658-4847-979c-cf919ffc9568)
+Clustering Streamed Vessels
+![s3](https://github.com/user-attachments/assets/461b134c-b175-4580-b269-360646aad6ed)
+Detailed Vessel Information
+![s4](https://github.com/user-attachments/assets/679174a1-2e01-4da2-8446-9f90bbc3cdf3)
+Past Route Tracker Timeline
+![s5](https://github.com/user-attachments/assets/2b30da37-f806-4cdf-9aa3-ccae96d42916)
+Future Route Prediction Fan Chart
+![s6](https://github.com/user-attachments/assets/4182c2ee-6b4f-4be0-b26f-06a5d274f227)
+Collision Calculations
+![s7](https://github.com/user-attachments/assets/23500221-a450-46fe-ae1e-43c62849c7b5)
+Region Free Drawing
+![s8](https://github.com/user-attachments/assets/aab894e6-625b-47b2-9eab-b7b460ccea22)
+Filtering by Types, but with drawing too
 
 ## **Enhancements & Future Plans**
 
