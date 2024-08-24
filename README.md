@@ -1,7 +1,10 @@
-# **LG AIS Visualization** ![App Logo](https://raw.githubusercontent.com/LiquidGalaxyLAB/LG-Ship-Automatic-Identification-System-visualization/main/assets/img/full_logos.png/app_logo_noname.png)
-
-[![Platform](https://img.shields.io/badge/platform-Android%20|%20Tablet-lightgrey)](https://github.com/username/repository)
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7ad1095d-7597-4a5e-bd17-493b8b6809b3" alt="app_logo_lg" width="500" />
+  <br/>
+  <a href="https://github.com/username/repository">
+    <img src="https://img.shields.io/badge/platform-Android%20|%20Tablet-lightgrey" alt="Platform" />
+  </a>
+</p>
 
 ## **Table of Contents**
 
@@ -67,16 +70,69 @@ Recent events, like the catastrophe of the Baltimore Key Bridge collapse after a
    - The app supports filtering based on the type of vessel (up to 70 types with search)
 
 ## **Usage**
+Here's a guide on how to use the AIS Visualization app, focusing on common tasks and key features:
 
+### 1. **Live Ship Tracking**
+- **Overview:** When you open the app, you’ll see a real-time map displaying the current positions of ships in Norwegian waters.
+- **How to Use:** Simply launch the app to start tracking. (Make sure you are registered as a client.) A cluster of vessels will appear for better visibility. Select a cluster to open vessel markers and view their details.
 
+### 2. **Detailed Vessel Information**
+- **Overview:** The app provides in-depth information about each ship, including its name, type, speed, course, and more.
+- **How to Use:** Tap on any ship icon on the map. (The information will appear in the "Visualization" section and will update whenever you select a different vessel. This data is streamed, so changes in vessel information are reflected in real-time.)
+
+### 3. **Historical Vessel Routes**
+- **Overview:** This feature allows you to review the past routes of vessels, helping you analyze navigation patterns and behavior over time.
+- **How to Use:** Navigate to the "Visualization" section in the vessel tracker timeline panel. Select the start and end dates, then use the media player to play back the routes of the selected vessel.
+
+### 4. **Future Route Prediction**
+- **Overview:** The app uses machine learning to predict potential future routes of ships, providing valuable insights for maritime safety.
+- **How to Use:** In the same "Visualization" section, find the "Predict Route" panel to view predicted future routes.
+
+### 5. **Collision Risk Management**
+- **Overview:** This feature helps in assessing potential collision scenarios by calculating the Closest Point of Approach (CPA) and Time to CPA (TCPA) between two vessels.
+- **How to Use:** Go to the "Collision" section, select your vessel and the target vessel, then perform the calculations to assess potential collision risks.
+
+### 6. **Data Processing and Filtering**
+- **Overview:** The app handles large volumes of data from the AIS source, which is updated every few minutes and tracks up to 4000 vessels, along with historical data going back two weeks.
+- **How to Use:** Data processing is mostly automated. You can manage the data load by selecting specific regions or applying filters from the filter section to ensure smooth performance and accurate visualization.
+
+### 7. **Liquid Galaxy Visualization**
+- **Overview:** Make sure you are connected to the Liquid Galaxy rig.
+- **How to Use:** Once connected, current vessels will automatically appear spanning the Norwegian region area in a polygon. For each visualization and filter, you can use a button to display the data on Liquid Galaxy. The app is designed to work both standalone and with Liquid Galaxy, supporting various visualizations including playing orbits, tour tracks, collision routes, predictive routes, past route tracks, and synchronization with the app map. The app also integrates balloons for detailed information.
 
 ## **Screenshots**
 
 
 ## **Enhancements & Future Plans**
 
+### **Enhancements**
+1. **Improvement in K-Nearest Neighbors (KNN) Prediction Model:**
+   - The current KNN model can be enhanced by fine-tuning the parameters and incorporating more data points to improve the accuracy of predicting future vessel routes. These additional data points can be obtained from the third API in the integration section. However, it's important to note that retrieving more data may slow down the process and occasionally cause interruptions with the API.
+    
+2. **Exploring Alternative Models for Prediction:**
+   - In addition to enhancing the current K-Nearest Neighbors (KNN) model, we plan to explore different machine learning models for vessel route prediction.
+
+3. **Advanced Collision Risk Management:**
+   - The collision risk management feature will be further developed to include more sophisticated algorithms that consider additional factors like weather conditions, nearby obstacles, and vessel maneuverability. This enhancement will provide more comprehensive safety measures and alert systems for avoiding potential collisions.
+
+### **Future Plans**
+1. **Integration of AIS Messages:**
+   - A new feature could be introduced to allow users to view specific AIS messages sent by a vessel through its antenna. By making use of the full range of AIS data, this feature would enable users to monitor communications and gain deeper insights into a vessel's operations and status, providing a more detailed picture of maritime activities.
+
+2. **Enhanced Visualization Options:**
+   - Future updates could include more advanced visualization options, such as 3D representations of vessels and dynamic weather overlays. This would provide users with a richer, more immersive experience when tracking and analyzing maritime data.
+
 
 ## **API Integration**
+
+- **[BarentsWatch AIS Live OpenAPI Documentation](https://live.ais.barentswatch.no/index.html#/AIS-Latest/get_v1_latest_combined):** Provides real-time AIS data for vessel tracking. This API is used for retrieving the latest positions and statuses of vessels.
+  
+- **[BarentsWatch AIS Historic OpenAPI Documentation](https://historic.ais.barentswatch.no/index.html):** This API is used to access vessel tracking data from the past 14 days, as the live API only provides access to the last 24 hours of data.
+
+For both the Live and Historic APIs, you can refer to the [API documentation](https://developer.barentswatch.no/docs/intro). Both APIs require a token, which can be obtained by registering a user client as described in the app.
+
+- **[Additional Data API](https://kystdatahuset.no/ws/swagger/index.html):** Since the 14-day limit may not be sufficient for accurate future route predictions in the KNN model, this API provides access to a larger dataset.
+
 
 ## **Installation**
 
